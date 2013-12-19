@@ -1,0 +1,60 @@
+#### DESIGN NOTES
+
+The galaxy is a 8x8x3 "board" of quatrants, containing the following entity types:
+
+starbases
+klingons
+stars
+planets
+pulars
+romulans
+federation ships
+black holes
+
+
+Each quadrant is subdivided into 64x16 locations corresponding to character positions on the short range scan. Thus to store the precise location of any entity
+
+X = 3 bits + 6 bits = 9 bits
+Y = 3 bits + 3 buts = 7 bits (NB: 16 bits for X,Y)
+Z = 2 bits.
+
+5 bytes encode each entity:
+
+<mark(1) + spare(1) + Z(2) + type(4)><X,Y>2bytes data.
+
+3 bytes, for type and position plus 2 extra bytes for data about the type. 2 bytes are required since ships need to store their total energy, which is a 2 byte value. Can use 14 bits for energy + 2 bits for torpedo count (0-3).
+
+Rather than having an array of 192, we have the reverse data structure, which is a table of entities. The advantage of this is that we can always maintain the exact screen location of all content. This is relevent when you cross a quadrant boundary locally (impulse engines) and then return; you want everything to be in the same position. Additionally, it means that photon torpedos can (in theory) cross quadrant boundaries.
+
+The disadvantage is that, to know the contents of a given quadrant, the whole table must be scanned (more on this later).
+
+To give some idea of table size, 4k = 4096 bytes = 819 entities, which is 4.2 entities per quadrant on average. This is fine, since many are empty or sparely populated, making up for the few dense ones.
+
+The assumption is that the code will be fast enough to perform a table scan of 800 entries for a command such as the long range scan. However, the short range scan screen will need updating faster (for real-time effect).
+
+The idea is that all content in a given quadrant is clusted in the table, using a mark bit to indicate the last entry. We will maintain the table index of the first object in the current quadrant so that only that small part of the table need be scanned in order to update the current screen.
+
+Another idea is for the whole table to also be in quadrant coordinate order so that it's possible to quickly find the contents of adjacent quadrants.
+
+
+
++---+---+---+---|---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---|---+---+---+---+
+
+
+
++---+---+---+---|---+---+---+---+  +---+---+---+---|---+---+---+---+
+|   |   |   |   |   |   |   |   |  |   |   |   |   |   |   |   |   |
++---+---+---+---|---+---+---+---+  +---+---+---+---|---+---+---+---+
+
+
+
+
+
+
+
+
+
+
+
