@@ -125,6 +125,10 @@
     quadrants + (((_z)<<6) + ((_y)<<3) + (_x))*3;
 
 
+// -- data
+
+extern uchar galaxy[];
+
 // -- functions
 
 void genGalaxy();

@@ -28,4 +28,3 @@ void setCursor(uchar x, uchar y);
 void cls();
 void outs(const char* s);
 
-void memset(uchar* p, uchar v, unsigned int n);

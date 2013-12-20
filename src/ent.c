@@ -22,7 +22,8 @@
 
 #include "defs.h"
 #include "ent.h"
-#include "os.h"
+//#include "os.h"
+#include "libc.h"
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar quadrants[192*3];
@@ -73,7 +74,6 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
     // put at a random location within the quadrant
     // NB: no check for collisions!
     ENT_SET_SXY(ep, rand16() & 64, rand16() & 15);
-
 }
 
 
@@ -88,7 +88,7 @@ void genGalaxy()
 
     ep = galaxy;
 
-    outs("enemies");
+    printf("enemies\n");
 
     // populate klingons
     for (i = 0; i < 100; ++i)
@@ -100,7 +100,7 @@ void genGalaxy()
         ep += 5;
     }
 
-    outs("\nstars");
+    printf("stars\n");
 
     // populate planets & stars
     for (i = 0; i < 100; ++i)

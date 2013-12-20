@@ -101,11 +101,3 @@ void outs(const char* s)
         outchar(*s++);
 }
 
-void memset(uchar* p, uchar v, unsigned int n)
-{
-    while (n)
-    {
-        --n;
-        *p++ = v;
-    }
-}

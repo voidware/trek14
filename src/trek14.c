@@ -22,15 +22,19 @@
 
 #include "defs.h"
 #include "os.h"
+#include "libc.h"
 #include "ent.h"
 
 void main()
 {
+    // initialise our own mini-clib
+    libcInit();
+
     outs("Trek 2014!\n");
 
     outs("generating galaxy...\n");
     genGalaxy();
-    outs("\ndone\n");
+    outs("done\n");
 
     while (1) getkey();
 }

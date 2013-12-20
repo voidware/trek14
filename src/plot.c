@@ -34,7 +34,7 @@ static const unsigned char bothCol[] =  { 0x03, 0x0C, 0x30 };
 
 void plot(char x, char y, uchar c)
 {
-    // with high bit
+    // plot pixel (x,y) colour c
 
     uchar q, r, mask;
     char* m;
@@ -70,6 +70,8 @@ void plot(char x, char y, uchar c)
 
 void plotSpan(char x, char y, uchar n, uchar c)
 {
+    // plot (x,y) to (x+n, y) colour c
+    
     uchar q, mask;
     char* m;
     uchar k;
@@ -130,9 +132,28 @@ void plotSpan(char x, char y, uchar n, uchar c)
     }
 }
 
+void plotHLine(int x1, int y, int x2, uchar c)
+{
+    if (x2 > x1)
+        plotSpan(x1, x2-x1, y, c);
+}
+
+void plotVLine(int x, int y1, int y2, uchar c)
+{
+    if (y2 > y1)
+    {
+        do
+        {
+            plot(x,y1,c);
+        } while (++y1 < y2);
+    }
+}
+
 void drawRLE(char x, char y, uchar* dp, uchar c)
 {
-    // format is:
+    // plot run-line encoded (RLE) sprite, colour c
+    
+    // sprite format is:
     // sequence of line alternations 
     // <byte number of alternations> <on-off pair> ... <byte flyback-x>
     // 
@@ -160,7 +181,7 @@ void drawRLE(char x, char y, uchar* dp, uchar c)
 
 void moveRLERight(char x, char y, uchar* dp)
 {
-    // moves RLE from (x,y) to (x+1, y)
+    // moves RLE sprite from (x,y) to (x+1, y)
     for (;;)
     {
         uchar n = *dp++;
