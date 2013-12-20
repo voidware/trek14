@@ -1,0 +1,12 @@
+*/sdltrs.*
+*/*.cas
+*/*.lst
+*/*.rel
+*/*.asm
+*/*.sym
+*/*.ihx
+*/*.map
+*/*.noi
+*~
+*/*~
+
