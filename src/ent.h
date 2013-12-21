@@ -63,21 +63,21 @@
 
 */
 
-#define ENT_TYPE(_p)  ((*(_p)) & 0xf)
+#define ENT_TYPE(_p)  (*(_p) & 0xf)
 #define ENT_MARK(_p)  (*((char*)(_p)) < 0)
 
 // NB: never change type
-#define ENT_SET_TYPE(_p, _v) *(_p) |= (_v);
+#define ENT_SET_TYPE(_p, _v) *(_p) |= (_v)
 #define ENT_SET_MARK(_p)   *(_p) |= 0x80
 #define ENT_CLEAR_MARK(_p)  *(_p) &= 0x7f
 
 #define ENT_QX(_p) ((_p)[1] & 7)
-#define ENT_QY(_p) ((_p)[1] & 7)
+#define ENT_QY(_p) ((_p)[2] & 7)
 #define ENT_QZ(_p) (((*(_p)) >> 4) & 0x3)
 
-#define ENT_SET_QZ(_p, _v)  *(_p) = ((*(_p) & ~0x30) | (_v))
-#define ENT_SET_QX(_p, _v) (_p)[1] = (((_p)[1] & ~0x3) | (_v))
-#define ENT_SET_QY(_p, _v) (_p)[2] = (((_p)[2] & ~0x3) | (_v))
+#define ENT_SET_QZ(_p, _v)  *(_p) = ((*(_p) & ~0x30) | ((_v)<<4))
+#define ENT_SET_QX(_p, _v) (_p)[1] = (((_p)[1] & ~0x7) | (_v))
+#define ENT_SET_QY(_p, _v) (_p)[2] = (((_p)[2] & ~0x7) | (_v))
 
 // sx5, qx3, (sy4, sx1), qy3
 #define ENT_SXY(_p, _x, _y)     \
@@ -114,20 +114,28 @@
 #define ENT_SIZE  5
 #define ENT_COUNT_MAX   800
 
-#define ENT_TYPE_ENTERPRISE 0
-#define ENT_TYPE_BASE   1
+#define ENT_TYPE_BASE   0
+#define ENT_TYPE_FEDERATION 1
 #define ENT_TYPE_STAR 2
 #define ENT_TYPE_PLANET  3
 #define ENT_TYPE_KLINGON 4
 #define ENT_TYPE_ROMULAN 5
+#define ENT_TYPE_COUNT 6
+
+// find that shifting left uses `int'. this works for chars better
+#define SC(_a, _b) ((uchar)((uchar)(_a) * (uchar)(1<<(_b))))
+//#define SC(_a, _b) ((_a) << (_b))
 
 #define QUAD(_x, _y, _z)   \
-    quadrants + (((_z)<<6) + ((_y)<<3) + (_x))*3;
+    (quadrants + ((int)(SC(_z,6) + SC(_y,3) + (uchar)(_x)))*3)
 
 
 // -- data
 
 extern uchar galaxy[];
+extern uchar QX, QY, QZ;
+extern uchar* galaxyEnd;
+extern const char entTypeChar[];
 
 // -- functions
 

@@ -25,6 +25,32 @@
 
 // ---- OS FUNCTIONS -----------------------------------------------------
 
+#ifdef _WIN32
+
+#include <stdio.h>
+
+void outchar(char c)
+{
+    putchar(c);
+}
+
+char getkey()
+{
+    char c;
+    scanf("%c", &c);
+    return c;
+}
+
+void setcursor(uchar x, uchar y)
+{
+}
+
+void cls()
+{
+}
+
+#else
+
 void outchar(char c)
 {
     // print `c' at current cursor position
@@ -91,7 +117,7 @@ void cls()
     call #0x1c9
     __endasm;
 }
-
+#endif
 
 // ---- LIB FUNCTIONS -----------------------------------------------------
 

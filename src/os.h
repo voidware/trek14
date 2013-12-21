@@ -28,9 +28,4 @@ void setcursor(uchar x, uchar y);
 void cls();
 void outs(const char* s);
 
-// format out
-void setfcursor(uint x, uint y);
-void outfchar(char c);
-void clsf();
-void outfs(const char* s);
 

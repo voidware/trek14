@@ -38,20 +38,32 @@ void printfat(uchar x, uchar y, const char* fmt, ...)
     flush();
 }
 
+void lrScanQuad(uchar x, uchar y, uchar z, uchar* quad)
+{
+    uchar* ep = galaxy;
+
+    memzero(quad, ENT_TYPE_COUNT);
+    
+    while (ep != galaxyEnd)
+    {
+        if (ENT_QX(ep) == x && ENT_QY(ep) == y && ENT_QZ(ep) == z)
+            ++quad[ENT_TYPE(ep)];
+
+        ep += ENT_SIZE;
+    }
+}
+
 void lrScan()
 {
     // long range scan
 
-    char i, j, k;
-    uchar x, y;
+    char i, j;
+    uchar quad[ENT_TYPE_COUNT];
+    char x, y, z;
     uchar cx, cy;
 
-    char qx = 7;
-    char qy = 7;
-    char qz = 0;
-
     cls();
-    printf("Long Range Scan, Quadrant %d %d %d\n", (int)qx, (int)qy, (int)qz);
+    printf("Long Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
 
     y = 7; // 2*cy+1
     x = 0;
@@ -63,27 +75,59 @@ void lrScan()
         y += 4*3; // 4 lines
         x += (1 + 18)*2; // self + 18 chars
     }
-    
+
     cy = 3;
-    --qy;
-    --qx;
-    --qz;
-    for (i = 0; i <= 2; ++i)
+    y = QY - 1;
+    for (i = 0; i <= 2; ++i, ++y)
     {
         cx = 2; 
-        for (j = 0; j <= 2; ++j)
+        x = QX - 1;
+        for (j = 0; j <= 2; ++j, ++x)
         {
-            if (!i) printfat(cx + 8, 1, "%d", (int)(qx+j));
-            for (k = 0; k <= 2; ++k)
+            char k;
+            
+            if (!i) printfat(cx + 8, 1, "%d", (int)x);
+            z = QZ - 1;
+
+            for (k = 0; k <= 2; ++k, ++z)
             {
-                printfat(cx, cy + k, "unknown quadrant");
+                char buf[ENT_TYPE_COUNT*2+1];
+                char* bp;
+                if (x >= 0 && x < 8 && y >= 0 && y < 8 && z >= 0 && z < 3)
+                {
+                    const char* tc = entTypeChar;
+                    uchar* cp = quad;
+                    lrScanQuad(x, y, z, cp);
+                    
+                    bp = buf;
+                    while (*bp = *tc++)
+                    {
+                        if (*cp)
+                        {
+                            bp[1] = '0' + *cp;
+                        }
+                        else
+                        {
+                            *bp = ' ';
+                            bp[1] = ' ';
+                        }
+                        bp += 2;
+                        ++cp;
+                    }
+                    bp = buf;
+                }
+                else
+                {
+                    bp = (char*)"Unknown Quadrant";
+                }
+                printfat(cx, cy + k, bp);
             }
             cx += 19;
         }
         --cx;
-        printfat(cx, cy, "%2d", (int)(qz-1));
-        printfat(cx, cy + 1, "%2d %d", (int)qz, (int)(qy+i));
-        printfat(cx, cy + 2, "%2d", (int)(qz+1));
+        printfat(cx, cy, "%2d", (int)(QZ-1));
+        printfat(cx, cy + 1, "%2d %d", (int)QZ, (int)y);
+        printfat(cx, cy + 2, "%2d", (int)(QZ+1));
         cy += 4;
     }
     printfat(0, 15, "Now What?");
