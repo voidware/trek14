@@ -25,16 +25,21 @@
 #include "libc.h"
 #include "ent.h"
 
+extern void lrScan();
+
 void main()
 {
     // initialise our own mini-clib
     libcInit();
 
+    cls();
     outs("Trek 2014!\n");
 
     outs("generating galaxy...\n");
     genGalaxy();
     outs("done\n");
+
+    lrScan();
 
     while (1) getkey();
 }

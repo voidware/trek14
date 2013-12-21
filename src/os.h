@@ -24,7 +24,13 @@ void outchar(char c);
 char inkey();
 char getkey();
 uchar getline(char* buf, uchar nmax);
-void setCursor(uchar x, uchar y);
+void setcursor(uchar x, uchar y);
 void cls();
 void outs(const char* s);
+
+// format out
+void setfcursor(uint x, uint y);
+void outfchar(char c);
+void clsf();
+void outfs(const char* s);
 

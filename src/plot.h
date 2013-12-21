@@ -25,5 +25,6 @@ void plot(char x, char y, uchar c);
 void plotSpan(char x, char y, uchar n, uchar c);
 void drawRLE(char x, char y, uchar* dp, uchar c);
 void moveRLERight(char x, char y, uchar* dp);
-void plotHLine(int x1, int y, int x2, uchar c);
-void plotVLine(int x, int y1, int y2, uchar c);
+
+void plotHLine(uchar x1, uchar y, uchar x2, uchar c);
+void plotVLine(uchar x, uchar y1, uchar y2, uchar c);

@@ -428,7 +428,7 @@ static usmint streamInt(StreamOutFn sf, void* ctx,
                        smint width,
                        usmint flags)
 {
-    static const int powerTable[] = 
+    static const unsigned int powerTable[] = 
     {
 #ifdef _WIN32
         1000000000,
@@ -498,10 +498,10 @@ static usmint streamInt(StreamOutFn sf, void* ctx,
     return n;
 }
 
-static int _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args)
+static usmint _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args)
 {
     const char* p = fmt;
-    int n = 0;
+    usmint n = 0;
     while (*p) 
     {
         if (*p == '%') 
@@ -510,10 +510,10 @@ static int _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args)
             smint prec = -1;
             usmint flags = 0;
             usmint t;
-            char numBuf[32];
+            char numBuf[20];
             usmint l;
             char* np;
-            usmint r;
+            smint r;
             usmint emitNumBuf = 0;
 
             ++p;
@@ -595,13 +595,12 @@ static int _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args)
             else if (*p == 'd' || *p == 'i') 
             {
                 int val = va_arg(args, int);
-
                 np = numBuf;
 
                 /* INCOMPATIBLE: what sort of person wants more than
                  * 32 leading zeros?
                  */
-                if (width > (int)sizeof(numBuf)) width = sizeof(numBuf);
+                if (width > (smint)sizeof(numBuf)) width = sizeof(numBuf);
 
                 l = streamInt(bufStreamOutFn, &np,
                               (unsigned int)val, width, (val < 0) | flags);
@@ -614,7 +613,7 @@ static int _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args)
                 np = numBuf;
 
                 /* INCOMPATIBLE */
-                if (width > sizeof(numBuf)) width = sizeof(numBuf);
+                if (width > (smint)sizeof(numBuf)) width = sizeof(numBuf);
 
                 l = streamInt(bufStreamOutFn, &np, val, width, flags);
                 emitNumBuf = 1;
@@ -780,27 +779,27 @@ static int _doFormatIn(StreamInFn sf, void* ctx, const char* fmt, va_list args)
 }
 #endif
 
-int sprintf(char* buf, const char* fmt, ...)
+smint sprintf(char* buf, const char* fmt, ...)
 {
     va_list args;
-    int n;
+    usmint n;
 
     va_start(args, fmt);
     n = _doFormat(bufStreamOutFn, &buf, fmt, args);
     va_end(args);
 
-    return n;
+    return (smint)n;
 }
 
-int printf(const char* fmt, ...)
+smint printf(const char* fmt, ...)
 {
     va_list args;
-    int n;
+    usmint n;
 
     va_start(args, fmt);
     n = _doFormat(streamWriteFn, stdout, fmt, args);
     va_end(args);
-    return n;
+    return (smint)n;
 }
 
 #if 0
@@ -816,17 +815,17 @@ int fprintf(FILE* fp, const char * fmt, ...)
 }
 #endif
 
-int vfprintf(FILE *fp, const char* fmt, va_list args)
+smint vfprintf(FILE *fp, const char* fmt, va_list args)
 {
     return _doFormat(streamWriteFn, fp, fmt, args);
 }
 
-int vprintf(const char* fmt, va_list args)
+smint vprintf(const char* fmt, va_list args)
 {
     return vfprintf(stdout, fmt, args);
 }
 
-int vsprintf(char* buf, const char* fmt, va_list args)
+smint vsprintf(char* buf, const char* fmt, va_list args)
 {
     return _doFormat(bufStreamOutFn, &buf, fmt, args);
 }
@@ -862,10 +861,16 @@ int puts(const char* s)
     return fputs(s, stdout);
 }
 
-int fflush(FILE* fp)
+smint fflush(FILE* fp)
 {
     return flushStream(fp);
 }
+
+void flush()
+{
+    flushStream(stdout);
+}
+
 
 #if 0
 size_t fwrite(const void* data, size_t size, size_t count, FILE* fp)

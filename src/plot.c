@@ -132,21 +132,20 @@ void plotSpan(char x, char y, uchar n, uchar c)
     }
 }
 
-void plotHLine(int x1, int y, int x2, uchar c)
+void plotHLine(uchar x1, uchar y, uchar x2, uchar c)
 {
-    if (x2 > x1)
-        plotSpan(x1, x2-x1, y, c);
+    // plot from x1 to x2 (inclusive)
+    plotSpan(x1, y, x2-x1+1, c);
 }
 
-void plotVLine(int x, int y1, int y2, uchar c)
+void plotVLine(uchar x, uchar y1, uchar y2, uchar c)
 {
-    if (y2 > y1)
+    // plot from y1 to y2 inclusive
+    do
     {
-        do
-        {
-            plot(x,y1,c);
-        } while (++y1 < y2);
-    }
+        plot(x,y1,c);
+    } while (++y1 <= y2);
+
 }
 
 void drawRLE(char x, char y, uchar* dp, uchar c)

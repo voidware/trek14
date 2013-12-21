@@ -76,7 +76,7 @@ uchar getline(char* buf, uchar nmax)
     __endasm;
 }
 
-void setCursor(uchar x, uchar y)
+void setcursor(uchar x, uchar y)
 {
     // 0x4020
     int* p = (int*)0x4020;

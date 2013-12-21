@@ -92,17 +92,18 @@ char*    strstr(const char*, const char*);
 char*    strtok(char*, const char*);
 
 /* file functions */
-int      printf(const char *, ...);
-int      sprintf(char *, const char *, ...);
-int      fprintf(FILE *, const char *, ...);
-int      vprintf(const char *, va_list);
-int      vfprintf(FILE *, const char *, va_list);
-int      vsprintf(char *, const char *, va_list);
+smint    printf(const char *, ...);
+smint    sprintf(char *, const char *, ...);
+smint    fprintf(FILE *, const char *, ...);
+smint    vprintf(const char *, va_list);
+smint    vfprintf(FILE *, const char *, va_list);
+smint    vsprintf(char *, const char *, va_list);
 int      fputc(int, FILE *);
 int      fputs(const char *, FILE *);
 int      putc(int, FILE *);
 int      putchar(int);
-int      fflush(FILE *);
+void     flush();
+smint    fflush(FILE *);
 size_t   fwrite(const void *, size_t, size_t, FILE *);
 int      fscanf(FILE *, const char *, ...);
 int      scanf(const char *, ...);

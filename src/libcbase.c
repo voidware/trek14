@@ -79,6 +79,7 @@ void BASE_CloseFile(usmint h)
 
 // trs80
 
+
 usmint BASE_OpenConsoleOutput()
 {
     return 1;
