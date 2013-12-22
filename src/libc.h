@@ -158,9 +158,6 @@ void*               realloc(void* p, size_t amt);
 /* call this to initialise libc */
 void            libcInit();
 
-// non-standard functions
-void memzero(void* ptr, size_t n);
-
 EXTERN_C_END
 
 #endif // __libc_h__

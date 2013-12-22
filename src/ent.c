@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "ent.h"
 #include "libc.h"
+#include "utils.h"
 #include "lrscan.h"
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
@@ -73,7 +74,7 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
 
     // put at a random location within the quadrant
     // NB: no check for collisions!
-    //ENT_SET_SXY(ep, rand16() & 64, rand16() & 15);
+    ENT_SET_SXY(ep, rand16() & 64, rand16() & 15);
 }
 
 
@@ -81,6 +82,7 @@ void genGalaxy()
 {
     uchar i;
     uchar* ep;
+    uchar quad[ENT_TYPE_COUNT];
         
     // XX should be zero anyway once we clear BSS
     memzero(galaxy, sizeof(galaxy));
@@ -107,11 +109,9 @@ void genGalaxy()
     for (i = 0; i < 100; ++i)
     {
         genEntLocation(ep, ENT_TYPE_STAR, 4);
-        ep += ENT_SIZE;
-        galaxyEnd = ep;
+        ep += ENT_SIZE; galaxyEnd = ep;
         genEntLocation(ep, ENT_TYPE_PLANET, 4);
-        ep += ENT_SIZE;
-        galaxyEnd = ep;
+        ep += ENT_SIZE; galaxyEnd = ep;
     }
 
     printf("federation\n");
@@ -120,13 +120,28 @@ void genGalaxy()
     for (i = 0; i < 5; ++i)
     {
         genEntLocation(ep, ENT_TYPE_BASE, 1);
-        ep += ENT_SIZE;
-        galaxyEnd = ep;
+        ep += ENT_SIZE; galaxyEnd = ep;
     }
 
-    QX = 6;
-    QY = 6;
-    QZ = 1;
+    // our current position
+    QX = 7;
+    QY = 7;
+    QZ = 2;
+
+    // are there any bases in start position
+    lrScanQuad(QX, QY, QZ, quad);    
+    if (!quad[ENT_TYPE_BASE])
+    {
+        // no, then put one here
+        ENT_SET_TYPE(ep, ENT_TYPE_BASE);
+        ENT_SET_QZ(ep, QZ);
+        ENT_SET_QX(ep, QX);
+        ENT_SET_QY(ep, QY);
+
+        // lives in the corner
+        ENT_SET_SXY(ep, 63, 15);
+        ep += ENT_SIZE; galaxyEnd = ep;
+    }
 }
 
 

@@ -77,10 +77,6 @@ void* memset(void* ptr, smint v, size_t n)
     return ptr;
 }
 
-void memzero(void* ptr, size_t n)
-{
-    memset(ptr, 0, n);
-}
 
 #if 0
 void* memsetInt(void* ptr, int v, size_t n)

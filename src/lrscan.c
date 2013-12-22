@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "os.h"
 #include "libc.h"
+#include "utils.h"
 #include "ent.h"
 #include "plot.h"
 
@@ -78,18 +79,18 @@ void lrScan()
 
     cy = 3;
     y = QY - 1;
-    for (i = 0; i <= 2; ++i, ++y)
+    for (i = 0; i <= 2; ++i, ++y)  // loop quadrant Y
     {
         cx = 2; 
         x = QX - 1;
-        for (j = 0; j <= 2; ++j, ++x)
+        for (j = 0; j <= 2; ++j, ++x) // loop quadrant X
         {
             char k;
             
             if (!i) printfat(cx + 8, 1, "%d", (int)x);
             z = QZ - 1;
 
-            for (k = 0; k <= 2; ++k, ++z)
+            for (k = 0; k <= 2; ++k, ++z) // loop quadrant Z
             {
                 char buf[ENT_TYPE_COUNT*2+1];
                 char* bp;
@@ -97,6 +98,8 @@ void lrScan()
                 {
                     const char* tc = entTypeChar;
                     uchar* cp = quad;
+
+                    // find out what we have in the quadrant
                     lrScanQuad(x, y, z, cp);
                     
                     bp = buf;
@@ -118,7 +121,7 @@ void lrScan()
                 }
                 else
                 {
-                    bp = (char*)"Unknown Quadrant";
+                    bp = (char*)"     Void";
                 }
                 printfat(cx, cy + k, bp);
             }
