@@ -25,6 +25,7 @@
 #include "libc.h"
 #include "utils.h"
 #include "lrscan.h"
+#include "warp.h"
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
@@ -91,8 +92,9 @@ unsigned int rand16()
 
 static void genEntLocation(uchar* ep, uchar type, uchar tmax)
 {
-    // pick a random location, ensuring type `type' does not
+    // pick a random location, ensuring type' does not
     // exceed `tmax'
+    // avoiding quadrant QX, QY, QZ
 
     uchar x, y, z;
     uchar quad[ENT_TYPE_COUNT];
@@ -103,10 +105,12 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
         // generate quadrant
         // call rand separately for each part because the lower bits
         // are more random.
-
-        x = rand16() & 0x7;
-        y = rand16() & 0x7;
-        do z = rand16() & 0x3; while (z == 3);
+        
+        do {
+            x = rand16() & 0x7;
+            y = rand16() & 0x7;
+            z = rand16() & 0x3;
+        } while (z == 3 || (x == QX && y == QY && z == QZ));
 
         lrScanQuad(x, y, z, quad);
         
@@ -141,26 +145,28 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
 void genGalaxy()
 {
     uchar i;
-    uchar* ep;
     uchar quad[ENT_TYPE_COUNT];
         
     // XX should be zero anyway once we clear BSS
     memzero(galaxy, sizeof(galaxy));
 
-    ep = galaxy;
-    galaxyEnd = ep;
+    galaxyEnd = galaxy;
+
+    // our current location. set void
+    QX = -1;
+    QY = -1;
+    QZ = -1;
 
     printf("enemies\n");
 
     // populate klingons
     for (i = 0; i < 20; ++i)
     {
-        genEntLocation(ep, ENT_TYPE_KLINGON, 3);
+        genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 3);
         
         // enemy has at least half its allowed energy
-        ENT_SET_DAT(ep, (rand16() & (ENT_ENERGYK_LIMIT/4-1)) + ENT_ENERGYK_LIMIT/2);
-        ep += ENT_SIZE;
-        galaxyEnd = ep;
+        ENT_SET_DAT(galaxyEnd, (rand16() & (ENT_ENERGYK_LIMIT/4-1)) + ENT_ENERGYK_LIMIT/2);
+        galaxyEnd += ENT_SIZE;
     }
 
     printf("stars\n");
@@ -168,40 +174,43 @@ void genGalaxy()
     // populate planets & stars
     for (i = 0; i < 100; ++i)
     {
-        genEntLocation(ep, ENT_TYPE_STAR, 4);
-        ep += ENT_SIZE; galaxyEnd = ep;
-        genEntLocation(ep, ENT_TYPE_PLANET, 4);
-        ep += ENT_SIZE; galaxyEnd = ep;
+        genEntLocation(galaxyEnd, ENT_TYPE_STAR, 4);
+        galaxyEnd += ENT_SIZE;
+        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 4);
+        galaxyEnd += ENT_SIZE;
     }
 
     printf("federation\n");
 
-    // populate bases & federation ships
-    for (i = 0; i < 5; ++i)
-    {
-        genEntLocation(ep, ENT_TYPE_BASE, 1);
-        ep += ENT_SIZE; galaxyEnd = ep;
-    }
 
-    // our current position
+    // our current location. setting this with prevent bases from 
+    // being put in this quadrant
     QX = 7;
     QY = 7;
     QZ = 2;
 
-    // are there any bases in start position
-    lrScanQuad(QX, QY, QZ, quad);    
-    if (!quad[ENT_TYPE_BASE])
+    // populate bases
+    for (i = 0; i < 5; ++i)
     {
-        // no, then put one here
-        ENT_SET_TYPE(ep, ENT_TYPE_BASE);
-        ENT_SET_QZ(ep, QZ);
-        ENT_SET_QX(ep, QX);
-        ENT_SET_QY(ep, QY);
-
-        // lives in the corner
-        ENT_SET_SXY(ep, 63-4, 1);
-        ep += ENT_SIZE; galaxyEnd = ep;
+        genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1);
+        galaxyEnd += ENT_SIZE; 
     }
+
+    // generate starfleet HQ
+    genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1);
+    
+    // change location to be our quadrant
+    ENT_SET_QX(galaxyEnd, QX);
+    ENT_SET_QY(galaxyEnd, QY);
+    ENT_SET_QZ(galaxyEnd, QZ);
+
+    galaxyEnd += ENT_SIZE; 
+    
+    // put us in the same location
+    genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1);
+    galaxyEnd += ENT_SIZE; 
+
+    warp(QX, QY, QZ);
 }
 
 

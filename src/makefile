@@ -15,6 +15,7 @@ LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7000
 OBJS = \
 	crt0.rel \
 	command.rel \
+	warp.rel \
 	lrscan.rel \
 	srscan.rel \
 	plot.rel \

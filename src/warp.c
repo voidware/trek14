@@ -23,57 +23,22 @@
 #include "defs.h"
 #include "os.h"
 #include "libc.h"
-#include "utils.h"
 #include "ent.h"
-#include "lrscan.h"
-#include "srscan.h"
 #include "warp.h"
-#include "command.h"
 
-void command()
+void warp(uchar x, uchar y, uchar z)
 {
-    for (;;)
+    if (x < 8 && y < 8 && z <= 2)
     {
-        cls();
-        printf("(S)hort Range Scan\n");
-        printf("(L)ong Range Scan\n");
-        printf("(W)warp\n");
-        conn();
-    }
-}
+        uchar* ep = galaxyEnd - ENT_SIZE;
 
-void warpCommand()
-{
-    int x, y, z;
-    
-    printf(" Location: "); flush();
-    scanf("%d,%d,%d", &x, &y, &z);
+        QX = x;
+        QY = y;
+        QZ = z;
 
-    warp(x,y,z);
-}
-
-// mr spock, you have the conn :-)
-void conn()
-{
-    char buf[4];
-    char c;
-
-    printfat(0, 15, "Command: ");
-    getline(buf, sizeof(buf));
-    
-    c = buf[0];
-    if (islower(c)) c = _toupper(c);
-    
-    switch (c)
-    {
-    case 'L':
-        lrScan();
-        break;
-    case 'W':
-        warpCommand();
-        break;
-    case 'S':
-        srScan();
-        break;
+        // we are always at `galaxyEnd'
+        ENT_SET_QX(ep, x);
+        ENT_SET_QY(ep, y);
+        ENT_SET_QZ(ep, z);
     }
 }
