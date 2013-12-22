@@ -43,7 +43,18 @@ usmint BASE_OpenConsoleInput()
 
 void BASE_Read(usmint h, void* buf, unsigned int amt, usmint * nr)
 {
-    ReadFile((HANDLE)h, buf, amt, nr, 0);
+    DWORD n;
+    ReadFile((HANDLE)h, buf, amt, &n, 0);
+
+    // remove whitespace on end to simulate loss of newline
+    while (n && ((char*)buf)[n-1] == 0xd || ((char*)buf)[n-1] == 0xa) --n;
+
+    // newline is lost, so add it back
+    if (n >= amt) n = amt-1;
+    ((char*)buf)[n] = '\n';
+    ++n;
+
+    *nr = n;
 }
 
 void BASE_Write(usmint h, const void* buf,
@@ -90,8 +101,16 @@ usmint BASE_OpenConsoleInput()
     return 0;
 }
 
-void BASE_Read(usmint h, void* buf, unsigned int amt, usmint * nr)
+void BASE_Read(usmint h, void* buf, usmint amt, usmint * nr)
 {
+    usmint n = getline(buf, amt);
+
+    // newline is lost, so add it back
+    if (n >= amt) n = amt-1;
+    ((char*)buf)[n] = '\n';
+    ++n;
+    
+    *nr = n;
 }
 
 void BASE_Write(usmint h, const void* buf,

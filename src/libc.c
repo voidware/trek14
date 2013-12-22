@@ -26,8 +26,6 @@
 
 #include "libc.h"
 
-//#include "malloc.h"
-
 #define LIBC_alloc      malloc
 #define LIBC_free       free
 
@@ -259,7 +257,7 @@ char* strstr(const char* s, const char* pat)
 typedef void (*StreamOutFn)(void*, char);
 typedef int (*StreamInFn)(void*);
 
-#define STDIO_BUFSIZE           128
+#define STDIO_BUFSIZE           40
 #define STDIO_MAXHANDLES        2
 #define TEXT_MODE(_x)           ((_x) & 1)
 #define SET_TEXT_MODE(_x)       ((_x) |= 1)
@@ -285,13 +283,13 @@ static usmint findFreeStream()
 static void openStream(usmint index, usmint flags)
 {
     /* Keep specific buffers for stdin and stdout */
-    //static char stdinBuf[STDIO_BUFSIZE];
+    static char stdinBuf[STDIO_BUFSIZE];
     static char stdoutBuf[STDIO_BUFSIZE];
 
     StreamRec* sr = ioTable + index;
     if (!index) 
     {
-        sr->buf_ = 0; // stdinBuf;
+        sr->buf_ = stdinBuf;
         sr->h_ = BASE_OpenConsoleInput();
     }
     else if (index == 1) 
@@ -309,6 +307,7 @@ static void openStream(usmint index, usmint flags)
     sr->flags_ = flags;
 }
 
+#if 0
 static void closeStream(StreamRec* sr)
 {
     if (sr->ioIndex_ > 1)
@@ -326,6 +325,7 @@ static void closeStream(StreamRec* sr)
         }
     }
 }
+#endif
 
 static void _initIoTable()
 {
@@ -407,6 +407,7 @@ static int streamReadFn(void* ctx)
 
         c = *sr->pos_++;
 
+#if 0
         if (c == 0xd && TEXT_MODE(sr->flags_)) 
         {
             /* ignore character */
@@ -414,6 +415,7 @@ static int streamReadFn(void* ctx)
             if (sr->pos_ == sr->end_) return EOF;            
             c = *sr->pos_++;            
         }
+#endif
     }
     return c;
 }
@@ -668,11 +670,11 @@ static usmint _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args
     return n;
 }
 
-#if 0
-static int _doFormatIn(StreamInFn sf, void* ctx, const char* fmt, va_list args)
+static smint _doFormatIn(StreamInFn sf, void* ctx,
+                         const char* fmt, va_list args)
 {
     const char* p = fmt;
-    int n = 0;
+    smint n = 0;
     int c;
 
     c = (*sf)(ctx);
@@ -706,7 +708,8 @@ static int _doFormatIn(StreamInFn sf, void* ctx, const char* fmt, va_list args)
                 /* string */
                 char* s = va_arg(args, char*);
                
-                while (c != EOF && !isspace(c) && width) {
+                while (c != EOF && !isspace(c) && width) 
+                {
                     *s++ = c;
                     c = (*sf)(ctx);
                     --width;
@@ -724,35 +727,36 @@ static int _doFormatIn(StreamInFn sf, void* ctx, const char* fmt, va_list args)
                 /* Decimal integer */
                 int* vp = va_arg(args, int*);
 
-                int neg;
-                int val;
-                if (c == '-') {
+                usmint neg = 0;
+                int val = 0;
+                if (c == '-') 
+                {
                     neg = 1;
                     c = (*sf)(ctx);
                 }
-                else neg = 0;
-                
-                val = 0;
-                while (isdigit(c)) {
+                while (isdigit(c)) 
+                {
                     val = (val * 10) + (c - '0');
                     c = (*sf)(ctx);
                 }
-
-                if (neg) val = -val;
-                *vp = val;
+                
+                *vp = neg ? -val : val;
             }
-            else if (*p == 'u') {
+            else if (*p == 'u') 
+            {
                 /* unsigned Decimal integer */
                 unsigned int* vp = va_arg(args, unsigned int*);
-
                 unsigned int val = 0;
-                while (isdigit(c)) {
+
+                while (isdigit(c)) 
+                {
                     val = (val * 10) + (c - '0');
                     c = (*sf)(ctx);
                 }
                 *vp = val;
             }
-            else {
+            else 
+            {
                 if (c != *p) break;
                 c = (*sf)(ctx);            
             }
@@ -778,7 +782,6 @@ static int _doFormatIn(StreamInFn sf, void* ctx, const char* fmt, va_list args)
     }
     return n;
 }
-#endif
 
 smint sprintf(char* buf, const char* fmt, ...)
 {
@@ -900,7 +903,7 @@ size_t fwrite(const void* data, size_t size, size_t count, FILE* fp)
     return nWritten/size;
 }
 
-int fscanf(FILE* fp, const char* fmt, ...)
+smint fscanf(FILE* fp, const char* fmt, ...)
 {
     int n;
     va_list args;
@@ -910,10 +913,11 @@ int fscanf(FILE* fp, const char* fmt, ...)
     va_end(args);
     return n;
 }
+#endif
 
-int scanf(const char* fmt, ...)
+smint scanf(const char* fmt, ...)
 {
-    int n;
+    smint n;
     va_list args;
     va_start(args, fmt);
 
@@ -921,8 +925,6 @@ int scanf(const char* fmt, ...)
     va_end(args);
     return n;
 }
-#endif
-
 
 int getchar()
 {

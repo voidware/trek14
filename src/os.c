@@ -45,6 +45,12 @@ void setcursor(uchar x, uchar y)
 {
 }
 
+void getcursor(uchar* x, uchar* y)
+{
+    *x = 0;
+    *y = 0;
+}
+
 void cls()
 {
 }
@@ -52,9 +58,9 @@ void cls()
 uchar getline(char* buf, uchar nmax)
 {
     char tbuf[256];
-    scanf("%s", tbuf);
-    strncpy(buf, tbuf, nmax);
-    return nmax;
+    int m = scanf("%s", tbuf);
+    strncpy(buf, tbuf, m);
+    return m;
 }
 
 #else
@@ -116,6 +122,13 @@ void setcursor(uchar x, uchar y)
     int* p = (int*)0x4020;
     int v = (y<<6) + x + (int)VIDRAM;
     *p = v;
+}
+
+void getcursor(uchar* x, uchar* y)
+{
+    int v = (*(int*)0x4020) - (int)VIDRAM;
+    *x = v & 63;
+    *y = v >> 6;
 }
 
 void cls()

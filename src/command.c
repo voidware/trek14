@@ -24,6 +24,7 @@
 #include "os.h"
 #include "libc.h"
 #include "utils.h"
+#include "ent.h"
 #include "lrscan.h"
 #include "command.h"
 
@@ -35,6 +36,23 @@ void command()
         printf("(L)ong Range Scan\n");
         printf("(W)warp\n");
         conn();
+    }
+}
+
+void warp()
+{
+    int x, y, z;
+    
+    printf(" Location: "); flush();
+    scanf("%d,%d,%d", &x, &y, &z);
+
+    //printf("Warped to %d,%d,%d\n", x, y, x);
+        
+    if (x >= 0 && x < 8 && y >= 0 && y < 8 && z >= 0 && z <= 2)
+    {
+        QX = x;
+        QY = y;
+        QZ = z;
     }
 }
 
@@ -56,6 +74,7 @@ void conn()
         lrScan();
         break;
     case 'W':
+        warp();
         break;
     }
 }

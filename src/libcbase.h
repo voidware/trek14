@@ -23,7 +23,7 @@
 
 usmint BASE_OpenConsoleOutput();
 usmint BASE_OpenConsoleInput();
-void BASE_Read(usmint h, void* buf, unsigned int amt, usmint*);
+void BASE_Read(usmint h, void* buf, usmint amt, usmint*);
 void BASE_Write(usmint h, const void* buf, usmint amt, usmint* nw);
 void* BASE_MemoryAllocate(unsigned int amt);
 void BASE_MemoryFree(void* p);

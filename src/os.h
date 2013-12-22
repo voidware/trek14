@@ -25,6 +25,7 @@ char inkey();
 char getkey();
 uchar getline(char* buf, uchar nmax);
 void setcursor(uchar x, uchar y);
+void getcursor(uchar* x, uchar* y);
 void cls();
 void outs(const char* s);
 

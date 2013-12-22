@@ -9,7 +9,7 @@ DEBUG =
 OPT = 
 CFLAGS = -mz80 $(DEBUG)
 ASFLAGS = -l
-LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x6000
+LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7000
 
 
 OBJS = \
@@ -35,7 +35,7 @@ OBJS = \
 	$(AS) $(ASFLAGS) -o $@ $< 
 
 trek14.cas: trek14.ihx
-	../tools/mksys/mksys -v trek14.ihx trek14.cas
+	../tools/mksys/mksys trek14.ihx trek14.cas
 
 
 trek14.ihx : $(OBJS)
