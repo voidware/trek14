@@ -148,7 +148,7 @@ void plotVLine(uchar x, uchar y1, uchar y2, uchar c)
 
 }
 
-void drawRLE(char x, char y, uchar* dp, uchar c)
+void drawRLE(char x, char y, const uchar* dp, uchar c)
 {
     // plot run-line encoded (RLE) sprite, colour c
     

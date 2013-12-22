@@ -20,11 +20,44 @@
  * IN THE SOFTWARE.
  */
 
+// quadrant view
 
-void plot(char x, char y, uchar c);
-void plotSpan(char x, char y, uchar n, uchar c);
-void drawRLE(char x, char y, const uchar* dp, uchar c);
-void moveRLERight(char x, char y, uchar* dp);
+#include "defs.h"
+#include "os.h"
+#include "libc.h"
+#include "utils.h"
+#include "ent.h"
+#include "plot.h"
+#include "srscan.h"
 
-void plotHLine(uchar x1, uchar y, uchar x2, uchar c);
-void plotVLine(uchar x, uchar y1, uchar y2, uchar c);
+extern uchar fedship[];
+
+void srScan()
+{
+    uchar* ep;
+    int i;
+
+    cls();
+    printf("Short Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
+
+    for (i = 64*7; i >= 0; --i) { outchar('.'); outchar(' '); }
+    
+
+    ep = galaxy;
+    while (ep != galaxyEnd)
+    {
+        if (ENT_QX(ep) == QX && ENT_QY(ep) == QY && ENT_QZ(ep) == QZ)
+        {
+            uchar t = ENT_TYPE(ep);
+            uchar sx, sy;
+            const EntObj* obj = objTable + t;
+
+            ENT_SXY(ep, sx, sy);
+
+            drawRLE(sx<<1,sy*3, obj->_data, 1);
+        }
+        ep += ENT_SIZE;
+    }    
+
+    conn();
+}

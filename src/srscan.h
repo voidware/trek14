@@ -20,11 +20,6 @@
  * IN THE SOFTWARE.
  */
 
+// quadrant view
 
-void plot(char x, char y, uchar c);
-void plotSpan(char x, char y, uchar n, uchar c);
-void drawRLE(char x, char y, const uchar* dp, uchar c);
-void moveRLERight(char x, char y, uchar* dp);
-
-void plotHLine(uchar x1, uchar y, uchar x2, uchar c);
-void plotVLine(uchar x, uchar y1, uchar y2, uchar c);
+void srScan();

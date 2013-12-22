@@ -16,6 +16,7 @@ OBJS = \
 	crt0.rel \
 	command.rel \
 	lrscan.rel \
+	srscan.rel \
 	plot.rel \
 	trek14.rel \
 	ent.rel \

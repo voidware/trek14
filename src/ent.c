@@ -31,6 +31,50 @@ uchar* galaxyEnd;
 uchar QX, QY, QZ;
 const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
 
+
+// RLE sprites
+const uchar fedship[] = { 0x01, 0x60, 0x02,
+                                 0x02, 0x14, 0x70, 0x0d,
+                                 0x01, 0xb0, 0x00,
+                                 0x00 };
+
+static const uchar base[] = { 0x01, 0x30, 0x01,
+                              0x01, 0x10, 0x06,
+                              0x01, 0xc0, 0x00,
+                              0x00 };
+
+static const uchar star[] = { 0x02, 0x22, 0x20, 0x05,
+                              0x01, 0x40, 0x05,
+                              0x02, 0x22, 0x20, 0x00,
+                              0x00 };
+
+static const uchar planet[] = { 0x01, 0x50, 0x06,
+                                0x01, 0x70, 0x06,
+                                0x01, 0x50, 0x00,
+                                0x00  };
+
+static const uchar klingon[] = { 0x02, 0x27, 0x20, 0x0b,
+                                 0x01, 0xb0, 0x07,
+                                 0x01, 0x30, 0x00,
+                                 0x00 };
+
+static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
+                                 0x01, 0xb0, 0x07,
+                                 0x01, 0x30, 0x00,
+                                 0x00 };
+
+                              
+const EntObj objTable[] =
+{
+    { 12, 3, base },
+    { 16, 3, fedship },
+    { 6, 3, star },
+    { 7, 3, planet },
+    { 11, 3, klingon },
+    { 0, 0, romulan },
+};
+
+
 unsigned int rand16()
 {
     static unsigned short seed = 0;
@@ -52,6 +96,7 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
 
     uchar x, y, z;
     uchar quad[ENT_TYPE_COUNT];
+    uchar w, wl;
     
     do
     {
@@ -74,7 +119,22 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
 
     // put at a random location within the quadrant
     // NB: no check for collisions!
-    ENT_SET_SXY(ep, rand16() & 64, rand16() & 15);
+    x = rand16() & 63;
+
+    do
+    {
+        y = rand16() & 15;
+    } while (y == 0 || y == 15);
+    
+    w = (objTable[type]._w + 1)>>1; // character cells wide
+
+    // left width (round down)
+    wl = w>>1;
+
+    if (x < wl) x = wl;
+    else if (x + (w - wl) > 64) x = 64 - w + wl;
+
+    ENT_SET_SXY(ep, x, y);
 }
 
 
@@ -139,7 +199,7 @@ void genGalaxy()
         ENT_SET_QY(ep, QY);
 
         // lives in the corner
-        ENT_SET_SXY(ep, 63, 15);
+        ENT_SET_SXY(ep, 63-4, 1);
         ep += ENT_SIZE; galaxyEnd = ep;
     }
 }

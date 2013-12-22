@@ -122,12 +122,12 @@
 #define ENT_TYPE_ROMULAN 5
 #define ENT_TYPE_COUNT 6
 
-// find that shifting left uses `int'. this works for chars better
-#define SC(_a, _b) ((uchar)((uchar)(_a) * (uchar)(1<<(_b))))
-//#define SC(_a, _b) ((_a) << (_b))
-
-#define QUAD(_x, _y, _z)   \
-    (quadrants + ((int)(SC(_z,6) + SC(_y,3) + (uchar)(_x)))*3)
+typedef struct 
+{
+    uchar               _w;
+    uchar               _h;
+    const uchar*        _data;
+} EntObj;
 
 
 // -- data
@@ -136,6 +136,7 @@ extern uchar galaxy[];
 extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
 extern const char entTypeChar[];
+extern const EntObj objTable[];
 
 // -- functions
 
