@@ -2,7 +2,7 @@
 
 ## Introduction
 
-TREK14 is a newly developed "classic startrek" game for the trs80 model 1. Inspired by some of the originals, but with some new ideas.
+TREK14 is a newly developed "classic startrek" game for the trs80 model I. Inspired by some of the originals, but with some new ideas.
 
 ## Installing/Running
 
@@ -20,6 +20,10 @@ The program will begin. The galaxy is generated and then you enter the main game
 If you don't have a real trs80 model 1 handy, you can run the game in an emulator. There are many excellent emulators around for the machine and even some web based ones.
 
 I use the open source SDLTRS emulator, which is free and you can compile it yourself from scratch. There is a windows binary in the "emu" directory for convenience.
+
+From the "src" directory, start the emulator like this:
+
+     ..\emu\sdltrs -model 1 -romfile ..\emu\model1.rom -scale 2 -cassette trek14.cas
 
 SDLTRS may be configured using the menu on F7. F11 is the "turbo" button, which you may find useful for speeding up loading.
 
