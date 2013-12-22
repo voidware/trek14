@@ -49,6 +49,14 @@ void cls()
 {
 }
 
+uchar getline(char* buf, uchar nmax)
+{
+    char tbuf[256];
+    scanf("%s", tbuf);
+    strncpy(buf, tbuf, nmax);
+    return nmax;
+}
+
 #else
 
 void outchar(char c)

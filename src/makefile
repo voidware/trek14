@@ -14,6 +14,7 @@ LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x6000
 
 OBJS = \
 	crt0.rel \
+	command.rel \
 	lrscan.rel \
 	plot.rel \
 	trek14.rel \

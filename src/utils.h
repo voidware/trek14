@@ -21,3 +21,4 @@
  */
 
 void memzero(void* ptr, size_t n);
+void printfat(uchar x, uchar y, const char* fmt, ...);

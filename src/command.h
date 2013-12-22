@@ -20,23 +20,6 @@
  * IN THE SOFTWARE.
  */
 
-#include "defs.h"
-#include "os.h"
-#include "libc.h"
-#include "ent.h"
-#include "command.h"
+void command();
+void conn();
 
-void main()
-{
-    // initialise our own mini-clib
-    libcInit();
-
-    cls();
-    outs("Trek 2014!\n");
-
-    outs("generating galaxy...\n");
-    genGalaxy();
-    outs("done\n");
-
-    command();
-}

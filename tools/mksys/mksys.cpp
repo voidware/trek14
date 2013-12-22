@@ -150,7 +150,7 @@ void emitFile(FILE* fpout)
     if (!n) return; // bail
 
     // XXX
-    cas_write_header(fpout, "HACK");
+    cas_write_header(fpout, "TREK14");
 
     int startAddr = 0;
     bool more;

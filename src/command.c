@@ -23,20 +23,39 @@
 #include "defs.h"
 #include "os.h"
 #include "libc.h"
-#include "ent.h"
+#include "utils.h"
+#include "lrscan.h"
 #include "command.h"
 
-void main()
+void command()
 {
-    // initialise our own mini-clib
-    libcInit();
+    for (;;)
+    {
+        cls();
+        printf("(L)ong Range Scan\n");
+        printf("(W)warp\n");
+        conn();
+    }
+}
 
-    cls();
-    outs("Trek 2014!\n");
+// mr spock, you have the conn :-)
+void conn()
+{
+    char buf[4];
+    char c;
 
-    outs("generating galaxy...\n");
-    genGalaxy();
-    outs("done\n");
-
-    command();
+    printfat(0, 15, "Command: ");
+    getline(buf, sizeof(buf));
+    
+    c = buf[0];
+    if (islower(c)) c = _toupper(c);
+    
+    switch (c)
+    {
+    case 'L':
+        lrScan();
+        break;
+    case 'W':
+        break;
+    }
 }

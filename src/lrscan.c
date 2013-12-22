@@ -26,18 +26,8 @@
 #include "utils.h"
 #include "ent.h"
 #include "plot.h"
+#include "command.h"
 
-void printfat(uchar x, uchar y, const char* fmt, ...)
-{
-    va_list args;
-
-    setcursor(x, y);    
-    va_start(args, fmt);
-    vprintf(fmt, args);
-    va_end(args);
-    
-    flush();
-}
 
 void lrScanQuad(uchar x, uchar y, uchar z, uchar* quad)
 {
@@ -133,7 +123,8 @@ void lrScan()
         printfat(cx, cy + 2, "%2d", (int)(QZ+1));
         cy += 4;
     }
-    printfat(0, 15, "Now What?");
+
+    conn();
 }
 
 

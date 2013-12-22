@@ -23,9 +23,23 @@
 // helper utility functions
 
 #include "defs.h"
+#include "os.h"
 #include "libc.h"
 
 void memzero(void* ptr, size_t n)
 {
     memset(ptr, 0, n);
+}
+
+void printfat(uchar x, uchar y, const char* fmt, ...)
+{
+    // printf at (x,y) character position
+    // NB: text is automatically flushed (without need for "\n")
+    
+    va_list args;
+    setcursor(x, y);    
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
+    flush();
 }
