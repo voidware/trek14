@@ -4,6 +4,10 @@
 
 TREK14 is a newly developed "classic startrek" game for the trs80 model I. Inspired by some of the originals, but with some new ideas.
 
+The graphics are retro and blocky, just like the orignals. 
+
+![Short Range Scan](http://s3-eu-west-1.amazonaws.com/stvle/5efee7216f98c0c6e38a6daa2f8b38e2.png "Short Range Scan")
+
 ## Installing/Running
 
 The binary TREK14.CAS is a trs80 model 1 SYSTEM CAS file, to be loaded through the cassette interface. Load using the following command:
