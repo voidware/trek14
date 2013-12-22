@@ -82,9 +82,9 @@ As well as klingons, romulans are planned. Naturally these will make use of cloa
 
 ### Bases & Federation Ships
 
-There are 5 star bases across the galaxy, where you can refuel and restock depleted photon torpedoes (only a max of 3 can be carried). Additionally Starfleet HQ is located in the galaxy far corner. Doc with HQ when you wish to finish your hame and receive your rating.
+There are 5 star bases across the galaxy, where you can refuel and restock depleted photon torpedoes (only a max of 3 can be carried). Additionally Starfleet HQ is located in the galaxy far corner. Dock with HQ when you wish to finish your game and receive your rating.
 
-Other Federation ships may be encountered in the galaxy. Sometimes these come under enemy attack and call for your assistance.
+Other Federation ships may be encountered in the galaxy. Sometimes these come under enemy attack and call for your assistance. Sometimes, they may even help you fight the Klingons.
 
 ### Phasers & Torpedoes
 
