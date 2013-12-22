@@ -1,4 +1,4 @@
-# This is trek14: Startrek for the trs-80 model 1
+# Trek14: StarTrek for the TRS-80 model I
 
 ## Introduction
 
