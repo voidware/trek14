@@ -82,13 +82,13 @@ As well as klingons, romulans are planned. Naturally these will make use of cloa
 
 ### Bases & Federation Ships
 
-There are 5 star bases across the galaxy, where you can refuel and restock depleted photon torpedoes (only a max of 3 can be carried). One of the bases is starfleet HQ.
+There are 5 star bases across the galaxy, where you can refuel and restock depleted photon torpedoes (only a max of 3 can be carried). Additionally Starfleet HQ is located in the galaxy far corner. Doc with HQ when you wish to finish your hame and receive your rating.
 
 Other Federation ships may be encountered in the galaxy. Sometimes these come under enemy attack and call for your assistance.
 
 ### Phasers & Torpedoes
 
-Federation ships have up to twice the energy capacity of enemies. Phases are the enemy's only weapon (although they might ram you!). Phaser damage decays linearly with distance. A Quadrant is about the max distance a phaser can be effective, whereas photon torpedoes may penetrate adjacent quadrants - watch out you don't blow up something by accident! You may be court marshalled.
+Federation ships have up to twice the energy capacity of enemies. Phases are the enemy's only weapon (although they might ram you!). Phaser damage decays linearly with distance. A quadrant is about the max distance a phaser can be effective, whereas photon torpedoes may penetrate adjacent quadrants - watch out you don't blow up something by accident! You may be court martialed.
 
 
 
