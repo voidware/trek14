@@ -112,7 +112,7 @@
 
 
 #define ENT_SIZE  5
-#define ENT_COUNT_MAX   800
+#define ENT_COUNT_MAX   400
 
 #define ENT_TYPE_BASE   0
 #define ENT_TYPE_FEDERATION 1
