@@ -58,22 +58,31 @@ void conn()
     char buf[4];
     char c;
 
-    printfat(0, 15, "Command: ");
-    getline(buf, sizeof(buf));
-    
-    c = buf[0];
-    if (islower(c)) c = _toupper(c);
-    
-    switch (c)
+    do
     {
-    case 'L':
-        lrScan();
-        break;
-    case 'W':
-        warpCommand();
-        break;
-    case 'S':
-        srScan();
-        break;
-    }
+        printfat(0, 15, "Command: ");
+        getline(buf, sizeof(buf));
+    
+        c = buf[0];
+
+    again:
+
+        if (islower(c)) c = _toupper(c);
+
+        switch (c)
+        {
+        case 'L':
+            lrScan();
+            break;
+        case 'W':
+            warpCommand();
+            // fall through
+        case 'S':
+            c = srScan();
+            if (c) goto again;
+            break;
+        default:
+            c = 0;
+        }
+    } while (c);
 }

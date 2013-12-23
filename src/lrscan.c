@@ -107,7 +107,5 @@ void lrScan()
         printfat(cx, cy + 2, "%2d", (int)(QZ+1));
         cy += 4;
     }
-
-    conn();
 }
 

@@ -30,3 +30,15 @@ typedef int int16;
 #define VIDRAM ((char*)0x3c00)
 #define VIDEND ((char*)0x3fff)
 
+#ifdef _WIN32
+#define KEY_ARROW_LEFT  '4'
+#define KEY_ARROW_RIGHT '6'
+#define KEY_ARROW_UP '8'
+#define KEY_ARROW_DOWN '2'
+#else
+#define KEY_ARROW_LEFT  8
+#define KEY_ARROW_RIGHT 9
+#define KEY_ARROW_UP 91
+#define KEY_ARROW_DOWN 10
+#endif
+

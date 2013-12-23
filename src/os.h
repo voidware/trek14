@@ -21,6 +21,7 @@
  */
 
 void outchar(char c);
+void outcharat(uchar x, uchar y, uchar c);
 char inkey();
 char getkey();
 uchar getline(char* buf, uchar nmax);

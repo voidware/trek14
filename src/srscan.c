@@ -31,26 +31,89 @@
 #include "srscan.h"
 #include "command.h"
 
-void srScan()
+static void fillbg(uchar x, uchar y)
+{
+    outcharat(x, y, (x & 1) ? ' ' : '.');
+}
+
+char srScan()
 {
     uchar** epp;
     int i;
-
+    char c;
+    uchar sx, sy;
+    
     cls();
     printf("Short Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
 
-    for (i = 64*7; i >= 0; --i) { outchar('.'); outchar(' '); }
+    for (i = 64*7; i > 0; --i) { outchar('.'); outchar(' '); }
 
     // use the current quadrant info
 
     epp = quadrant;
     while (*epp)
     {
-        uchar sx, sy;
+        const EntObj* eo = objTable + ENT_TYPE(*epp);
         ENT_SXY(*epp, sx, sy);
-        drawRLE(sx<<1,sy*3, objTable[ENT_TYPE(*epp)]._data, 1);
+
+        // convert sector position to pixel
+        drawRLE((sx - (eo->_w>>1))<<1, sy*3, eo->_data, 1);
         ++epp;
     }    
 
-    conn();
+    for (;;)
+    {
+        uchar* ep;
+        uchar x, y;
+        
+        c = inkey();
+        if (!c) continue;
+
+        // our entity
+        ep = galaxyEnd - ENT_SIZE;
+        ENT_SXY(ep, sx, sy);        
+
+        // convert to pixels        
+        x = (sx - ENTOBJ_FEDSHIP_W/2)<<1;
+        y = sy * 3;
+        
+        if (c == KEY_ARROW_LEFT)
+        {
+            if (!setSector(ep, sx-1, sy))
+            {
+                moveRLE(x, y, fedshipRLE, 1);
+                moveRLE(x-1, y, fedshipRLE, 1);
+                fillbg(sx + ENTOBJ_FEDSHIP_W/2, sy);
+            }
+        }
+        else if (c == KEY_ARROW_RIGHT)
+        {
+            if (!setSector(ep, sx+1, sy))
+            {
+                moveRLE(x, y, fedshipRLE, 0);
+                moveRLE(x+1, y, fedshipRLE, 0);
+                fillbg(sx - ENTOBJ_FEDSHIP_W/2, sy);
+            }
+        }
+        else if (c == KEY_ARROW_UP)
+        {
+            if (!setSector(ep, sx, sy-1))
+            {
+                drawRLE(x, y-3, fedshipRLE, 1);
+                for (x = sx - ENTOBJ_FEDSHIP_W/2; x < sx + ENTOBJ_FEDSHIP_W; ++x) fillbg(x, sy);
+
+            }
+        }
+        else if (c == KEY_ARROW_DOWN)
+        {
+            if (!setSector(ep, sx, sy+1))
+            {
+                drawRLE(x, y+3, fedshipRLE, 1);
+                for (x = sx - ENTOBJ_FEDSHIP_W/2; x < sx + ENTOBJ_FEDSHIP_W; ++x) fillbg(x, sy);
+            }
+        }
+        else break;
+    }
+
+    return c;
 }

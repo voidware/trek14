@@ -130,6 +130,8 @@ typedef struct
     const uchar*        _data;
 } EntObj;
 
+#define ENTOBJ_FEDSHIP_W  8
+
 
 // -- data
 
@@ -139,9 +141,12 @@ extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
+extern const uchar fedshipRLE[];
 
 // -- functions
 
 void getQuad(uchar x, uchar y, uchar z, uchar* quad, uchar** eplist);
 void genGalaxy();
 unsigned int rand16();
+uchar collision(uchar* ep1, uchar* ep2);
+uchar setSector(uchar* ep, uchar x, uchar y);

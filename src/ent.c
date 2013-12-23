@@ -38,7 +38,7 @@ uchar* quadrant[ENT_QUAD_MAX];
 
 
 // RLE sprites
-const uchar fedship[] = { 0x01, 0x60, 0x02,
+const uchar fedshipRLE[] = { 0x01, 0x60, 0x02,
                                  0x02, 0x14, 0x70, 0x0d,
                                  0x01, 0xb0, 0x00,
                                  0x00 };
@@ -75,7 +75,7 @@ static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
 const EntObj objTable[] =
 {
     { CW(12), 3, base },
-    { CW(16), 3, fedship },
+    { ENTOBJ_FEDSHIP_W, 3, fedshipRLE },  // w = 16 pixels
     { CW(6), 3, star },
     { CW(7), 3, planet },
     { CW(11), 3, klingon },
@@ -117,10 +117,10 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
 }
 
 
-static int collision(uchar* ep1, uchar* ep2)
+uchar collision(uchar* ep1, uchar* ep2)
 {
     // if object `ep1' overlaps `ep2'
-    // or if `ep1' does not git properly in the quadrant
+    // or if `ep1' does not fit properly in the quadrant
 
     uchar w1, x1, y1;
     uchar w2, x2, y2;
@@ -131,7 +131,7 @@ static int collision(uchar* ep1, uchar* ep2)
     x1 -= (w1>>1); 
 
     // overlap quadrant edge
-    if (!y1 || y1 == 15 || x1 >= 64 || x1 + w1 > 64) return 1;
+    if (!y1 || y1 > 14 || x1 >= 64 || x1 + w1 > 64) return 1;
 
     ENT_SXY(ep2, x2, y2);
 
@@ -148,6 +148,32 @@ static int collision(uchar* ep1, uchar* ep2)
 
     }
     
+    return 0;
+}
+
+uchar setSector(uchar* ep, uchar x, uchar y)
+{
+    uchar** qp;
+
+    // get old values
+    int oldxy = *((int*)(ep + 1));
+
+    if (y > 14) return 1;
+    
+    // set new values
+    ENT_SET_SXY(ep, x, y);
+
+    // check for collision
+    for (qp = quadrant; *qp; ++qp)
+    {
+        uchar c;
+        if (ep != *qp && (c = collision(ep, *qp)))
+        {
+            // restore old values
+            *(int*)(ep+1) = oldxy;
+            return c;
+        }
+    }
     return 0;
 }
 
@@ -181,39 +207,13 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
     ENT_SET_QX(ep, x);
     ENT_SET_QY(ep, y);
 
-    for (;;)
+    do
     {
-        uchar** qp;
-
-    retry:
-
-        qp = quadrant;
-        
         // put at a random location within the quadrant
         x = rand16() & 63;
         y = rand16() & 15;
-        ENT_SET_SXY(ep, x, y);
 
-        // check for collision
-        while (*qp)
-        {
-            if (collision(ep, *qp)) goto retry;
-            ++qp;
-        }
-
-        break;
-    }
-    
-#if 0
-    w = (objTable[type]._w + 1)>>1; // character cells wide
-
-    // left width (round down)
-    wl = w>>1;
-
-    if (x < wl) x = wl;
-    else if (x + (w - wl) > 64) x = 64 - w + wl;
-#endif
-
+    } while (setSector(ep, x, y));
 }
 
 

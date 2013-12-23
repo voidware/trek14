@@ -34,11 +34,22 @@ void outchar(char c)
     putchar(c);
 }
 
+void outcharat(uchar x, uchar y, uchar c)
+{
+    setcursor(x,y);
+    outchar(c);
+}
+
 char getkey()
 {
     char c;
     scanf("%c", &c);
     return c;
+}
+
+char inkey()
+{
+    return getkey();
 }
 
 void setcursor(uchar x, uchar y)
@@ -138,6 +149,12 @@ void cls()
     call #0x1c9
     __endasm;
 }
+
+void outcharat(uchar x, uchar y, uchar c)
+{
+    *(VIDRAM + ((int)y<<6) + x) = c;
+}
+
 #endif
 
 // ---- LIB FUNCTIONS -----------------------------------------------------
@@ -147,4 +164,5 @@ void outs(const char* s)
     while (*s)
         outchar(*s++);
 }
+
 

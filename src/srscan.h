@@ -22,4 +22,4 @@
 
 // quadrant view
 
-void srScan();
+char srScan();

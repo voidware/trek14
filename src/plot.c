@@ -178,9 +178,12 @@ void drawRLE(char x, char y, const uchar* dp, uchar c)
     }
 }
 
-void moveRLERight(char x, char y, uchar* dp)
+void moveRLE(char x, char y, const uchar* dp, uchar left)
 {
-    // moves RLE sprite from (x,y) to (x+1, y)
+    // moves RLE sprite from (x,y) to (x-1, y)
+    // or from (x,y) to (x+1, y)
+    
+    x -= left;
     for (;;)
     {
         uchar n = *dp++;
@@ -195,9 +198,9 @@ void moveRLERight(char x, char y, uchar* dp)
             m = pair >> 4;
             if (m > 0)
             {
-                plot(x,y,0);
+                plot(x,y,left);
                 x += m;
-                plot(x,y,1);
+                plot(x,y,!left);
             }
             
             x += pair & 0xf;
@@ -209,3 +212,4 @@ void moveRLERight(char x, char y, uchar* dp)
         ++y;
     }    
 }
+
