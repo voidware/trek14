@@ -20,6 +20,5 @@
  * IN THE SOFTWARE.
  */
 
-void lrScanQuad(uchar x, uchar y, uchar z, uchar* entCount);
 void lrScan();
 

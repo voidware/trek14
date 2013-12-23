@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "os.h"
 #include "libc.h"
+#include "utils.h"
 #include "ent.h"
 #include "warp.h"
 
@@ -30,15 +31,20 @@ void warp(uchar x, uchar y, uchar z)
 {
     if (x < 8 && y < 8 && z <= 2)
     {
+        uchar quad[ENT_TYPE_COUNT];
         uchar* ep = galaxyEnd - ENT_SIZE;
-
-        QX = x;
-        QY = y;
-        QZ = z;
 
         // we are always at `galaxyEnd'
         ENT_SET_QX(ep, x);
         ENT_SET_QY(ep, y);
         ENT_SET_QZ(ep, z);
+
+        // update current location variables
+        QX = x;
+        QY = y;
+        QZ = z;
+        
+        // update list of things in this quadrant
+        getQuad(x, y, z, quad, quadrant);
     }
 }

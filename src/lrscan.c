@@ -28,22 +28,6 @@
 #include "plot.h"
 #include "command.h"
 
-
-void lrScanQuad(uchar x, uchar y, uchar z, uchar* quad)
-{
-    uchar* ep = galaxy;
-
-    memzero(quad, ENT_TYPE_COUNT);
-    
-    while (ep != galaxyEnd)
-    {
-        if (ENT_QX(ep) == x && ENT_QY(ep) == y && ENT_QZ(ep) == z)
-            ++quad[ENT_TYPE(ep)];
-
-        ep += ENT_SIZE;
-    }
-}
-
 void lrScan()
 {
     // long range scan
@@ -90,7 +74,7 @@ void lrScan()
                     uchar* cp = quad;
 
                     // find out what we have in the quadrant
-                    lrScanQuad(x, y, z, cp);
+                    getQuad(x, y, z, cp, 0);
                     
                     bp = buf;
                     while (*bp = *tc++)
@@ -126,5 +110,4 @@ void lrScan()
 
     conn();
 }
-
 

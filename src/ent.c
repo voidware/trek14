@@ -24,13 +24,17 @@
 #include "ent.h"
 #include "libc.h"
 #include "utils.h"
-#include "lrscan.h"
 #include "warp.h"
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
-uchar QX, QY, QZ;
 const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
+
+// current location
+uchar QX, QY, QZ;
+
+// entities in current quadrant
+uchar* quadrant[ENT_QUAD_MAX];
 
 
 // RLE sprites
@@ -64,17 +68,19 @@ static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
                                  0x01, 0x30, 0x00,
                                  0x00 };
 
+
+// pixel to char width
+#define CW(_v) (((_v)+1)>>1)
                               
 const EntObj objTable[] =
 {
-    { 12, 3, base },
-    { 16, 3, fedship },
-    { 6, 3, star },
-    { 7, 3, planet },
-    { 11, 3, klingon },
-    { 0, 0, romulan },
+    { CW(12), 3, base },
+    { CW(16), 3, fedship },
+    { CW(6), 3, star },
+    { CW(7), 3, planet },
+    { CW(11), 3, klingon },
+    { CW(0), 0, romulan },
 };
-
 
 unsigned int rand16()
 {
@@ -89,6 +95,61 @@ unsigned int rand16()
     return seed;
 }
 
+void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
+{
+    uchar* ep = galaxy;
+
+    memzero(quadCounts, ENT_TYPE_COUNT);
+    
+    while (ep != galaxyEnd)
+    {
+        if (ENT_QX(ep) == x && ENT_QY(ep) == y && ENT_QZ(ep) == z)
+        {
+            if (eplist)
+            {
+                *eplist++ = ep;
+                *eplist = 0;
+            }
+            ++quadCounts[ENT_TYPE(ep)];
+        }
+        ep += ENT_SIZE;
+    }
+}
+
+
+static int collision(uchar* ep1, uchar* ep2)
+{
+    // if object `ep1' overlaps `ep2'
+    // or if `ep1' does not git properly in the quadrant
+
+    uchar w1, x1, y1;
+    uchar w2, x2, y2;
+
+    w1 = objTable[ENT_TYPE(ep1)]._w;
+    ENT_SXY(ep1, x1, y1);
+
+    x1 -= (w1>>1); 
+
+    // overlap quadrant edge
+    if (!y1 || y1 == 15 || x1 >= 64 || x1 + w1 > 64) return 1;
+
+    ENT_SXY(ep2, x2, y2);
+
+    // for now assume everyone is the same height, so to collide they
+    // must be on the same line
+    if (y1 == y2)
+    {
+        w2 = objTable[ENT_TYPE(ep2)]._w;
+        x2 -= (w2>>1);
+
+        // collision!
+        if (x2 + w2 > x1 && x2 < x1 + w1) 
+            return 2;
+
+    }
+    
+    return 0;
+}
 
 static void genEntLocation(uchar* ep, uchar type, uchar tmax)
 {
@@ -97,8 +158,7 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
     // avoiding quadrant QX, QY, QZ
 
     uchar x, y, z;
-    uchar quad[ENT_TYPE_COUNT];
-    uchar w, wl;
+    uchar quadCounts[ENT_TYPE_COUNT];
     
     do
     {
@@ -112,24 +172,39 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
             z = rand16() & 0x3;
         } while (z == 3 || (x == QX && y == QY && z == QZ));
 
-        lrScanQuad(x, y, z, quad);
+        getQuad(x, y, z, quadCounts, quadrant);
         
-    } while (quad[type] >= tmax);
+    } while (quadCounts[type] >= tmax);
 
     ENT_SET_TYPE(ep, type);
     ENT_SET_QZ(ep, z);
     ENT_SET_QX(ep, x);
     ENT_SET_QY(ep, y);
 
-    // put at a random location within the quadrant
-    // NB: no check for collisions!
-    x = rand16() & 63;
-
-    do
+    for (;;)
     {
+        uchar** qp;
+
+    retry:
+
+        qp = quadrant;
+        
+        // put at a random location within the quadrant
+        x = rand16() & 63;
         y = rand16() & 15;
-    } while (y == 0 || y == 15);
+        ENT_SET_SXY(ep, x, y);
+
+        // check for collision
+        while (*qp)
+        {
+            if (collision(ep, *qp)) goto retry;
+            ++qp;
+        }
+
+        break;
+    }
     
+#if 0
     w = (objTable[type]._w + 1)>>1; // character cells wide
 
     // left width (round down)
@@ -137,15 +212,14 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
 
     if (x < wl) x = wl;
     else if (x + (w - wl) > 64) x = 64 - w + wl;
+#endif
 
-    ENT_SET_SXY(ep, x, y);
 }
 
 
 void genGalaxy()
 {
     uchar i;
-    uchar quad[ENT_TYPE_COUNT];
         
     // XX should be zero anyway once we clear BSS
     memzero(galaxy, sizeof(galaxy));

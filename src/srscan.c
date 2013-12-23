@@ -29,34 +29,27 @@
 #include "ent.h"
 #include "plot.h"
 #include "srscan.h"
-
-extern uchar fedship[];
+#include "command.h"
 
 void srScan()
 {
-    uchar* ep;
+    uchar** epp;
     int i;
 
     cls();
     printf("Short Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
 
     for (i = 64*7; i >= 0; --i) { outchar('.'); outchar(' '); }
-    
 
-    ep = galaxy;
-    while (ep != galaxyEnd)
+    // use the current quadrant info
+
+    epp = quadrant;
+    while (*epp)
     {
-        if (ENT_QX(ep) == QX && ENT_QY(ep) == QY && ENT_QZ(ep) == QZ)
-        {
-            uchar t = ENT_TYPE(ep);
-            uchar sx, sy;
-            const EntObj* obj = objTable + t;
-
-            ENT_SXY(ep, sx, sy);
-
-            drawRLE(sx<<1,sy*3, obj->_data, 1);
-        }
-        ep += ENT_SIZE;
+        uchar sx, sy;
+        ENT_SXY(*epp, sx, sy);
+        drawRLE(sx<<1,sy*3, objTable[ENT_TYPE(*epp)]._data, 1);
+        ++epp;
     }    
 
     conn();

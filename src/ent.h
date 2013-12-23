@@ -113,6 +113,7 @@
 
 #define ENT_SIZE  5
 #define ENT_COUNT_MAX   400
+#define ENT_QUAD_MAX    10
 
 #define ENT_TYPE_BASE   0
 #define ENT_TYPE_FEDERATION 1
@@ -133,6 +134,7 @@ typedef struct
 // -- data
 
 extern uchar galaxy[];
+extern uchar* quadrant[];
 extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
 extern const char entTypeChar[];
@@ -140,5 +142,6 @@ extern const EntObj objTable[];
 
 // -- functions
 
+void getQuad(uchar x, uchar y, uchar z, uchar* quad, uchar** eplist);
 void genGalaxy();
 unsigned int rand16();
