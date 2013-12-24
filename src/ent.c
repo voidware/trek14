@@ -75,7 +75,7 @@ static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
 const EntObj objTable[] =
 {
     { CW(12), 3, base },
-    { ENTOBJ_FEDSHIP_W, 3, fedshipRLE },  // w = 16 pixels
+    { CW(16), 3, fedshipRLE }, 
     { CW(6), 3, star },
     { CW(7), 3, planet },
     { CW(11), 3, klingon },
@@ -97,8 +97,11 @@ unsigned int rand16()
 
 void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
 {
+    // get information about quadrant (x,y,z)
+    // quadCounts is an array of counts indexed by ent type
+    // eplist (optional) is a list of ent pointers, objects in this quadrant
+    
     uchar* ep = galaxy;
-
     memzero(quadCounts, ENT_TYPE_COUNT);
     
     while (ep != galaxyEnd)
@@ -145,14 +148,16 @@ uchar collision(uchar* ep1, uchar* ep2)
         // collision!
         if (x2 + w2 > x1 && x2 < x1 + w1) 
             return 2;
-
     }
-    
     return 0;
 }
 
 uchar setSector(uchar* ep, uchar x, uchar y)
 {
+    // attempt to set the sector location of `ep' to (x,y)
+    // if this results in collision or outside quadrant, restore
+    // original location and return != 0 value.
+    
     uchar** qp;
 
     // get old values
@@ -255,7 +260,6 @@ void genGalaxy()
     }
 
     printf("federation\n");
-
 
     // our current location. setting this with prevent bases from 
     // being put in this quadrant

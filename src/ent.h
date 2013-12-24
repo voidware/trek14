@@ -83,9 +83,8 @@
 #define ENT_SXY(_p, _x, _y)     \
 {                               \
     _x = ((_p)[1] >> 2) & ~1;   \
-    _y = (_p)[2] >> 3;          \
-    if (_y & 1) ++_x;           \
-    _y >>= 1;                   \
+    _y = (_p)[2] >> 4;          \
+    if ((_p)[2] & (1<<3)) ++_x; \
 }
 
 #define ENT_SET_SXY(_p, _x, _y)                                 \
@@ -112,7 +111,7 @@
 
 
 #define ENT_SIZE  5
-#define ENT_COUNT_MAX   400
+#define ENT_COUNT_MAX   300
 #define ENT_QUAD_MAX    10
 
 #define ENT_TYPE_BASE   0
@@ -129,8 +128,6 @@ typedef struct
     uchar               _h;
     const uchar*        _data;
 } EntObj;
-
-#define ENTOBJ_FEDSHIP_W  8
 
 
 // -- data

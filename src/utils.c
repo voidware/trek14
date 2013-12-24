@@ -43,3 +43,27 @@ void printfat(uchar x, uchar y, const char* fmt, ...)
     va_end(args);
     flush();
 }
+
+#if 0
+unsigned char isqrt16(unsigned short a)
+{
+    // 16 bit version, valid up to 16383
+    unsigned short rem = 0;
+    unsigned char root = 0;
+    unsigned char i;
+    for (i = 0; i < 8; ++i)
+    {
+        root <<= 1;
+        rem = (rem << 2) + (a >> 14);
+        a <<= 2;
+        if (root < rem)
+        {
+            ++root;
+            rem -= root;
+            ++root;
+        }
+    }
+    return root >> 1;
+}
+#endif
+

@@ -9,12 +9,13 @@ DEBUG =
 OPT = 
 CFLAGS = -mz80 $(DEBUG)
 ASFLAGS = -l
-LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7000
+LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7600
 
 
 OBJS = \
 	crt0.rel \
 	command.rel \
+	enemy.rel \
 	warp.rel \
 	lrscan.rel \
 	srscan.rel \
@@ -28,7 +29,6 @@ OBJS = \
 	crtcall.rel \
 	divunsigned.rel \
 	mul.rel \
-	
 
 %.rel: %.c
 	$(CC) $(CFLAGS) -c $< 

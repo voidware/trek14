@@ -20,7 +20,4 @@
  * IN THE SOFTWARE.
  */
 
-// quadrant view
-
-char srScan();
-void moveEnt(uchar* ep, char dx, char dy);
+void enemyMove();

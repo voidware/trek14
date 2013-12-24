@@ -29,11 +29,46 @@
 #include "ent.h"
 #include "plot.h"
 #include "srscan.h"
+#include "enemy.h"
 #include "command.h"
 
 static void fillbg(uchar x, uchar y)
 {
     outcharat(x, y, (x & 1) ? ' ' : '.');
+}
+
+void moveEnt(uchar* ep, char dx, char dy)
+{
+    uchar sx, sy;
+    ENT_SXY(ep, sx, sy);
+    if (!setSector(ep, sx+dx, sy+dy))
+    {
+        uchar x, y;
+        const EntObj* obj = objTable + ENT_TYPE(ep);
+        uchar w2 = obj->_w;
+        sx -= w2>>1;
+            
+        if (dy)
+        {
+            drawRLE((sx+dx)<<1, (sy + dy)*3, obj->_data, 1);
+            while (w2)
+            {
+                --w2;
+                fillbg(sx++, sy);
+            }
+        }
+        else if (dx)
+        {
+            x = sx<<1;
+            y = sy*3;
+            moveRLE(x, y, obj->_data, (dx < 0));            
+            moveRLE(x+dx, y, obj->_data, (dx < 0));            
+            if (dx < 0)
+                fillbg(sx + w2 - 1, sy);                
+            else
+                fillbg(sx, sy);
+        }
+    }
 }
 
 char srScan()
@@ -58,61 +93,35 @@ char srScan()
 
         // convert sector position to pixel
         drawRLE((sx - (eo->_w>>1))<<1, sy*3, eo->_data, 1);
+
         ++epp;
     }    
 
     for (;;)
     {
-        uchar* ep;
-        uchar x, y;
+        char dx, dy;
         
         c = inkey();
         if (!c) continue;
 
-        // our entity
-        ep = galaxyEnd - ENT_SIZE;
-        ENT_SXY(ep, sx, sy);        
-
-        // convert to pixels        
-        x = (sx - ENTOBJ_FEDSHIP_W/2)<<1;
-        y = sy * 3;
-        
+        dx = 0;
+        dy = 0;
         if (c == KEY_ARROW_LEFT)
-        {
-            if (!setSector(ep, sx-1, sy))
-            {
-                moveRLE(x, y, fedshipRLE, 1);
-                moveRLE(x-1, y, fedshipRLE, 1);
-                fillbg(sx + ENTOBJ_FEDSHIP_W/2, sy);
-            }
-        }
+            dx = -1;
         else if (c == KEY_ARROW_RIGHT)
-        {
-            if (!setSector(ep, sx+1, sy))
-            {
-                moveRLE(x, y, fedshipRLE, 0);
-                moveRLE(x+1, y, fedshipRLE, 0);
-                fillbg(sx - ENTOBJ_FEDSHIP_W/2, sy);
-            }
-        }
+            dx = 1;
         else if (c == KEY_ARROW_UP)
-        {
-            if (!setSector(ep, sx, sy-1))
-            {
-                drawRLE(x, y-3, fedshipRLE, 1);
-                for (x = sx - ENTOBJ_FEDSHIP_W/2; x < sx + ENTOBJ_FEDSHIP_W; ++x) fillbg(x, sy);
-
-            }
-        }
+            dy = -1;
         else if (c == KEY_ARROW_DOWN)
+            dy = 1;
+        else if (c == ' ')
         {
-            if (!setSector(ep, sx, sy+1))
-            {
-                drawRLE(x, y+3, fedshipRLE, 1);
-                for (x = sx - ENTOBJ_FEDSHIP_W/2; x < sx + ENTOBJ_FEDSHIP_W; ++x) fillbg(x, sy);
-            }
+            // dummy move!
         }
         else break;
+
+        moveEnt(galaxyEnd - ENT_SIZE, dx, dy);
+        enemyMove();
     }
 
     return c;
