@@ -42,7 +42,7 @@ uchar distance(uchar* ep1, uchar* ep2)
 
 #if 1
     // manhatten distance    
-    return ABS(x1-x2) + ABS(y1-y2); /
+    return ABS(x1-x2) + ABS(y1-y2); 
 #else
     return isqrt16(x1*x1 + x2*x2);
 #endif

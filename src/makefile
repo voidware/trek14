@@ -9,8 +9,12 @@ DEBUG =
 OPT = 
 CFLAGS = -mz80 $(DEBUG)
 ASFLAGS = -l
-LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7600
 
+#16k machine
+#LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7600
+
+# 48k dos machine
+LDFLAGS = -mjwx -b _CODE=0x5200  -b _DATA=0xF600
 
 OBJS = \
 	crt0.rel \
@@ -42,6 +46,9 @@ trek14.cas: trek14.ihx
 
 trek14.ihx : $(OBJS)
 	$(LD) $(LDFLAGS) -i trek14.ihx $(OBJS)
+
+trek14.cmd: trek14.cas
+	../tools/trld trek14.cas trek14.cmd
 
 clean:
 	rm -f *.rel
