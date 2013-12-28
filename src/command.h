@@ -23,4 +23,5 @@
 void command();
 void conn();
 void phaserCommand();
-
+void baseLine();
+void message(const char* s);

@@ -25,7 +25,7 @@
 
 
 // divide by 3, 0 to 47
-static const unsigned char div3tab[] = {
+const unsigned char div3tab[] = {
     0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,9,10,10,10,11,11,11,12,12,12,13,13,13,14,14,14,15,15,15};
 
 static const unsigned char leftCol[] = { 0x01, 0x04, 0x10 };

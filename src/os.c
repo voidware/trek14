@@ -132,13 +132,14 @@ uchar getline(char* buf, uchar nmax)
 void setcursor(uchar x, uchar y)
 {
     // 0x4020
-    int* p = (int*)0x4020;
-    *p = (((int)y<<6) + x + (int)VIDRAM);
+    char** p = CURMEM;
+    *p = VIDRAM + ((int)y<<6) + x;
 }
 
 void getcursor(uchar* x, uchar* y)
 {
-    int v = (*(int*)0x4020) - (int)VIDRAM;
+    char** p = CURMEM;
+    int v = *p - VIDRAM;
     *x = v & 63;
     *y = v >> 6;
 }
@@ -185,7 +186,7 @@ uchar getline2(char* buf, uchar nmax)
         char c;
 
         // current cursor pos
-        char* cp = *(char**)0x4020;
+        char* cp = *CURMEM;
         
         // emit prompt
         *cp = '_';
@@ -217,11 +218,22 @@ uchar getline2(char* buf, uchar nmax)
 }
 #endif
 
+void clearlineend()
+{
+    // clear from current cursor to end of line
+    // leave cursor where it is
+#ifndef _WIN32
+    char* cp = *CURMEM;
+    while (((int)cp) & 63) *cp++ = ' ';
+#endif    
+}
+
 void clearline()
 {
 #ifndef _WIN32
     // clear from current cursor to start of line
-    char** cpp = (char**)0x4020;
+    // set cursor to start of line
+    char** cpp = CURMEM;
     char* cp = *cpp;
     while (((int)cp) & 63)
         *cp-- = ' ';

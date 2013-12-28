@@ -28,9 +28,9 @@
 #include "utils.h"
 #include "ent.h"
 #include "enemy.h"
+#include "warp.h"
+#include "command.h"
 #include "srscan.h"
-
-#define ABS(_c) ((char)(_c) < 0 ? -(_c) : (_c))
 
 uchar distance(uchar* ep1, uchar* ep2)
 {
@@ -112,3 +112,36 @@ void enemyMove()
             klingonMove(*epp);
     }
 }
+
+void removeEnt(uchar *ep)
+{
+    undrawEnt(ep);
+    memmove(ep, ep + ENT_SIZE, galaxyEnd - ep - ENT_SIZE);
+    galaxyEnd -= ENT_SIZE;
+
+    // regenerate tables for this quadrant
+    warp(QX, QY, QZ);
+}
+
+char takeDamage(uchar* ep, unsigned int d)
+{
+    // return < 0, means destroyed
+    
+    int e;
+    e = ENT_ENERGY(ep) - d;
+    
+    //printfat(40,1, "%u %u = %d", (int)ENT_ENERGY(ep), d, e); flush();
+
+    if (e >= 0)
+    {
+        ENT_SET_ENERGY(ep, e);
+    }
+    else
+    {
+        // blow up!
+        message("Destroyed");
+        removeEnt(ep);
+    }
+    return (char)e;
+}
+

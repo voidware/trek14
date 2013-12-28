@@ -28,6 +28,7 @@
 #include "ent.h"
 #include "plot.h"
 #include "srscan.h"
+#include "enemy.h"
 #include "phasers.h"
 
 static void setPixel(char x, char y)
@@ -35,36 +36,67 @@ static void setPixel(char x, char y)
     plot(x, y, 1);
 }
 
-void phasers(uchar* ep, int e, uchar type)
+static void fillBgPixel(char x, char y)
+{
+    // restore background at this pixel
+    fillbg(x>>1, div3tab[y]);
+}
+
+void phasers(uchar* ep, unsigned int e, uchar type)
 {
     // entity `ep' fire phasers at `type' energy `e'
     
-    uchar sx, sy;
-    int en;
+    unsigned int en;
     uchar** qp;
 
     en = ENT_ENERGY(ep);
-
-    ENT_SXY(ep, sx, sy);
-
-    // shoot from the front
-    sx += objTable[ENT_TYPE(ep)]._w>>1;
     
     for (qp = quadrant; *qp; ++qp)
     {
         if (ENT_TYPE(*qp) == type)
         {
+            // do we have enough energy?
             if (en >= e)
             {
+                uchar sx, sy;
                 uchar ex, ey;
-            
+                char dw;
+                unsigned int dam;
+                
+
+                // update remaining energy
                 en -= e;
                 ENT_SET_ENERGY(ep, en);
-
+                
+                ENT_SXY(ep, sx, sy);
                 ENT_SXY(*qp, ex, ey);
 
-                plotLine(sx<<1, sy*3 + 1, ex<<1, ey*3 + 1, setPixel);
-                plotLine(sx, sy, ex, ey, fillbg);
+                dw = objTable[ENT_TYPE(ep)]._w>>1;
+                if (sx <= ex) sx += dw;  // front the front
+                else sx -= dw; // from the back
+
+                // convert to pixels
+                sx <<= 1;
+                sy = sy*3+1; // take mid point
+                ex <<= 1; 
+                ey = ey*3+1;
+
+                // zap!
+                plotLine(sx, sy, ex, ey, setPixel);
+
+                // calculate effective damage
+                
+                // damage = E*exp(-dist/4)
+                
+                // dist*32 = dist*128/4 (work fixed point 128)
+                dam = ((unsigned int)distance(ep, *qp))<<5;
+
+                // need to shift exp(exp) down 7 (fixed 128)
+                // but since e is 14 bits, shift up 2 to get the most
+                // accuracy.
+                takeDamage(*qp, (e<<2)/(expfixed(dam)>>5));
+                
+                plotLine(sx, sy, ex, ey, fillBgPixel);
             }
         }
     }

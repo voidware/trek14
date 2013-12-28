@@ -67,3 +67,77 @@ unsigned char isqrt16(unsigned short a)
 }
 #endif
 
+static const unsigned int exptab[] =
+{
+710, 256, 1,
+355, 16, 1,
+177, 4, 1,
+89, 2, 1,
+52, 3, 2,
+29, 5, 4,
+15, 9, 8,
+8, 17, 16,
+4, 33, 32,
+2, 65, 64,
+1, 129, 128,
+};
+
+unsigned int expfixed(unsigned int v)
+{
+    // fixed point, value * 128 without multiply and divide!
+    unsigned int r = 128;
+    unsigned char n = DIM(exptab)/3;
+    unsigned char more;
+    do
+    {
+        unsigned char i;
+        const int* tp = exptab;
+        more = 0;
+        for (i = 0; i < n; ++i)
+        {
+            if (*tp <= v)
+            {
+                int r0;
+                unsigned char d;
+
+                // subtract value column
+                v -= *tp;
+
+                // if numerator is odd, then it is 2^k+1, so we rememeber
+                // the odd `r' and add it later
+                
+                r0 = 0;
+                d = tp[1];
+                if (d & 1)
+                {
+                    --d;
+                    r0 = r;
+                }
+
+                // then perform the 2^k * r for the numerator
+                while (d > 1)
+                {
+                    d >>= 1;
+                    r <<= 1;
+                }
+                
+                // add back any odd `r'
+                r += r0;
+
+                // denominator is always power of 2
+                d = tp[2];
+                while (d > 1)
+                {
+                    d >>= 1;
+                    r >>= 1;
+                }
+
+                more = 1;
+                break;
+            }
+            tp += 3;
+        }
+    } while (more);
+
+    return r;
+}

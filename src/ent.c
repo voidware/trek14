@@ -28,7 +28,6 @@
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
-uchar* ship;
 const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
 
 // current location
@@ -191,7 +190,6 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
     // avoiding quadrant QX, QY, QZ
 
     uchar x, y, z;
-    //uchar quadCounts[ENT_TYPE_COUNT];
     
     do
     {
@@ -233,31 +231,15 @@ void genGalaxy()
 
     galaxyEnd = galaxy;
 
-    // our current location. set void
-    QX = -1;
-    QY = -1;
-    QZ = -1;
+    // we are the first entity in the table
+    genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1);
 
-    // populate klingons
-    for (i = 0; i < 20; ++i)
-    {
-        genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 3);
-        
-        // enemy has at least half its allowed energy
-        ENT_SET_DAT(galaxyEnd, (rand16() & (ENT_ENERGYK_LIMIT/4-1)) + ENT_ENERGYK_LIMIT/2);
-        galaxyEnd += ENT_SIZE;
-    }
+    // full energy & photons
+    ENT_SET_DAT(galaxyEnd, 0xffff);
 
-    // populate planets & stars
-    for (i = 0; i < 100; ++i)
-    {
-        genEntLocation(galaxyEnd, ENT_TYPE_STAR, 4);
-        galaxyEnd += ENT_SIZE;
-        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 4);
-        galaxyEnd += ENT_SIZE;
-    }
+    galaxyEnd += ENT_SIZE; 
 
-    // our current location. setting this with prevent bases from 
+    // our current location. setting this with prevent anything else from 
     // being put in this quadrant
     QX = 7;
     QY = 7;
@@ -280,18 +262,26 @@ void genGalaxy()
 
     galaxyEnd += ENT_SIZE; 
 
-    
-    // put us in the same location
-    genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1);
+    // populate klingons
+    for (i = 0; i < 20; ++i)
+    {
+        genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 3);
+        
+        // enemy has at least half its allowed energy
+        ENT_SET_DAT(galaxyEnd, (rand16() & (ENT_ENERGYK_LIMIT/4-1)) + ENT_ENERGYK_LIMIT/2);
+        galaxyEnd += ENT_SIZE;
+    }
 
-    // full energy & photons
-    ENT_SET_DAT(galaxyEnd, 0xffff);
-
-    ship = galaxyEnd;
-    galaxyEnd += ENT_SIZE; 
+    // populate planets & stars
+    for (i = 0; i < 100; ++i)
+    {
+        genEntLocation(galaxyEnd, ENT_TYPE_STAR, 4);
+        galaxyEnd += ENT_SIZE;
+        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 4);
+        galaxyEnd += ENT_SIZE;
+    }
 
     warp(QX, QY, QZ);
-
 }
 
 

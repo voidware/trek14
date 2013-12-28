@@ -43,11 +43,25 @@ void command()
     }
 }
 
+void message(const char* s)
+{
+    baseLine();
+    outs(s);
+    outs(", captain!");
+}
+
+void baseLine()
+{
+    // prompt at the base of the screen, clearing anything already there
+    setcursor(63, 15);
+    clearline();
+}
+
 void warpCommand()
 {
     int x, y, z;
     
-    clearline();
+    baseLine();
     printf("Location: "); flush();
     scanf("%d,%d,%d", &x, &y, &z);
     warp(x,y,z);
@@ -59,19 +73,25 @@ void phaserCommand()
     
     if (quadCounts[ENT_TYPE_KLINGON])
     {
-        clearline();
+        baseLine();
         printf("Energy: "); flush();
         scanf("%d", &e);
 
         if (e > 0)
         {
-            phasers(ship, e, ENT_TYPE_KLINGON);
-            showState();
+            if (e <= ENT_ENERGY(galaxy))
+            {
+                phasers(galaxy, e, ENT_TYPE_KLINGON);
+                showState();
+            }
+            else
+                message("Not enough energy");
         }
     }
     else
     {
         // no enemies!
+        message("No target");
     }
 }
 

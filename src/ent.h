@@ -106,7 +106,7 @@
     ENT_SET_DAT(_p, (ENT_DAT(_p) >> ENT_ENERGY_BITS) | (_v))
 
 // klingons have half energy max
-#define ENT_ENERGYK_BITS  ENT_ENERGY_BITS
+#define ENT_ENERGYK_BITS  (ENT_ENERGY_BITS-1)
 #define ENT_ENERGYK_LIMIT (1<<ENT_ENERGYK_BITS)
 
 
@@ -138,7 +138,6 @@ extern uchar quadCounts[];
 
 extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
-extern uchar* ship;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
 extern const uchar fedshipRLE[];

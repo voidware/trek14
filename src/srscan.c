@@ -37,6 +37,34 @@ void fillbg(char x, char y)
     outcharat(x, y, (x & 1) ? ' ' : '.');
 }
 
+void drawEnt(uchar* ep)
+{
+    uchar sx, sy;
+    const EntObj* eo = objTable + ENT_TYPE(ep);
+    ENT_SXY(ep, sx, sy);
+
+    // convert sector position to pixel
+    drawRLE((sx - (eo->_w>>1))<<1, sy*3, eo->_data, 1);
+}
+
+void undrawEnt(uchar* ep)
+{
+    uchar sx, sy;
+    const EntObj* eo = objTable + ENT_TYPE(ep);
+    uchar w2 = eo->_w;
+
+    ENT_SXY(ep, sx, sy);
+
+    // adjust to left pos
+    sx -= w2>>1;
+            
+    while (w2)
+    {
+        --w2;
+        fillbg(sx++, sy);
+    }
+}
+
 void moveEnt(uchar* ep, char dx, char dy)
 {
     // move entity `ep' by `dx' `dy' & redraw
@@ -52,7 +80,7 @@ void moveEnt(uchar* ep, char dx, char dy)
             
         if (dy)
         {
-            drawRLE((sx+dx)<<1, (sy + dy)*3, obj->_data, 1);
+            drawEnt(ep);
             while (w2)
             {
                 --w2;
@@ -75,8 +103,11 @@ void moveEnt(uchar* ep, char dx, char dy)
 
 void showState()
 {
-    printfat(40, 0, "Energy: %d", ENT_ENERGY(ship));
+    setcursor(40,0);
+    clearlineend();
+    printf("Energy: %d", ENT_ENERGY(galaxy)); flush();
 }
+
 
 char srScan()
 {
@@ -86,7 +117,6 @@ char srScan()
     uchar** epp;
     int i;
     char c;
-    uchar sx, sy;
     
     cls();
     printf("Short Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
@@ -97,16 +127,8 @@ char srScan()
 
     epp = quadrant;
     while (*epp)
-    {
-        const EntObj* eo = objTable + ENT_TYPE(*epp);
-        ENT_SXY(*epp, sx, sy);
-
-        // convert sector position to pixel
-        drawRLE((sx - (eo->_w>>1))<<1, sy*3, eo->_data, 1);
-
-        ++epp;
-    }    
-
+        drawEnt(*epp++);
+    
     for (;;)
     {
         char dx, dy;
@@ -134,7 +156,7 @@ char srScan()
         }
         else break;
 
-        moveEnt(galaxyEnd - ENT_SIZE, dx, dy);
+        moveEnt(galaxy, dx, dy);
         enemyMove();
     }
 

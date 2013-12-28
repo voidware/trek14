@@ -43,15 +43,20 @@ void* memcpy(void* dst, const void* src, size_t n)
 }
 #endif
 
-#if 0
 void* memmove(void* dst, const void* src, size_t n)
 {
+    char* p = (char*)dst;
+    const char* q = (const char*)src;
     if (dst < src) 
-        memcpy(dst, src, n);
+    {
+        while (n) 
+        {
+            --n;
+            *p++ = *q++;
+        }
+    }
     else 
     {
-        char* p = (char*)dst;
-        const char* q = (const char*)src;
         p += n;
         q += n;
         while (n) 
@@ -62,7 +67,6 @@ void* memmove(void* dst, const void* src, size_t n)
     }
     return dst;
 }
-#endif
 
 void* memset(void* ptr, smint v, size_t n)
 {

@@ -31,12 +31,10 @@ void warp(uchar x, uchar y, uchar z)
 {
     if (x < 8 && y < 8 && z <= 2)
     {
-        uchar* ep = galaxyEnd - ENT_SIZE;
-
-        // we are always at `galaxyEnd'
-        ENT_SET_QX(ep, x);
-        ENT_SET_QY(ep, y);
-        ENT_SET_QZ(ep, z);
+        // we are the first entry in the galaxy
+        ENT_SET_QX(galaxy, x);
+        ENT_SET_QY(galaxy, y);
+        ENT_SET_QZ(galaxy, z);
 
         // update current location variables
         QX = x;

@@ -20,4 +20,4 @@
  * IN THE SOFTWARE.
  */
 
-void phasers(uchar* ep, int e, uchar type);
+void phasers(uchar* ep, unsigned int e, uchar type);
