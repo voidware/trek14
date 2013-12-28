@@ -108,6 +108,7 @@ char getkey()
     __endasm;
 }
 
+#if 0
 uchar getline(char* buf, uchar nmax)
 {
     // get whole line
@@ -126,13 +127,13 @@ uchar getline(char* buf, uchar nmax)
      ld l,b
     __endasm;
 }
+#endif
 
 void setcursor(uchar x, uchar y)
 {
     // 0x4020
     int* p = (int*)0x4020;
-    int v = (y<<6) + x + (int)VIDRAM;
-    *p = v;
+    *p = (((int)y<<6) + x + (int)VIDRAM);
 }
 
 void getcursor(uchar* x, uchar* y)
@@ -164,5 +165,69 @@ void outs(const char* s)
     while (*s)
         outchar(*s++);
 }
+
+#ifdef _WIN32
+uchar getline2(char* buf, uchar nmax)
+{
+    return getline(buf, nmax);
+}
+
+#else
+uchar getline2(char* buf, uchar nmax)
+{
+    // our own version of `getline' 
+    // the os version always prints the newline, but this one
+    // does not. This can be useful when we dont want the screen to scroll
+    // because of our input.
+    uchar pos = 0;
+    for (;;)
+    {
+        char c;
+
+        // current cursor pos
+        char* cp = *(char**)0x4020;
+        
+        // emit prompt
+        *cp = '_';
+        
+        // wait for key
+        c = getkey();
+
+        if (c == 0x08) // backspace
+        {
+            if (pos)
+            {
+                --pos;
+                *cp = ' ';
+                outchar(c);
+            }
+        }
+        else 
+        {
+            if (pos < nmax)
+            {
+                buf[pos++] = c;
+                if (c != 0xd)
+                    outchar(c);
+            }
+            if (c == 0xd) break;
+        }
+    }
+    return pos;
+}
+#endif
+
+void clearline()
+{
+#ifndef _WIN32
+    // clear from current cursor to start of line
+    char** cpp = (char**)0x4020;
+    char* cp = *cpp;
+    while (((int)cp) & 63)
+        *cp-- = ' ';
+    *cpp = cp;
+#endif
+}
+
 
 

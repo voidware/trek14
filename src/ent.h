@@ -94,7 +94,7 @@
 }
 
 // _d is 16 bits
-#define ENT_DAT(_p) (*(uint16*)(_p + 3))
+#define ENT_DAT(_p) (*((uint16*)((uchar*)(_p) + 3)))
 #define ENT_SET_DAT(_p, _d)  ENT_DAT(_p) = (_d)
 
 // 14 bits
@@ -134,8 +134,11 @@ typedef struct
 
 extern uchar galaxy[];
 extern uchar* quadrant[];
+extern uchar quadCounts[];
+
 extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
+extern uchar* ship;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
 extern const uchar fedshipRLE[];

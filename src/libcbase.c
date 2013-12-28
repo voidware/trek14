@@ -103,14 +103,8 @@ usmint BASE_OpenConsoleInput()
 
 void BASE_Read(usmint h, void* buf, usmint amt, usmint * nr)
 {
-    usmint n = getline(buf, amt);
-
-    // newline is lost, so add it back
-    if (n >= amt) n = amt-1;
-    ((char*)buf)[n] = '\n';
-    ++n;
-    
-    *nr = n;
+    // using our own getline
+    *nr = getline2(buf, amt);
 }
 
 void BASE_Write(usmint h, const void* buf,

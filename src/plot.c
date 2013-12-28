@@ -148,6 +148,74 @@ void plotVLine(uchar x, uchar y1, uchar y2, uchar c)
 
 }
 
+void plotLine(char x1, char y1, char x2, char y2, plotfn* fn)
+{
+    // draw line (x1, y1) to (x2, y2) inclusive
+    uchar ax, ay;
+    char sx, sy;
+    char x, y;
+
+    sx = 1;
+    ax = x2-x1; 
+    if ((char)ax < 0)
+    {
+        ax = -ax;
+        sx = -1;
+    }
+    else if (!ax)
+        sx = 0;
+    
+    ax <<= 1;
+
+    sy = 1;    
+    ay = y2-y1;
+    if ((char)ay < 0)
+    {
+        ay = -ay;
+        sy = -1;
+    }
+    else if (!ay)
+        sy = 0;
+    
+    ay <<= 1;
+
+    x = x1;
+    y = y1;
+    
+    if (ax>ay) 	
+    {	
+	char d = ay-(ax>>1);
+	for (;;) 
+        {
+            (*fn)(x, y);
+	    if (x==x2) return;
+	    if (d>=0) 
+            {
+		y += sy;
+		d -= ax;
+	    }
+	    x += sx;
+	    d += ay;
+	}
+    }
+    else        
+    {
+	char d = ax-(ay>>1);
+	for (;;) 
+        {
+            (*fn)(x, y);
+	    if (y==y2) return;
+	    if (d>=0) 
+            {
+		x += sx;
+		d -= ay;
+	    }
+	    y += sy;
+	    d += ax;
+	}
+    }
+}
+
 void drawRLE(char x, char y, const uchar* dp, uchar c)
 {
     // plot run-line encoded (RLE) sprite, colour c

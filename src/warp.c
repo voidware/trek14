@@ -31,7 +31,6 @@ void warp(uchar x, uchar y, uchar z)
 {
     if (x < 8 && y < 8 && z <= 2)
     {
-        uchar quad[ENT_TYPE_COUNT];
         uchar* ep = galaxyEnd - ENT_SIZE;
 
         // we are always at `galaxyEnd'
@@ -45,6 +44,6 @@ void warp(uchar x, uchar y, uchar z)
         QZ = z;
         
         // update list of things in this quadrant
-        getQuad(x, y, z, quad, quadrant);
+        getQuad(x, y, z, quadCounts, quadrant);
     }
 }

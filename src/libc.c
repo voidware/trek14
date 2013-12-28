@@ -595,7 +595,7 @@ static usmint _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args
                     --r;
                 }
             }
-            else if (*p == 'd' || *p == 'i') 
+            else if (*p == 'd' || *p == 'u')
             {
                 int val = va_arg(args, int);
                 np = numBuf;
@@ -606,19 +606,31 @@ static usmint _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args
                 if (width > (smint)sizeof(numBuf)) width = sizeof(numBuf);
 
                 l = streamInt(bufStreamOutFn, &np,
-                              (unsigned int)val, width, (val < 0) | flags);
+                              (unsigned int)val, width,
+                              (*p == 'd' && (val < 0)) | flags);
                 
                 emitNumBuf = 1;
             }
-            else if (*p == 'u') 
+            else if (*p == 'x')
             {
-                unsigned int val = va_arg(args, unsigned int);
-                np = numBuf;
-
-                /* INCOMPATIBLE */
-                if (width > (smint)sizeof(numBuf)) width = sizeof(numBuf);
-
-                l = streamInt(bufStreamOutFn, &np, val, width, flags);
+                // XX only do 4 digits
+                unsigned int val = va_arg(args, unsigned int);             
+                smint i;
+                np = numBuf + 4;
+                *np = 0;
+                for (i = 0; i < 4; ++i)
+                {
+                    usmint v = val & 0x0f;
+                    --np;
+                    if (v < 10)
+                        *np = '0' + v;
+                    else
+                        *np = v - 10 + 'A';
+                    
+                    val >>= 4;
+                }
+                
+                l = i; // length
                 emitNumBuf = 1;
             }
             else 

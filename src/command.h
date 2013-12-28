@@ -22,4 +22,5 @@
 
 void command();
 void conn();
+void phaserCommand();
 

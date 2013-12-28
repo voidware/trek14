@@ -29,6 +29,7 @@
 #include "srscan.h"
 #include "warp.h"
 #include "command.h"
+#include "phasers.h"
 
 void command()
 {
@@ -37,7 +38,7 @@ void command()
         cls();
         printf("(S)hort Range Scan\n");
         printf("(L)ong Range Scan\n");
-        printf("(W)warp\n");
+        printf("(W)arp\n");
         conn();
     }
 }
@@ -46,11 +47,34 @@ void warpCommand()
 {
     int x, y, z;
     
-    printf(" Location: "); flush();
+    clearline();
+    printf("Location: "); flush();
     scanf("%d,%d,%d", &x, &y, &z);
-
     warp(x,y,z);
 }
+
+void phaserCommand()
+{
+    int e;
+    
+    if (quadCounts[ENT_TYPE_KLINGON])
+    {
+        clearline();
+        printf("Energy: "); flush();
+        scanf("%d", &e);
+
+        if (e > 0)
+        {
+            phasers(ship, e, ENT_TYPE_KLINGON);
+            showState();
+        }
+    }
+    else
+    {
+        // no enemies!
+    }
+}
+
 
 // mr spock, you have the conn :-)
 void conn()
@@ -61,7 +85,7 @@ void conn()
     do
     {
         printfat(0, 15, "Command: ");
-        getline(buf, sizeof(buf));
+        getline2(buf, sizeof(buf));
     
         c = buf[0];
 

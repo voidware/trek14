@@ -32,13 +32,15 @@
 #include "enemy.h"
 #include "command.h"
 
-static void fillbg(uchar x, uchar y)
+void fillbg(char x, char y)
 {
     outcharat(x, y, (x & 1) ? ' ' : '.');
 }
 
 void moveEnt(uchar* ep, char dx, char dy)
 {
+    // move entity `ep' by `dx' `dy' & redraw
+
     uchar sx, sy;
     ENT_SXY(ep, sx, sy);
     if (!setSector(ep, sx+dx, sy+dy))
@@ -71,8 +73,16 @@ void moveEnt(uchar* ep, char dx, char dy)
     }
 }
 
+void showState()
+{
+    printfat(40, 0, "Energy: %d", ENT_ENERGY(ship));
+}
+
 char srScan()
 {
+    // short range scan.
+    // draw quadrant screen & content.
+
     uchar** epp;
     int i;
     char c;
@@ -80,10 +90,10 @@ char srScan()
     
     cls();
     printf("Short Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
+    showState();
 
+    setcursor(0,1);
     for (i = 64*7; i > 0; --i) { outchar('.'); outchar(' '); }
-
-    // use the current quadrant info
 
     epp = quadrant;
     while (*epp)
@@ -117,6 +127,10 @@ char srScan()
         else if (c == ' ')
         {
             // dummy move!
+        }
+        else if (c == 'P')
+        {
+            phaserCommand();
         }
         else break;
 

@@ -30,7 +30,7 @@
 #include "enemy.h"
 #include "srscan.h"
 
-#define ABS(_c)  ((char)(_c) < 0 ? -(_c) : (_c))
+#define ABS(_c) ((char)(_c) < 0 ? -(_c) : (_c))
 
 uchar distance(uchar* ep1, uchar* ep2)
 {
@@ -40,13 +40,10 @@ uchar distance(uchar* ep1, uchar* ep2)
     ENT_SXY(ep1, x1, y1);
     ENT_SXY(ep2, x2, y2);
 
-#if 1
-    // manhatten distance    
-    return ABS(x1-x2) + ABS(y1-y2); 
-#else
-    return isqrt16(x1*x1 + x2*x2);
-#endif
-
+    // use hypot approx |a| + |b| - min(|a|,|b|)/2 
+    if ((char)(x2 -= x1) < 0) x2 = -x2;
+    if ((char)(y2 -= y1) < 0) y2 = -y2;
+    return x2 + y2 - (((x2>y2) ? y2 : x2) >> 1);
 }
 
 uchar* findClosest(uchar* kp, uchar type)

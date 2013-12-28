@@ -20,17 +20,53 @@
  * IN THE SOFTWARE.
  */
 
-void outchar(char c);
-void outcharat(uchar x, uchar y, uchar c);
-char inkey();
-char getkey();
-uchar getline(char* buf, uchar nmax);
-void setcursor(uchar x, uchar y);
-void getcursor(uchar* x, uchar* y);
-void cls();
 
+#include "defs.h"
+#include "os.h"
+#include "libc.h"
+#include "utils.h"
+#include "ent.h"
+#include "plot.h"
+#include "srscan.h"
+#include "phasers.h"
 
-void outs(const char* s);
-uchar getline2(char* buf, uchar nmax);
-void clearline();
+static void setPixel(char x, char y)
+{
+    plot(x, y, 1);
+}
+
+void phasers(uchar* ep, int e, uchar type)
+{
+    // entity `ep' fire phasers at `type' energy `e'
+    
+    uchar sx, sy;
+    int en;
+    uchar** qp;
+
+    en = ENT_ENERGY(ep);
+
+    ENT_SXY(ep, sx, sy);
+
+    // shoot from the front
+    sx += objTable[ENT_TYPE(ep)]._w>>1;
+    
+    for (qp = quadrant; *qp; ++qp)
+    {
+        if (ENT_TYPE(*qp) == type)
+        {
+            if (en >= e)
+            {
+                uchar ex, ey;
+            
+                en -= e;
+                ENT_SET_ENERGY(ep, en);
+
+                ENT_SXY(*qp, ex, ey);
+
+                plotLine(sx<<1, sy*3 + 1, ex<<1, ey*3 + 1, setPixel);
+                plotLine(sx, sy, ex, ey, fillbg);
+            }
+        }
+    }
+}
 

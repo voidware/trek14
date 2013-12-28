@@ -28,12 +28,14 @@
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
+uchar* ship;
 const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
 
 // current location
 uchar QX, QY, QZ;
 
 // entities in current quadrant
+uchar quadCounts[ENT_TYPE_COUNT];
 uchar* quadrant[ENT_QUAD_MAX];
 
 
@@ -189,7 +191,7 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
     // avoiding quadrant QX, QY, QZ
 
     uchar x, y, z;
-    uchar quadCounts[ENT_TYPE_COUNT];
+    //uchar quadCounts[ENT_TYPE_COUNT];
     
     do
     {
@@ -236,8 +238,6 @@ void genGalaxy()
     QY = -1;
     QZ = -1;
 
-    printf("enemies\n");
-
     // populate klingons
     for (i = 0; i < 20; ++i)
     {
@@ -248,8 +248,6 @@ void genGalaxy()
         galaxyEnd += ENT_SIZE;
     }
 
-    printf("stars\n");
-
     // populate planets & stars
     for (i = 0; i < 100; ++i)
     {
@@ -258,8 +256,6 @@ void genGalaxy()
         genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 4);
         galaxyEnd += ENT_SIZE;
     }
-
-    printf("federation\n");
 
     // our current location. setting this with prevent bases from 
     // being put in this quadrant
@@ -283,12 +279,19 @@ void genGalaxy()
     ENT_SET_QZ(galaxyEnd, QZ);
 
     galaxyEnd += ENT_SIZE; 
+
     
     // put us in the same location
     genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1);
+
+    // full energy & photons
+    ENT_SET_DAT(galaxyEnd, 0xffff);
+
+    ship = galaxyEnd;
     galaxyEnd += ENT_SIZE; 
 
     warp(QX, QY, QZ);
+
 }
 
 

@@ -28,3 +28,7 @@ void moveRLE(char x, char y, const uchar* dp, uchar left);
 
 void plotHLine(uchar x1, uchar y, uchar x2, uchar c);
 void plotVLine(uchar x, uchar y1, uchar y2, uchar c);
+
+typedef void plotfn(char x, char y);
+void plotLine(char x1, char y1, char x2, char y2, plotfn* fn);
+

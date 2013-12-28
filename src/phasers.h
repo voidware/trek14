@@ -20,17 +20,4 @@
  * IN THE SOFTWARE.
  */
 
-void outchar(char c);
-void outcharat(uchar x, uchar y, uchar c);
-char inkey();
-char getkey();
-uchar getline(char* buf, uchar nmax);
-void setcursor(uchar x, uchar y);
-void getcursor(uchar* x, uchar* y);
-void cls();
-
-
-void outs(const char* s);
-uchar getline2(char* buf, uchar nmax);
-void clearline();
-
+void phasers(uchar* ep, int e, uchar type);
