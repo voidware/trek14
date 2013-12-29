@@ -218,6 +218,7 @@ uchar getline2(char* buf, uchar nmax)
 }
 #endif
 
+#if 0
 void clearlineend()
 {
     // clear from current cursor to end of line
@@ -227,6 +228,7 @@ void clearlineend()
     while (((int)cp) & 63) *cp++ = ' ';
 #endif    
 }
+#endif
 
 void clearline()
 {

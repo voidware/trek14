@@ -25,6 +25,7 @@
 #include "libc.h"
 #include "utils.h"
 #include "ent.h"
+#include "srscan.h"
 #include "warp.h"
 
 void warp(uchar x, uchar y, uchar z)
@@ -41,7 +42,6 @@ void warp(uchar x, uchar y, uchar z)
         QY = y;
         QZ = z;
         
-        // update list of things in this quadrant
-        getQuad(x, y, z, quadCounts, quadrant);
+        updateQuadrant();
     }
 }

@@ -27,10 +27,12 @@
 #include "libc.h"
 #include "utils.h"
 #include "ent.h"
-#include "enemy.h"
 #include "warp.h"
 #include "command.h"
 #include "srscan.h"
+#include "phasers.h"
+#include "enemy.h"
+
 
 uchar distance(uchar* ep1, uchar* ep2)
 {
@@ -56,8 +58,8 @@ uchar* findClosest(uchar* kp, uchar type)
     {
         if (ENT_TYPE(*epp) == type)
         {
-            uchar d;
-            if (!best || (d = distance(kp, *epp) < dist))
+            uchar d = distance(kp, *epp);
+            if (!best || d < dist)
             {
                 dist = d;
                 best = *epp;
@@ -67,15 +69,42 @@ uchar* findClosest(uchar* kp, uchar type)
     return best;
 }
 
-void klingonMove(uchar* kp)
+static void klingonFire(uchar* kp, uchar dist)
+{
+    // consider firing
+    unsigned int ke = ENT_ENERGY(kp);
+    if (ke >= 200)
+    {
+        uchar pow = 1;
+        while (dist > 0)
+        {
+            pow <<= 1;
+            dist >>= 1;
+        }
+        if (!(rand16() & (pow-1)))
+        {
+            unsigned int e = ke - 100;
+            phasers(kp, e, ENT_TYPE_FEDERATION);
+        }
+    }
+}
+
+static uchar klingonMove(uchar* kp)
 {
     uchar* target = findClosest(kp, ENT_TYPE_FEDERATION);
     if (target)
     {
         uchar sx, sy;
         char i, j;
-        uchar dmin = -1;
         char dx, dy;
+        uchar dbest = -1;
+        uchar flee = ENT_ENERGY(kp) < 200;
+
+        if (flee)
+        {
+            // flee!
+            dbest = 0;
+        }
         
         ENT_SXY(kp, sx, sy);
         for (i = -1; i <= 1; ++i)
@@ -85,9 +114,9 @@ void klingonMove(uchar* kp)
                 if (!setSector(kp, sx + i, sy + j))
                 {
                     uchar d = distance(kp, target);
-                    if (d < dmin)
+                    if (flee && d > dbest || !flee && d < dbest)
                     {
-                        dmin = d;
+                        dbest = d;
                         dx = i;
                         dy = j;
                     }
@@ -99,8 +128,14 @@ void klingonMove(uchar* kp)
         setSector(kp, sx, sy);
 
         // then move delta (if non-zero)
-        moveEnt(kp, dx, dy);
+        // NB: can expire here and be deleted
+        if (!moveEnt(kp, dx, dy)) return 0;
+        
+        // fire?
+        klingonFire(kp, dbest);
+
     }
+    return 1;
 }
 
 void enemyMove()
@@ -109,7 +144,10 @@ void enemyMove()
     for (epp = quadrant; *epp; ++epp)
     {
         if (ENT_TYPE(*epp) == ENT_TYPE_KLINGON)
-            klingonMove(*epp);
+        {
+            // if destroyed, back up one as list is regenerated
+            if (!klingonMove(*epp)) --epp;
+        }
     }
 }
 
@@ -119,19 +157,15 @@ void removeEnt(uchar *ep)
     memmove(ep, ep + ENT_SIZE, galaxyEnd - ep - ENT_SIZE);
     galaxyEnd -= ENT_SIZE;
 
-    // regenerate tables for this quadrant
-    warp(QX, QY, QZ);
+    // rebuild quadrant content
+    updateQuadrant();
 }
 
-char takeDamage(uchar* ep, unsigned int d)
+uchar takeEnergy(uchar* ep, unsigned int d)
 {
-    // return < 0, means destroyed
-    
-    int e;
-    e = ENT_ENERGY(ep) - d;
-    
-    //printfat(40,1, "%u %u = %d", (int)ENT_ENERGY(ep), d, e); flush();
+    // return 0 if `ep' expires.
 
+    int e = ENT_ENERGY(ep) - d;
     if (e >= 0)
     {
         ENT_SET_ENERGY(ep, e);
@@ -139,9 +173,14 @@ char takeDamage(uchar* ep, unsigned int d)
     else
     {
         // blow up!
-        message("Destroyed");
-        removeEnt(ep);
+        if (ep != galaxy) 
+        {
+            message("Destroyed");
+            removeEnt(ep);
+        }
+        
+        // else you're out of energy & game over
     }
-    return (char)e;
+    return (e >= 0);
 }
 

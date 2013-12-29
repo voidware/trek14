@@ -263,7 +263,7 @@ void genGalaxy()
     galaxyEnd += ENT_SIZE; 
 
     // populate klingons
-    for (i = 0; i < 20; ++i)
+    for (i = 0; i < 30; ++i)
     {
         genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 3);
         

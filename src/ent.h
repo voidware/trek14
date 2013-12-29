@@ -102,8 +102,15 @@
 #define ENT_ENERGY_LIMIT (1<<ENT_ENERGY_BITS)
 
 #define ENT_ENERGY(_p) (ENT_DAT(_p) & (ENT_ENERGY_LIMIT-1))
-#define ENT_SET_ENERGY(_p, _v) \
-    ENT_SET_DAT(_p, (ENT_DAT(_p) >> ENT_ENERGY_BITS) | (_v))
+
+#define ENT_SET_ENERGY(_p, _v)                  \
+{                                               \
+    uint16* p = (uint16*)((_p) + 3);            \
+    *p = (*p & ~(ENT_ENERGY_LIMIT-1)) | (_v);   \
+}
+
+// torps only applies to federation ships
+#define ENT_TORPS(_p) (ENT_DAT(_p) >> ENT_ENERGY_BITS)
 
 // klingons have half energy max
 #define ENT_ENERGYK_BITS  (ENT_ENERGY_BITS-1)

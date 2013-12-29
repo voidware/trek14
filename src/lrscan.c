@@ -33,9 +33,11 @@ void lrScan()
     // long range scan
 
     char i, j;
-    uchar quad[ENT_TYPE_COUNT];
     char x, y, z;
     uchar cx, cy;
+
+    // counts for each type
+    uchar quad[ENT_TYPE_COUNT];
 
     cls();
     printf("Long Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);

@@ -22,4 +22,4 @@
 
 void enemyMove();
 uchar distance(uchar* ep1, uchar* ep2);
-char takeDamage(uchar* ep, unsigned int d);
+uchar takeEnergy(uchar* ep, unsigned int d);

@@ -62,7 +62,6 @@ void phasers(uchar* ep, unsigned int e, uchar type)
                 uchar ex, ey;
                 char dw;
                 unsigned int dam;
-                
 
                 // update remaining energy
                 en -= e;
@@ -81,22 +80,40 @@ void phasers(uchar* ep, unsigned int e, uchar type)
                 ex <<= 1; 
                 ey = ey*3+1;
 
-                // zap!
-                plotLine(sx, sy, ex, ey, setPixel);
+                // zap line over and over
+                for (dw = 0; dw < 100; ++dw)
+                {
+                    plotLine(sx, sy, ex, ey, 
+                             (dw & 1) ? fillBgPixel : setPixel);
+                }
+
+                // redraw attacker
+                drawEnt(ep);
 
                 // calculate effective damage
+                // damage = E*exp(-dist/32)
                 
-                // damage = E*exp(-dist/4)
+                // dist*4 = dist*128/32 (work fixed point 128)
+                dam = ((unsigned int)distance(ep, *qp))<<2;
                 
-                // dist*32 = dist*128/4 (work fixed point 128)
-                dam = ((unsigned int)distance(ep, *qp))<<5;
-
                 // need to shift exp(exp) down 7 (fixed 128)
                 // but since e is 14 bits, shift up 2 to get the most
                 // accuracy.
-                takeDamage(*qp, (e<<2)/(expfixed(dam)>>5));
+                dam = (e*4)/(expfixed(dam)>>5);
+
+                // true if still there
+                dw = takeEnergy(*qp, dam);
                 
-                plotLine(sx, sy, ex, ey, fillBgPixel);
+                // restore background
+                //plotLine(sx, sy, ex, ey, fillBgPixel);
+                
+                // re-draw enemy
+                if (dw) drawEnt(*qp);
+                else 
+                {
+                    // destroyed, so backup one slot
+                    --qp;
+                }
             }
         }
     }

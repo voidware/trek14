@@ -65,11 +65,16 @@ void undrawEnt(uchar* ep)
     }
 }
 
-void moveEnt(uchar* ep, char dx, char dy)
+uchar moveEnt(uchar* ep, char dx, char dy)
 {
     // move entity `ep' by `dx' `dy' & redraw
+    // return 0 if expired
 
     uchar sx, sy;
+
+    if (!takeEnergy(ep, ABS(dx) + ABS(dy)))
+        return 0;
+
     ENT_SXY(ep, sx, sy);
     if (!setSector(ep, sx+dx, sy+dy))
     {
@@ -99,15 +104,19 @@ void moveEnt(uchar* ep, char dx, char dy)
                 fillbg(sx, sy);
         }
     }
+    return 1;
+}
+
+void updateQuadrant()
+{
+    // update list of things in this quadrant
+    getQuad(QX, QY, QZ, quadCounts, quadrant);
 }
 
 void showState()
 {
-    setcursor(40,0);
-    clearlineend();
-    printf("Energy: %d", ENT_ENERGY(galaxy)); flush();
+    printfat(40, 0, "E:%-5d T:%d", ENT_ENERGY(galaxy), ENT_TORPS(galaxy));
 }
-
 
 char srScan()
 {
@@ -125,6 +134,7 @@ char srScan()
     setcursor(0,1);
     for (i = 64*7; i > 0; --i) { outchar('.'); outchar(' '); }
 
+    // draw items in this quadrant
     epp = quadrant;
     while (*epp)
         drawEnt(*epp++);
@@ -132,7 +142,7 @@ char srScan()
     for (;;)
     {
         char dx, dy;
-        
+
         c = inkey();
         if (!c) continue;
 
@@ -158,6 +168,7 @@ char srScan()
 
         moveEnt(galaxy, dx, dy);
         enemyMove();
+        showState();
     }
 
     return c;
