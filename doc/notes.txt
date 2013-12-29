@@ -1,4 +1,4 @@
-#### DESIGN NOTES
+# DESIGN NOTES
 
 The galaxy is a 8x8x3 "board" of quatrants, containing the following entity types:
 
@@ -24,17 +24,103 @@ Z = 2 bits.
 
 3 bytes, for type and position plus 2 extra bytes for data about the type. 2 bytes are required since ships need to store their total energy, which is a 2 byte value. Can use 14 bits for energy + 2 bits for torpedo count (0-3).
 
+NB: require only 13 bits for energy (so we have a spare bit)
+
 Rather than having an array of 192, we have the reverse data structure, which is a table of entities. The advantage of this is that we can always maintain the exact screen location of all content. This is relevent when you cross a quadrant boundary locally (impulse engines) and then return; you want everything to be in the same position. Additionally, it means that photon torpedos can (in theory) cross quadrant boundaries.
 
 The disadvantage is that, to know the contents of a given quadrant, the whole table must be scanned (more on this later).
 
-To give some idea of table size, 4k = 4096 bytes = 819 entities, which is 4.2 entities per quadrant on average. This is fine, since many are empty or sparely populated, making up for the few dense ones.
+To give some idea of table size, 2k = 2048 bytes ~ 400 entities, which is 2.1 entities per quadrant on average. This is fine, since many are empty or sparely populated, making up for the few dense ones.
 
 The assumption is that the code will be fast enough to perform a table scan of 800 entries for a command such as the long range scan. However, the short range scan screen will need updating faster (for real-time effect).
 
-The idea is that all content in a given quadrant is clusted in the table, using a mark bit to indicate the last entry. We will maintain the table index of the first object in the current quadrant so that only that small part of the table need be scanned in order to update the current screen.
+The SR scan will populate a temporary list of current quadrant entities and a temporary list of type counts for the current quadrant. This will be used by the AI and general SR scan movement operations.
 
-Another idea is for the whole table to also be in quadrant coordinate order so that it's possible to quickly find the contents of adjacent quadrants.
+NOTE: whenever an entity is destroyed, the table is updated by removing that entity. the SR temp quadrant list must be regenerated. Care must be taken by any code looping through this list whenever it is changed.
+
+NOTE: the alternative of marking the entities dead has been rejected. This could have been done by asssining a dummy type. However, all code would have to test against this special type including placement of new items, collisions, combat AI etc. it is simpler to just remove the item and be careful about any ongoing loops. then, at least, the galaxy list is correct (and faster to scan thereafter).
+
+# use of energy
+
+The scale of energy against effect is arbitrary except is is sensible to keep the numbers as small as possible. The scaling of attack energy is only relevant aghainst that needed for movement.
+
+The smallest amount of energy is expended by moving 1 place on the SR screen, so this is 1 unit.
+
+NB: remaining stationary count also use 1 (or possibly 0).
+
+phaser energy dissipates with distance according to exp(-distance/32), thus only 13% reaches across 64 sector locations. The energy delivered is subtracted from the target ship's energy (which it needs to counter this attack). If the attacked ship does not have enough energy, it is destroyed.
+
+warp drive saves time at the expense of energy. therefore it must cost more than 64 units to cross one quadrant. Warp speed takes the same time to go from any two points of the galaxy, but the energy used is distance*128. So to cross diagonally, the galaxy (dist = 10) is 1280. 
+
+NB: only quadrants are used for distance. sector position is ignored.
+NB: only 7 quads across because you move from, eg, 0 to 7.
+
+# time
+
+stardates, which are approximately days and one decimal fraction of a day, start from 2014.0. You have a deadline to meet your game objectives, after which you are recalled to HQ for review.
+
+the smallest time interval is that to move from one sector position to the next, which is 0.1. Thus it takes 6.4 to move across a quadrant horizontally and 1.5 vertically.
+
+warp saves time at the expense of energy. Therefore warp must take less than 1.5 star dates. Warp will therefore take 1.0 dates (ie 10 units). Warp time is the same for any warp distance and only affected by warp speed.
+
+20 klingons in groups up to 3, say 10 battles. say 20 movs per battle = 20*10/10 = 20.0 time units, plus explore, plus warp. start by giving 50 units of time to mission. therefore game will end not later than 2064.0
+
+# klingons
+
+mostly apply a hit and run attack. if energy is greater than half capacity, they will close on the enemy, fire and retreat.
+
+ok, klingons dont retreat. so instead they "retreat" to recharge from the nearest star. 
+
+klingons can recharge from stars, because they have no base stations. whenever a klingon is adjancent to a star, it will collect a fixed amount of recharge energy each turn (until capacity). This amount is dependent on the star and is set up as the "star energy" (in the entity energy field) on creation of the galaxy. Thus there are some stars better than others to use. and recharging is consistent.
+
+klingon max energy is 4096, they attack whenever >= 2048. so recharge of 2048 in, say 10, turns is 2048/10 ~ 200 units per turn. Thus stars have a randomly chosen recharge energy of between 128 and 256, as 128 + rand(128).
+
+If there is no star to recharge from, the klingons will just try to hide.
+
+it is possible that klingons in adjacent quadrants can come into the current quadrant, usually to help other klingons in battle. This means it is possible for more than 3 klingons to be in a quadrant.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
