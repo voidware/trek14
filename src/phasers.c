@@ -104,9 +104,6 @@ void phasers(uchar* ep, unsigned int e, uchar type)
                 // true if still there
                 dw = takeEnergy(*qp, dam);
                 
-                // restore background
-                //plotLine(sx, sy, ex, ey, fillBgPixel);
-                
                 // re-draw enemy
                 if (dw) drawEnt(*qp);
                 else 

@@ -23,3 +23,4 @@
 void enemyMove();
 uchar distance(uchar* ep1, uchar* ep2);
 uchar takeEnergy(uchar* ep, unsigned int d);
+uchar findAdjacent(uchar* ep, uchar type);

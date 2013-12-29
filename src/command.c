@@ -28,8 +28,10 @@
 #include "lrscan.h"
 #include "srscan.h"
 #include "warp.h"
-#include "command.h"
 #include "phasers.h"
+#include "enemy.h"
+#include "command.h"
+
 
 void command()
 {
@@ -95,6 +97,14 @@ void phaserCommand()
     }
 }
 
+void docCommand()
+{
+    if (findAdjacent(galaxy, ENT_TYPE_BASE))
+    {
+        // full house
+        ENT_SET_DAT(galaxy, 0xffff);
+    }
+}
 
 // mr spock, you have the conn :-)
 void conn()

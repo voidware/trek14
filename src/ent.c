@@ -135,7 +135,7 @@ uchar collision(uchar* ep1, uchar* ep2)
     x1 -= (w1>>1); 
 
     // overlap quadrant edge
-    if (!y1 || y1 > 14 || x1 >= 64 || x1 + w1 > 64) return 1;
+    if (!y1 || y1 > 14 || x1 >= 64 || x1 + w1 > 64) return -1;
 
     ENT_SXY(ep2, x2, y2);
 
@@ -143,12 +143,13 @@ uchar collision(uchar* ep1, uchar* ep2)
     // must be on the same line
     if (y1 == y2)
     {
-        w2 = objTable[ENT_TYPE(ep2)]._w;
+        uchar t = ENT_TYPE(ep2);
+        w2 = objTable[t]._w;
         x2 -= (w2>>1);
 
         // collision!
-        if (x2 + w2 > x1 && x2 < x1 + w1) 
-            return 2;
+        if (x2 + w2 >= x1 && x2 <= x1 + w1) 
+            return t+1;
     }
     return 0;
 }
@@ -164,7 +165,7 @@ uchar setSector(uchar* ep, uchar x, uchar y)
     // get old values
     int oldxy = *((int*)(ep + 1));
 
-    if (y > 14) return 1;
+    if (y > 14) return -1; // hit edge
     
     // set new values
     ENT_SET_SXY(ep, x, y);
@@ -180,7 +181,7 @@ uchar setSector(uchar* ep, uchar x, uchar y)
             return c;
         }
     }
-    return 0;
+    return 0; // ok
 }
 
 static void genEntLocation(uchar* ep, uchar type, uchar tmax)

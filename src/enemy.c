@@ -69,6 +69,34 @@ uchar* findClosest(uchar* kp, uchar type)
     return best;
 }
 
+uchar findAdjacent(uchar* ep, uchar type)
+{
+    uchar sx, sy;
+    char i, j;
+    
+    ENT_SXY(ep, sx, sy);
+    for (i = -1; i <= 1; ++i)
+    {
+        for (j = -1; j <= 1; ++j)
+        {
+            char c = setSector(ep, sx + i, sy + j);
+            if (c > 0) 
+            {
+                // hit something not boundary
+                if (c-1 == type)
+                {
+                    // that will do
+                    return 1;
+                }
+            }
+
+            // restore
+            setSector(ep, sx, sy);
+        }
+    }
+    return 0;
+}
+
 static void klingonFire(uchar* kp, uchar dist)
 {
     // consider firing

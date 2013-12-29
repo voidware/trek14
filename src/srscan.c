@@ -164,6 +164,10 @@ char srScan()
         {
             phaserCommand();
         }
+        else if (c == 'D')
+        {
+            docCommand();
+        }
         else break;
 
         moveEnt(galaxy, dx, dy);
