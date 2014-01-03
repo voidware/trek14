@@ -31,8 +31,7 @@ typedef int int16;
 #define VIDEND ((char*)0x3fff)
 #define CURMEM ((char**)0x4020)
 
-#define ABS(_c) ((_c) < 0 ? -(_c) : (_c))
-
+#define ABS(_c) ((char)(_c) < 0 ? -(_c) : (_c))
 
 #ifdef _WIN32
 #define KEY_ARROW_LEFT  '4'

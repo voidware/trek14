@@ -28,6 +28,7 @@
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
+unsigned int stardate;
 const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
 
 // current location
@@ -120,6 +121,19 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
     }
 }
 
+uchar distance(uchar* ep1, uchar* ep2)
+{
+    // distance between two entities
+    uchar x1, y1;
+    uchar x2, y2;
+    ENT_SXY(ep1, x1, y1);
+    ENT_SXY(ep2, x2, y2);
+
+    // use hypot approx |a| + |b| - min(|a|,|b|)/2 
+    if ((char)(x2 -= x1) < 0) x2 = -x2;
+    if ((char)(y2 -= y1) < 0) y2 = -y2;
+    return x2 + y2 - (((x2>y2) ? y2 : x2) >> 1);
+}
 
 uchar collision(uchar* ep1, uchar* ep2)
 {
@@ -230,13 +244,14 @@ void genGalaxy()
     // XX should be zero anyway once we clear BSS
     memzero(galaxy, sizeof(galaxy));
 
+    stardate = 20130; // 2014.0 - 10 (adjust for bogus warp to start)
     galaxyEnd = galaxy;
 
     // we are the first entity in the table
     genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1);
 
     // full energy & photons
-    ENT_SET_DAT(galaxyEnd, 0xffff);
+    ENT_SET_DAT(galaxyEnd, ENT_REFUEL_DATA);
 
     galaxyEnd += ENT_SIZE; 
 

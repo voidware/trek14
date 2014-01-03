@@ -237,8 +237,15 @@ void clearline()
     // set cursor to start of line
     char** cpp = CURMEM;
     char* cp = *cpp;
-    while (((int)cp) & 63)
-        *cp-- = ' ';
+
+    for (;;)
+    {
+        *cp = ' ';
+        if (!(((int)cp) & 63))
+            break;
+        --cp;
+    }
+    
     *cpp = cp;
 #endif
 }

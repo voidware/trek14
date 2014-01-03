@@ -34,19 +34,6 @@
 #include "enemy.h"
 
 
-uchar distance(uchar* ep1, uchar* ep2)
-{
-    // distance between two entities
-    uchar x1, y1;
-    uchar x2, y2;
-    ENT_SXY(ep1, x1, y1);
-    ENT_SXY(ep2, x2, y2);
-
-    // use hypot approx |a| + |b| - min(|a|,|b|)/2 
-    if ((char)(x2 -= x1) < 0) x2 = -x2;
-    if ((char)(y2 -= y1) < 0) y2 = -y2;
-    return x2 + y2 - (((x2>y2) ? y2 : x2) >> 1);
-}
 
 uchar* findClosest(uchar* kp, uchar type)
 {
@@ -189,16 +176,23 @@ void removeEnt(uchar *ep)
     updateQuadrant();
 }
 
-uchar takeEnergy(uchar* ep, unsigned int d)
+uchar enoughEnergy(uchar* ep, unsigned int d)
 {
-    // return 0 if `ep' expires.
-
+    // reduce energy by `d' if possible
     int e = ENT_ENERGY(ep) - d;
     if (e >= 0)
     {
         ENT_SET_ENERGY(ep, e);
+        return 1;
     }
-    else
+    return 0;
+}
+
+uchar takeEnergy(uchar* ep, unsigned int d)
+{
+    // return 0 if `ep' expires.
+
+    if (!enoughEnergy(ep, d))
     {
         // blow up!
         if (ep != galaxy) 
@@ -206,9 +200,8 @@ uchar takeEnergy(uchar* ep, unsigned int d)
             message("Destroyed");
             removeEnt(ep);
         }
-        
-        // else you're out of energy & game over
+        return 0;
     }
-    return (e >= 0);
+    return 1;
 }
 

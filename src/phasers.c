@@ -102,10 +102,9 @@ void phasers(uchar* ep, unsigned int e, uchar type)
                 dam = (e*4)/(expfixed(dam)>>5);
 
                 // true if still there
-                dw = takeEnergy(*qp, dam);
-                
-                // re-draw enemy
-                if (dw) drawEnt(*qp);
+                if (takeEnergy(*qp, dam))
+                    // re-draw enemy
+                    drawEnt(*qp);
                 else 
                 {
                     // destroyed, so backup one slot

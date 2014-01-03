@@ -97,8 +97,8 @@
 #define ENT_DAT(_p) (*((uint16*)((uchar*)(_p) + 3)))
 #define ENT_SET_DAT(_p, _d)  ENT_DAT(_p) = (_d)
 
-// 14 bits
-#define ENT_ENERGY_BITS 14
+// 13 bits
+#define ENT_ENERGY_BITS 13
 #define ENT_ENERGY_LIMIT (1<<ENT_ENERGY_BITS)
 
 #define ENT_ENERGY(_p) (ENT_DAT(_p) & (ENT_ENERGY_LIMIT-1))
@@ -111,6 +111,9 @@
 
 // torps only applies to federation ships
 #define ENT_TORPS(_p) (ENT_DAT(_p) >> ENT_ENERGY_BITS)
+
+// at 13 bits, refuel to 8000 rather than 8192.
+#define ENT_REFUEL_DATA ((3<<ENT_ENERGY_BITS) + 8000)
 
 // klingons have half energy max
 #define ENT_ENERGYK_BITS  (ENT_ENERGY_BITS-1)
@@ -145,6 +148,7 @@ extern uchar quadCounts[];
 
 extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
+extern unsigned int stardate;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
 extern const uchar fedshipRLE[];
@@ -156,3 +160,5 @@ void genGalaxy();
 unsigned int rand16();
 uchar collision(uchar* ep1, uchar* ep2);
 uchar setSector(uchar* ep, uchar x, uchar y);
+uchar distance(uchar* ep1, uchar* ep2);
+

@@ -73,7 +73,7 @@ uchar moveEnt(uchar* ep, char dx, char dy)
     uchar sx, sy;
 
     if (!takeEnergy(ep, ABS(dx) + ABS(dy)))
-        return 0;
+        return 0; // run out of energy
 
     ENT_SXY(ep, sx, sy);
     if (!setSector(ep, sx+dx, sy+dy))
@@ -115,7 +115,14 @@ void updateQuadrant()
 
 void showState()
 {
-    printfat(40, 0, "E:%-5d T:%d", ENT_ENERGY(galaxy), ENT_TORPS(galaxy));
+    unsigned int d;
+    // advance time `here, since we always refresh the status line each move
+    ++stardate;
+
+    d = stardate/10;
+    printfat(40, 0, "E:%-4d T:%d D:%d.%d",
+             ENT_ENERGY(galaxy), ENT_TORPS(galaxy),
+             d, (stardate - d*10));
 }
 
 char srScan()
@@ -127,8 +134,8 @@ char srScan()
     int i;
     char c;
     
-    cls();
-    printf("Short Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
+    printfat(0,0, "Short Range Scan, Quadrant %d %d %d", 
+             (int)QX, (int)QY, (int)QZ);
     showState();
 
     setcursor(0,1);

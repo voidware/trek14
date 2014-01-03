@@ -26,22 +26,38 @@
 #include "utils.h"
 #include "ent.h"
 #include "srscan.h"
+#include "command.h"
+#include "enemy.h"
 #include "warp.h"
 
 void warp(uchar x, uchar y, uchar z)
 {
     if (x < 8 && y < 8 && z <= 2)
     {
-        // we are the first entry in the galaxy
-        ENT_SET_QX(galaxy, x);
-        ENT_SET_QY(galaxy, y);
-        ENT_SET_QZ(galaxy, z);
-
-        // update current location variables
-        QX = x;
-        QY = y;
-        QZ = z;
+        // do we have enough energy
+        uchar d = ABS(QX - x) + ABS(QY - y) + ABS(QZ - z);
         
-        updateQuadrant();
+        if (enoughEnergy(galaxy, ((int)d)*100))
+        {
+            // we are the first entry in the galaxy
+            ENT_SET_QX(galaxy, x);
+            ENT_SET_QY(galaxy, y);
+            ENT_SET_QZ(galaxy, z);
+
+            // update current location variables
+            QX = x;
+            QY = y;
+            QZ = z;
+
+            // takes 10 units to warp (+1 for this move)
+            stardate += 9;
+        
+            updateQuadrant();
+
+        }
+        else
+        {
+            message("not enough energy");
+        }
     }
 }

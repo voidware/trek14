@@ -102,7 +102,7 @@ void docCommand()
     if (findAdjacent(galaxy, ENT_TYPE_BASE))
     {
         // full house
-        ENT_SET_DAT(galaxy, 0xffff);
+        ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
     }
 }
 
@@ -118,6 +118,9 @@ void conn()
         getline2(buf, sizeof(buf));
     
         c = buf[0];
+
+        // clear bottom line
+        baseLine();
 
     again:
 
