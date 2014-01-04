@@ -141,3 +141,65 @@ unsigned int expfixed(unsigned int v)
 
     return r;
 }
+
+
+#define cordic_1K 0x26DD
+
+static const short cordicTab[] = {0x3243, 0x1DAC, 0x0FAD, 0x07F5, 0x03FE, 0x01FF, 0x00FF, 0x007F, 0x003F, 0x001F, 0x000F, 0x0007, 0x0003, 0x0001 };
+
+static void cordic(short theta, short *s, short *c)
+{
+    short x=cordic_1K,y=0,z=theta;
+    unsigned char k;
+
+    for (k=0; k<14; ++k)
+    {
+        short tx, ty;
+
+        tx = y>>k;
+        ty = x>>k;
+        if (z < 0)
+        {
+            x += tx;
+            y -= ty;
+            z += cordicTab[k];
+        }
+        else
+        {
+            x -= tx;
+            y += ty;
+            z -= cordicTab[k];
+        }
+    }  
+    *c = x; *s = y;
+}
+
+void tanfxDeg(short v, short* s, short* c)
+{
+    // v in [-180, +180] degrees
+    // return s = sin(v), c = cos(v), that we can use as ratio
+    
+    uchar neg = 0;
+    
+    if (v > 90)
+    {
+        v -= 180;
+        neg = 1;
+    }
+    else if (v < -90)
+    {
+        v += 180;
+        neg = 1;
+    }
+    
+    v *= 286; // pi/180 shifted
+    
+    cordic(v, s, c);
+
+    if (neg) 
+    {
+        *s = -*s;
+        *c = -*c;
+    }
+}
+

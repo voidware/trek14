@@ -46,27 +46,20 @@ void phasers(uchar* ep, unsigned int e, uchar type)
 {
     // entity `ep' fire phasers at `type' energy `e'
     
-    unsigned int en;
     uchar** qp;
 
-    en = ENT_ENERGY(ep);
-    
     for (qp = quadrant; *qp; ++qp)
     {
         if (ENT_TYPE(*qp) == type)
         {
-            // do we have enough energy?
-            if (en >= e)
+            // do we have enough energy, if so subtract it.
+            if (enoughEnergy(ep, e))
             {
                 uchar sx, sy;
                 uchar ex, ey;
                 char dw;
                 unsigned int dam;
 
-                // update remaining energy
-                en -= e;
-                ENT_SET_ENERGY(ep, en);
-                
                 ENT_SXY(ep, sx, sy);
                 ENT_SXY(*qp, ex, ey);
 
@@ -81,7 +74,7 @@ void phasers(uchar* ep, unsigned int e, uchar type)
                 ey = ey*3+1;
 
                 // zap line over and over
-                for (dw = 0; dw < 100; ++dw)
+                for (dw = 0; dw < 80; ++dw)
                 {
                     plotLine(sx, sy, ex, ey, 
                              (dw & 1) ? fillBgPixel : setPixel);
@@ -114,4 +107,103 @@ void phasers(uchar* ep, unsigned int e, uchar type)
         }
     }
 }
+
+uchar* torpCollide(uchar x, uchar y)
+{
+    uchar** qp;
+    uchar torp[ENT_SIZE];
+
+    // make up a bogus entity for the torpedo
+    ENT_SET_TYPE(torp, ENT_TYPE_TORPEDO);
+    
+    // with the sector coordinates of the current point
+    ENT_SET_SXY(torp, x>>1, div3tab[y]);
+    
+    // search current quadrant table for collision with this fake entity
+    for (qp = quadrant; *qp; ++qp)
+    {
+        if (*qp != galaxy && collision(torp, *qp) > 0)
+            return *qp;
+    }  
+    return 0;
+}
+
+void torps(uchar* ep, int dir)
+{
+    // entity `ep' fire one torpedo in `dir'ection
+
+    uchar sx, sy;
+    char dw;
+    short s, c;
+    short t;
+    char dx, dy;
+    
+    // convert direction to [-180, +180]
+    if (dir > 180) dir -= 360;
+
+    // tan(dir degrees)
+    tanfxDeg(dir, &s, &c);
+
+    //printfat(0,15, "%d/%d ", s, c);
+
+    ENT_SXY(ep, sx, sy);
+    
+    dw = (objTable[ENT_TYPE(ep)]._w>>1);
+    if (ABS(dir) <= 90) sx += dw;  // front the front
+    else sx -= dw; // from the back
+
+    // convert to pixels
+    sx <<= 1;
+    sy = sy*3+1; // take mid point
+
+    t = 0;
+    dy = SIGN(s);
+    dx = SIGN(c);
+
+    s = ABS(s);
+    c = ABS(c);
+    
+    while ((char)sx >= 0 && sy > 2 && sy < 45)
+    {
+        uchar i;
+        uchar* hit;
+
+        for (i = 0; i < 10; ++i) plot(sx, sy, 1);
+
+        hit = torpCollide(sx, sy);
+        
+        fillBgPixel(sx, sy);
+
+        if (hit)
+        {
+            if (takeEnergy(hit, 5000)) drawEnt(hit);
+            break;
+        }
+
+        if (s <= c)
+        {
+            sx += dx;
+            
+            t += s;
+            if (t >= c)
+            {
+                t -= c;
+                sy -= dy;
+            }
+        }
+        else
+        {
+            sy -= dy;
+            
+            t += c;
+            if (t >= s)
+            {
+                t -= s;
+                sx += dx;
+            }
+        }
+    }
+}
+
+
 

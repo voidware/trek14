@@ -24,3 +24,4 @@ void memzero(void* ptr, size_t n);
 void printfat(uchar x, uchar y, const char* fmt, ...);
 unsigned char isqrt16(unsigned short a);
 unsigned int expfixed(unsigned int v);
+void tanfxDeg(short v, short* s, short* c);

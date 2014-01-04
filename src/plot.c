@@ -220,27 +220,25 @@ void drawRLE(char x, char y, const uchar* dp, uchar c)
 {
     // plot run-line encoded (RLE) sprite, colour c
     
-    // sprite format is:
-    // sequence of line alternations 
-    // <byte number of alternations> <on-off pair> ... <byte flyback-x>
-    // 
-    // an on-off pair is a nibble, any part can be zero.
+    // sprite format is made up of a sequence of skip/draw nibbles:
+    // <skip-draw> ... <0> <flyback>
+    // <skip-draw> ... <0> <flyback>
+    // ...
+    // 0x00
+
+    uchar pair;
 
     for (;;)
     {
-        uchar n = *dp++;
-        if (!n) break; // empty line means done
-
-        do 
+        while (pair = *dp++)
         {
-            uchar pair, m;
-            pair = *dp++; // get on off pair
-            m = pair >> 4;
-            plotSpan(x, y, m, c); // on
-            x += m + (pair & 0xf);
-        } while (--n);
-
+            x += (pair >> 4); // skip
+            plotSpan(x, y, pair & 0xf, c); // plot
+            x += pair & 0xf;
+        }
+        
         // flyback
+        if (!*dp) break;
         x -= *dp++;
         ++y;
     }
@@ -250,34 +248,28 @@ void moveRLE(char x, char y, const uchar* dp, uchar left)
 {
     // moves RLE sprite from (x,y) to (x-1, y)
     // or from (x,y) to (x+1, y)
-    
+
+    uchar pair;
+
     x -= left;
     for (;;)
     {
-        uchar n = *dp++;
-        if (!n) break; // empty line means done
-        
-        do 
+        while (pair = *dp++)
         {
-            uchar pair, m;
-
-            pair = *dp++; // get on off pair
-            
-            m = pair >> 4;
-            if (m > 0)
+            x += (pair >> 4); // skip
+            if (pair & 0xf)
             {
                 plot(x,y,left);
-                x += m;
-                plot(x,y,!left);
+                x += pair & 0xf;
+                plot(x,y,!left);;
             }
-            
-            x += pair & 0xf;
-            
-        } while (--n);
-
+        }
+        
         // flyback
+        if (!*dp) break;
         x -= *dp++;
         ++y;
-    }    
+    }
+
 }
 

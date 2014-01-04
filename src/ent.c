@@ -40,29 +40,29 @@ uchar* quadrant[ENT_QUAD_MAX];
 
 
 // RLE sprites
-const uchar fedshipRLE[] = { 0x01, 0x60, 0x02,
-                                 0x02, 0x14, 0x70, 0x0d,
-                                 0x01, 0xb0, 0x00,
-                                 0x00 };
-
-static const uchar base[] = { 0x01, 0x30, 0x01,
-                              0x01, 0x10, 0x06,
-                              0x01, 0xc0, 0x00,
+static const uchar base[] = { 0x33, 0x00, 0x01,
+                              0x01, 0x00, 0x06,
+                              0x0c, 0x00,
                               0x00 };
 
-static const uchar star[] = { 0x02, 0x22, 0x20, 0x05,
-                              0x01, 0x40, 0x05,
-                              0x02, 0x22, 0x20, 0x00,
+const uchar fedshipRLE[] = { 0x06, 0, 0x02,
+                             0x01, 0x47, 0, 0x0d,
+                             0x0b, 0x00,
+                             0x00 };
+
+static const uchar star[] = { 0x02, 0x22, 0, 0x05,
+                              0x04, 0, 0x05,
+                              0x02, 0x22, 0x00,
                               0x00 };
 
-static const uchar planet[] = { 0x01, 0x50, 0x06,
-                                0x01, 0x70, 0x06,
-                                0x01, 0x50, 0x00,
+static const uchar planet[] = { 0x15, 0, 0x06,
+                                0x07, 0, 0x06,
+                                0x05, 0,
                                 0x00  };
 
-static const uchar klingon[] = { 0x02, 0x27, 0x20, 0x0b,
-                                 0x01, 0xb0, 0x07,
-                                 0x01, 0x30, 0x00,
+static const uchar klingon[] = { 0x02, 0x72, 0, 0x0b,
+                                 0x0b, 0, 0x07,
+                                 0x03, 0,
                                  0x00 };
 
 static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
@@ -82,6 +82,7 @@ const EntObj objTable[] =
     { CW(7), 3, planet },
     { CW(11), 3, klingon },
     { CW(0), 0, romulan },
+    { 1, 1, romulan }, // additional entry used for torpedo
 };
 
 unsigned int rand16()
@@ -135,7 +136,7 @@ uchar distance(uchar* ep1, uchar* ep2)
     return x2 + y2 - (((x2>y2) ? y2 : x2) >> 1);
 }
 
-uchar collision(uchar* ep1, uchar* ep2)
+char collision(uchar* ep1, uchar* ep2)
 {
     // if object `ep1' overlaps `ep2'
     // or if `ep1' does not fit properly in the quadrant
@@ -162,7 +163,7 @@ uchar collision(uchar* ep1, uchar* ep2)
         x2 -= (w2>>1);
 
         // collision!
-        if (x2 + w2 >= x1 && x2 <= x1 + w1) 
+        if (x2 + w2 > x1 && x2 < x1 + w1) 
             return t+1;
     }
     return 0;

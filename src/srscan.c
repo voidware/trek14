@@ -116,6 +116,7 @@ void updateQuadrant()
 void showState()
 {
     unsigned int d;
+
     // advance time `here, since we always refresh the status line each move
     ++stardate;
 
@@ -125,7 +126,7 @@ void showState()
              d, (stardate - d*10));
 }
 
-char srScan()
+char srScan(char k)
 {
     // short range scan.
     // draw quadrant screen & content.
@@ -150,7 +151,8 @@ char srScan()
     {
         char dx, dy;
 
-        c = inkey();
+        if (k) { c = k; k = 0; }
+        else c = inkey();
         if (!c) continue;
 
         dx = 0;
@@ -174,6 +176,10 @@ char srScan()
         else if (c == 'D')
         {
             docCommand();
+        }
+        else if (c == 'T')
+        {
+            torpCommand();
         }
         else break;
 

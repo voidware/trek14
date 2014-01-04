@@ -35,7 +35,7 @@ void warp(uchar x, uchar y, uchar z)
     if (x < 8 && y < 8 && z <= 2)
     {
         // do we have enough energy
-        uchar d = ABS(QX - x) + ABS(QY - y) + ABS(QZ - z);
+        uchar d = ABSC(QX - x) + ABSC(QY - y) + ABSC(QZ - z);
         
         if (enoughEnergy(galaxy, ((int)d)*100))
         {
@@ -57,7 +57,7 @@ void warp(uchar x, uchar y, uchar z)
         }
         else
         {
-            message("not enough energy");
+            messageCode(MSG_CODE_INSUFENERGY);
         }
     }
 }

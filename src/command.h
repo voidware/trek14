@@ -24,5 +24,16 @@ void command();
 void conn();
 void phaserCommand();
 void baseLine();
-void message(const char* s);
+
 void docCommand();
+void torpCommand();
+
+void messageCode(uchar mc);
+
+#define MSG_CODE_INSUFENERGY  0
+#define MSG_CODE_NO_TARGET 1
+#define MSG_CODE_DESTROYED 2
+#define MSG_CODE_NO_TORPS 3
+#define MSG_CODE_DOCKED 4
+
+

@@ -22,7 +22,7 @@
 
 // quadrant view
 
-char srScan();
+char srScan(char k);
 void drawEnt(uchar* ep);
 void undrawEnt(uchar* ep);
 uchar moveEnt(uchar* ep, char dx, char dy);

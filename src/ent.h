@@ -90,7 +90,7 @@
 #define ENT_SET_SXY(_p, _x, _y)                                 \
 {                                                               \
     (_p)[1] = (((_x) & 0x3e) << 2) | ENT_QX(_p);                \
-    (_p)[2] = ((_y) << 4) | (((_x)&1) << 3) | ENT_QY(_p);       \
+    (_p)[2] = ((((_y) << 1) | ((_x)&1)) << 3) | ENT_QY(_p);     \
 }
 
 // _d is 16 bits
@@ -111,6 +111,11 @@
 
 // torps only applies to federation ships
 #define ENT_TORPS(_p) (ENT_DAT(_p) >> ENT_ENERGY_BITS)
+#define ENT_SET_TORPS(_p, _v)                                           \
+{                                                                       \
+    uint16* p = (uint16*)((_p) + 3);                                    \
+    *p = (*p & (ENT_ENERGY_LIMIT-1)) | ((_v) << ENT_ENERGY_BITS);       \
+}
 
 // at 13 bits, refuel to 8000 rather than 8192.
 #define ENT_REFUEL_DATA ((3<<ENT_ENERGY_BITS) + 8000)
@@ -130,6 +135,7 @@
 #define ENT_TYPE_PLANET  3
 #define ENT_TYPE_KLINGON 4
 #define ENT_TYPE_ROMULAN 5
+#define ENT_TYPE_TORPEDO 6
 #define ENT_TYPE_COUNT 6
 
 typedef struct 
@@ -158,7 +164,7 @@ extern const uchar fedshipRLE[];
 void getQuad(uchar x, uchar y, uchar z, uchar* quad, uchar** eplist);
 void genGalaxy();
 unsigned int rand16();
-uchar collision(uchar* ep1, uchar* ep2);
+char collision(uchar* ep1, uchar* ep2);
 uchar setSector(uchar* ep, uchar x, uchar y);
 uchar distance(uchar* ep1, uchar* ep2);
 

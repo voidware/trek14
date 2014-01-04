@@ -41,15 +41,27 @@ void command()
         printf("(S)hort Range Scan\n");
         printf("(L)ong Range Scan\n");
         printf("(W)arp\n");
+        printf("(T)orpedoes\n");
         conn();
     }
 }
 
-void message(const char* s)
+
+void messageCode(uchar mc)
 {
+    static const char* msgTable[] = 
+    {
+        "Not Enough Energy",
+        "No Target",
+        "Destroyed",
+        "No Torpedoes",
+        "Docked",
+    };
+
     baseLine();
-    outs(s);
+    outs(msgTable[mc]);
     outs(", captain!");
+
 }
 
 void baseLine()
@@ -87,14 +99,35 @@ void phaserCommand()
                 showState();
             }
             else
-                message("Not enough energy");
+                messageCode(MSG_CODE_INSUFENERGY);
         }
     }
     else
+        messageCode(MSG_CODE_NO_TARGET);
+}
+
+void torpCommand()
+{
+    // fire torpedo
+    int dir;
+
+    int t = ENT_TORPS(galaxy);
+    if (t > 0)
     {
-        // no enemies!
-        message("No target");
+        baseLine();
+        printf("Direction: "); flush();
+        scanf("%d", &dir);
+
+        // if out of range, abort command
+        if (dir >= 0 && dir <= 360)
+        {
+            ENT_SET_TORPS(galaxy, t-1);
+            torps(galaxy, dir);
+        }
     }
+    else
+        messageCode(MSG_CODE_NO_TORPS);
+    
 }
 
 void docCommand()
@@ -103,6 +136,7 @@ void docCommand()
     {
         // full house
         ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
+        messageCode(MSG_CODE_DOCKED);
     }
 }
 
@@ -135,7 +169,11 @@ void conn()
             warpCommand();
             // fall through
         case 'S':
-            c = srScan();
+            c = srScan(0);
+            if (c) goto again;
+            break;
+        case 'T':
+            c = srScan(c);
             if (c) goto again;
             break;
         default:

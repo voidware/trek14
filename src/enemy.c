@@ -34,9 +34,9 @@
 #include "enemy.h"
 
 
-
 uchar* findClosest(uchar* kp, uchar type)
 {
+    // find the closest entity of `type' to `kp'
     uchar** epp;
     uchar dist;
     uchar* best = 0;
@@ -58,6 +58,7 @@ uchar* findClosest(uchar* kp, uchar type)
 
 uchar findAdjacent(uchar* ep, uchar type)
 {
+    // is entity `ep' adjacent to one of `type'
     uchar sx, sy;
     char i, j;
     
@@ -197,7 +198,7 @@ uchar takeEnergy(uchar* ep, unsigned int d)
         // blow up!
         if (ep != galaxy) 
         {
-            message("Destroyed");
+            messageCode(MSG_CODE_DESTROYED);
             removeEnt(ep);
         }
         return 0;
