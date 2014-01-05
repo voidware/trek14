@@ -125,15 +125,9 @@ void showState()
     ++stardate;
 
     d = stardate/10;
-#if 1
-    printfat(34, 0, "E:%-4d T:%d D:%d.%d S:%d",
-             ENT_ENERGY(galaxy), ENT_TORPS(galaxy),
-             d, (stardate - d*10), score);
-#else
     printfat(34, 0, "E:%-4d T:%d D:%d.%d",
              ENT_ENERGY(galaxy), ENT_TORPS(galaxy),
              d, (stardate - d*10));
-#endif
 }
 
 char srScan(char k)
