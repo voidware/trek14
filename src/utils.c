@@ -191,7 +191,8 @@ void tanfxDeg(short v, short* s, short* c)
         v += 180;
         neg = 1;
     }
-    
+
+    // v now reduced to [-90,90]
     v *= 286; // pi/180 shifted
     
     cordic(v, s, c);

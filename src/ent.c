@@ -29,7 +29,7 @@
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
 unsigned int stardate;
-unsigned int score;
+int score;
 const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
 
 // current location
@@ -77,13 +77,13 @@ static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
                               
 const EntObj objTable[] =
 {
-    { CW(12), 3, base },
-    { CW(16), 3, fedshipRLE }, 
-    { CW(6), 3, star },
-    { CW(7), 3, planet },
-    { CW(11), 3, klingon },
-    { CW(0), 0, romulan },
-    { 1, 1, romulan }, // additional entry used for torpedo
+    { CW(12), 3, -1000, base },
+    { CW(16), 3, -1000, fedshipRLE }, 
+    { CW(6), 3, 0, star },
+    { CW(7), 3, 0, planet },
+    { CW(11), 3, SCORE_KLINGON, klingon },
+    { CW(0), 0, SCORE_KLINGON, romulan },
+    { 1, 1, 0, romulan }, // additional entry used for torpedo
 };
 
 unsigned int rand16()
@@ -112,6 +112,12 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
     {
         if (ENT_QX(ep) == x && ENT_QY(ep) == y && ENT_QZ(ep) == z)
         {
+            if (!ENT_MARKED(ep))
+            {
+                ENT_SET_MARK(ep);
+                ++score;
+            }
+
             if (eplist)
             {
                 *eplist++ = ep;
@@ -137,22 +143,44 @@ uchar distance(uchar* ep1, uchar* ep2)
     return x2 + y2 - (((x2>y2) ? y2 : x2) >> 1);
 }
 
+uchar getWidth(uchar* ep)
+{
+    return objTable[ENT_TYPE(ep)]._w;
+}
+
+char collisionBorder(uchar* ep)
+{
+    // do we collide with the border, if so return the mask
+    // otherwise 0
+    
+    uchar sx, sy;
+    uchar w = getWidth(ep);
+
+    ENT_SXY(ep, sx, sy);
+
+    // logical draw pos
+    sx -= (w>>1); 
+
+    // overlap quadrant edge
+    if ((char)sy < 1) return MASK_TOP;
+    if ((char)sy > 14) return MASK_BOT;
+    if ((char)sx < 0) return MASK_LEFT;
+    if ((char)(sx + w) > 64) return MASK_RIGHT;
+    return 0;
+}
+
 char collision(uchar* ep1, uchar* ep2)
 {
     // if object `ep1' overlaps `ep2'
-    // or if `ep1' does not fit properly in the quadrant
 
     uchar w1, x1, y1;
     uchar w2, x2, y2;
 
-    w1 = objTable[ENT_TYPE(ep1)]._w;
+    w1 = getWidth(ep1);
     ENT_SXY(ep1, x1, y1);
 
     // logical draw pos
     x1 -= (w1>>1); 
-
-    // overlap quadrant edge
-    if (!y1 || y1 > 14 || x1 >= 64 || x1 + w1 > 64) return -1;
 
     ENT_SXY(ep2, x2, y2);
 
@@ -160,48 +188,145 @@ char collision(uchar* ep1, uchar* ep2)
     // must be on the same line
     if (y1 == y2)
     {
-        uchar t = ENT_TYPE(ep2);
-        w2 = objTable[t]._w;
-        x2 -= (w2>>1);
+        w2 = getWidth(ep2);
+        x2 -= w2>>1;
 
         // collision!
         if (x2 + w2 > x1 && x2 < x1 + w1) 
-            return t+1;
+            return ENT_TYPE(ep2) + 1;
     }
     return 0;
 }
 
-uchar setSector(uchar* ep, uchar x, uchar y)
+void updateQuadrant()
+{
+    // update list of things in this quadrant
+    getQuad(QX, QY, QZ, quadCounts, quadrant);
+}
+
+
+uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z)
+{
+    if (x < 8 && y < 8 && z < 3)
+    {
+        ENT_SET_QX(ep, x);
+        ENT_SET_QY(ep, y);
+        ENT_SET_QZ(ep, z);
+
+        if (ep == galaxy)
+        {
+            // update current location variables
+            QX = x;
+            QY = y;
+            QZ = z;
+
+            // refresh content of quadrant
+            updateQuadrant();
+        }
+        return 1;
+    }
+    return 0;
+}
+
+uchar setSector(uchar* ep, uchar x, uchar y, uchar cancross)
 {
     // attempt to set the sector location of `ep' to (x,y)
     // if this results in collision or outside quadrant, restore
-    // original location and return != 0 value.
+    // original location.
+    // return 0 => ok
+    // return >0 => collision (or border) fail
+    // return <0 => border crossing
     
     uchar** qp;
+    char c;
 
-    // get old values
-    int oldxy = *((int*)(ep + 1));
+    // get old values (quad & sector)
+    uchar oldx, oldy;
+    oldx = ep[1];
+    oldy = ep[2];
 
-    if (y > 14) return -1; // hit edge
-    
     // set new values
     ENT_SET_SXY(ep, x, y);
 
-    // check for collision
-    for (qp = quadrant; *qp; ++qp)
+    c = collisionBorder(ep);
+    if (c)
     {
-        uchar c;
-        if (ep != *qp && (c = collision(ep, *qp)))
+        // have a border collision, but can we cross?
+        if (cancross)
         {
-            // restore old values
-            *(int*)(ep+1) = oldxy;
-            return c;
+            uchar qx, qy, qz;
+            char dx, dy;
+            uchar w2 = getWidth(ep)>>1;
+
+            qx = ENT_QX(ep);
+            qy = ENT_QY(ep);
+            qz = ENT_QZ(ep);
+            
+            dx = dy = 0;
+            if (c == MASK_RIGHT)
+            { 
+                dx = 1;
+                x = w2;
+            }
+            if (c == MASK_LEFT)
+            {
+                dx = -1;
+                x = 64 - w2;
+            }
+            if (c == MASK_TOP) 
+            {
+                dy = -1;
+                y = 14; // assume all heights 1
+            }
+            if (c == MASK_BOT)
+            {
+                dy = 1;
+                y = 1;
+            }
+            
+            if (setQuadrant(ep, qx + dx, qy + dy, qz))
+            {
+                // check for collision across border
+                if (!setSector(ep, x, y, 0))
+                    return -1; // <0 => border crossed
+            }
+
+            // failed to cross, restore original quadrant
+            setQuadrant(ep, qx, qy, qz);
         }
     }
-    return 0; // ok
+    else
+    {
+        // check for collision with other entities
+        for (qp = quadrant; *qp; ++qp)
+        {
+            if (ep != *qp && (c = collision(ep, *qp)))
+                break;
+        }
+    }
+
+    if (c)
+    {
+        // restore old values
+        ep[1] = oldx;
+        ep[2] = oldy;
+    }
+
+    return c;
 }
 
-static void genEntLocation(uchar* ep, uchar type, uchar tmax)
+void genSector(uchar* ep)
+{
+    uchar x, y;
+    do
+    {
+        // put at a random location within the quadrant avoiding collisions
+        x = rand16() & 63;
+        y = rand16() & 15;
+    } while (setSector(ep, x, y, 0));
+}
+
+static void genEntLocation(uchar* ep, uchar type, uchar tmax, uchar tmin)
 {
     // pick a random location, ensuring type' does not
     // exceed `tmax'
@@ -223,22 +348,33 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax)
 
         getQuad(x, y, z, quadCounts, quadrant);
         
-    } while (quadCounts[type] >= tmax);
+    } while ((uchar)(quadCounts[type] + tmin) > tmax);
 
-    ENT_SET_TYPE(ep, type);
-    ENT_SET_QZ(ep, z);
-    ENT_SET_QX(ep, x);
-    ENT_SET_QY(ep, y);
-
-    do
+    while (tmin)
     {
-        // put at a random location within the quadrant
-        x = rand16() & 63;
-        y = rand16() & 15;
-
-    } while (setSector(ep, x, y));
+        --tmin;
+        
+        ENT_SET_TYPE(ep, type);
+        ENT_SET_QX(ep, x);
+        ENT_SET_QZ(ep, z);
+        ENT_SET_QY(ep, y);
+        genSector(ep);
+        ep += ENT_SIZE;
+    } 
 }
 
+
+void clearMarks()
+{
+    // except the first entry
+    uchar* ep = galaxy;
+    for (;;)
+    {
+        ep += ENT_SIZE;
+        if (ep == galaxyEnd) break;
+        ENT_CLEAR_MARK(ep);
+    } 
+}
 
 void genGalaxy()
 {
@@ -247,12 +383,11 @@ void genGalaxy()
     // XX should be zero anyway once we clear BSS
     memzero(galaxy, sizeof(galaxy));
 
-    score = 0;
     stardate = 20130; // 2014.0 - 10 (adjust for bogus warp to start)
     galaxyEnd = galaxy;
 
     // we are the first entity in the table
-    genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1);
+    genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1, 1);
 
     // full energy & photons
     ENT_SET_DAT(galaxyEnd, ENT_REFUEL_DATA);
@@ -268,39 +403,58 @@ void genGalaxy()
     // populate bases
     for (i = 0; i < 5; ++i)
     {
-        genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1);
+        genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1, 1);
         galaxyEnd += ENT_SIZE; 
     }
 
     // generate starfleet HQ
-    genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1);
+    genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1, 1);
     
     // change location to be our quadrant
-    ENT_SET_QX(galaxyEnd, QX);
-    ENT_SET_QY(galaxyEnd, QY);
-    ENT_SET_QZ(galaxyEnd, QZ);
-
+    setQuadrant(galaxyEnd, QX, QY, QZ);
     galaxyEnd += ENT_SIZE; 
 
     // populate klingons
-    for (i = 0; i < 30; ++i)
+    i = 30;
+    while (i > 0)
     {
-        genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 3);
+        // between 1 & 3 klingons
+        uchar n = rand16() & 3;
+
+        if (!n) continue;
+        if (n > i) n = i;
         
-        // enemy has at least half its allowed energy
-        ENT_SET_DAT(galaxyEnd, (rand16() & (ENT_ENERGYK_LIMIT/4-1)) + ENT_ENERGYK_LIMIT/2);
-        galaxyEnd += ENT_SIZE;
+        genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 3, n);
+        
+        while (n)
+        {
+            --n;
+            --i;
+
+            // enemy has at least half its allowed energy
+            ENT_SET_DAT(galaxyEnd, (rand16() & (ENT_ENERGYK_LIMIT/4-1)) + ENT_ENERGYK_LIMIT/2);
+            galaxyEnd += ENT_SIZE;
+        }
     }
 
     // populate planets & stars
     for (i = 0; i < 100; ++i)
     {
-        genEntLocation(galaxyEnd, ENT_TYPE_STAR, 4);
+        genEntLocation(galaxyEnd, ENT_TYPE_STAR, 1, 1);
+
+        // give stars a random energy between 128 and 256
+        // this energy can be drawn by enemies to recharge
+        ENT_SET_DAT(galaxyEnd, (rand16() & 127) + 128);
         galaxyEnd += ENT_SIZE;
-        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 4);
+
+        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 3, 1);
         galaxyEnd += ENT_SIZE;
     }
 
+    clearMarks();
+
+    // +1 for starfleet HQ, not to count
+    score = -1;
     warp(QX, QY, QZ);
 }
 

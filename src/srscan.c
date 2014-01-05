@@ -65,22 +65,31 @@ void undrawEnt(uchar* ep)
     }
 }
 
-uchar moveEnt(uchar* ep, char dx, char dy)
+char moveEnt(uchar* ep, char dx, char dy)
 {
     // move entity `ep' by `dx' `dy' & redraw
-    // return 0 if expired
+    // return >0, expired
+    // return <0 border crossed
+    // return 0, ok
 
     uchar sx, sy;
+    char c;
 
     if (!takeEnergy(ep, ABS(dx) + ABS(dy)))
-        return 0; // run out of energy
+        return 1; // run out of energy, expired
 
     ENT_SXY(ep, sx, sy);
-    if (!setSector(ep, sx+dx, sy+dy))
+
+    // allow border crossing
+    c = setSector(ep, sx+dx, sy+dy, 1);
+
+    // if ok, but not crossed border
+    if (!c) 
     {
         uchar x, y;
         const EntObj* obj = objTable + ENT_TYPE(ep);
         uchar w2 = obj->_w;
+
         sx -= w2>>1;
             
         if (dy)
@@ -104,13 +113,8 @@ uchar moveEnt(uchar* ep, char dx, char dy)
                 fillbg(sx, sy);
         }
     }
-    return 1;
-}
 
-void updateQuadrant()
-{
-    // update list of things in this quadrant
-    getQuad(QX, QY, QZ, quadCounts, quadrant);
+    return c;
 }
 
 void showState()
@@ -121,9 +125,15 @@ void showState()
     ++stardate;
 
     d = stardate/10;
-    printfat(40, 0, "E:%-4d T:%d D:%d.%d",
+#if 1
+    printfat(34, 0, "E:%-4d T:%d D:%d.%d S:%d",
+             ENT_ENERGY(galaxy), ENT_TORPS(galaxy),
+             d, (stardate - d*10), score);
+#else
+    printfat(34, 0, "E:%-4d T:%d D:%d.%d",
              ENT_ENERGY(galaxy), ENT_TORPS(galaxy),
              d, (stardate - d*10));
+#endif
 }
 
 char srScan(char k)
@@ -134,6 +144,8 @@ char srScan(char k)
     uchar** epp;
     int i;
     char c;
+
+ again:
     
     printfat(0,0, "Short Range Scan, Quadrant %d %d %d", 
              (int)QX, (int)QY, (int)QZ);
@@ -183,7 +195,12 @@ char srScan(char k)
         }
         else break;
 
-        moveEnt(galaxy, dx, dy);
+        if (moveEnt(galaxy, dx, dy) < 0)
+        {
+            // crossed border
+            goto again;
+        }
+
         enemyMove();
         showState();
     }

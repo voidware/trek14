@@ -33,7 +33,7 @@ void lrScan()
     // long range scan
 
     char i, j;
-    char x, y, z;
+    uchar x, y, z;
     uchar cx, cy;
 
     // counts for each type
@@ -70,7 +70,7 @@ void lrScan()
             {
                 char buf[ENT_TYPE_COUNT*2+1];
                 char* bp;
-                if (x >= 0 && x < 8 && y >= 0 && y < 8 && z >= 0 && z < 3)
+                if (x < 8 && y < 8 && z < 3)
                 {
                     const char* tc = entTypeChar;
                     uchar* cp = quad;

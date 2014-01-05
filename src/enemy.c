@@ -67,7 +67,7 @@ uchar findAdjacent(uchar* ep, uchar type)
     {
         for (j = -1; j <= 1; ++j)
         {
-            char c = setSector(ep, sx + i, sy + j);
+            char c = setSector(ep, sx + i, sy + j, 0);
             if (c > 0) 
             {
                 // hit something not boundary
@@ -79,7 +79,7 @@ uchar findAdjacent(uchar* ep, uchar type)
             }
 
             // restore
-            setSector(ep, sx, sy);
+            setSector(ep, sx, sy, 0);
         }
     }
     return 0;
@@ -88,8 +88,10 @@ uchar findAdjacent(uchar* ep, uchar type)
 static void klingonFire(uchar* kp, uchar dist)
 {
     // consider firing
-    unsigned int ke = ENT_ENERGY(kp);
-    if (ke >= 200)
+    unsigned int ke = ENT_DAT(kp);
+
+    // fire if have at least half max energy
+    if (ke >= ENT_ENERGYK_LIMIT/2)
     {
         uchar pow = 1;
         while (dist > 0)
@@ -99,10 +101,27 @@ static void klingonFire(uchar* kp, uchar dist)
         }
         if (!(rand16() & (pow-1)))
         {
-            unsigned int e = ke - 100;
+            // keep 256
+            unsigned int e = ke - 256;
             phasers(kp, e, ENT_TYPE_FEDERATION);
         }
     }
+}
+
+static int klingonRecharge(uchar* kp)
+{
+    uchar* star;
+    int e = ENT_DAT(kp);
+
+    star = findClosest(kp, ENT_TYPE_STAR);
+    if (star)
+    {
+        // recharge from the star
+        e += ENT_DAT(star);
+        if (e > ENT_ENERGYK_LIMIT) e = ENT_ENERGYK_LIMIT;
+        ENT_SET_DAT(kp, e);
+    }
+    return e;
 }
 
 static uchar klingonMove(uchar* kp)
@@ -114,8 +133,11 @@ static uchar klingonMove(uchar* kp)
         char i, j;
         char dx, dy;
         uchar dbest = -1;
-        uchar flee = ENT_ENERGY(kp) < 200;
+        uchar flee;
 
+        // if weak, keep away and recharge
+        flee = klingonRecharge(kp) < ENT_ENERGYK_LIMIT/2;
+        
         if (flee)
         {
             // flee!
@@ -127,7 +149,7 @@ static uchar klingonMove(uchar* kp)
         {
             for (j = -1; j <= 1; ++j)
             {
-                if (!setSector(kp, sx + i, sy + j))
+                if (!setSector(kp, sx + i, sy + j, 0))
                 {
                     uchar d = distance(kp, target);
                     if (flee && d > dbest || !flee && d < dbest)
@@ -141,11 +163,11 @@ static uchar klingonMove(uchar* kp)
         }
 
         // put back in original place
-        setSector(kp, sx, sy);
+        setSector(kp, sx, sy, 0);
 
         // then move delta (if non-zero)
         // NB: can expire here and be deleted
-        if (!moveEnt(kp, dx, dy)) return 0;
+        if (moveEnt(kp, dx, dy)) return 0;
         
         // fire?
         klingonFire(kp, dbest);
@@ -172,8 +194,12 @@ void removeEnt(uchar *ep)
     undrawEnt(ep);
 
     // adjust score
-    if (ENT_TYPE(ep) == ENT_TYPE_KLINGON)
-        score += SCORE_KLINGON;
+    score += objTable[ENT_TYPE(ep)]._score;
+    if (score < 0)
+    {
+        score = 0;
+        endgame(MSG_CODE_ENDGAME_RELIEVED);
+    }
 
     galaxyEnd -= ENT_SIZE;
     memmove(ep, ep + ENT_SIZE, galaxyEnd - ep);

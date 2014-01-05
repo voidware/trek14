@@ -40,21 +40,13 @@ void warp(uchar x, uchar y, uchar z)
         if (enoughEnergy(galaxy, ((int)d)*100))
         {
             // we are the first entry in the galaxy
-            ENT_SET_QX(galaxy, x);
-            ENT_SET_QY(galaxy, y);
-            ENT_SET_QZ(galaxy, z);
-
-            // update current location variables
-            QX = x;
-            QY = y;
-            QZ = z;
-
+            setQuadrant(galaxy, x, y, z);
+            
             // takes 10 units to warp (+1 for this move)
             stardate += 9;
 
-            // refresh content of quadrant
-            updateQuadrant();
-
+            // position in quadrant without collision
+            genSector(galaxy);
         }
         else
             messageCode(MSG_CODE_INSUFENERGY);

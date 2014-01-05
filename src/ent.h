@@ -31,7 +31,7 @@
  | M |   | Z | Z | T | Y | P | E |
  +---+---+---+---|---+---+---+---+
 
- M = mark bit
+ M = mark bit (explored)
  Z = quadrant Z coordinate (0-3)
  TYPE = entity type
 
@@ -55,16 +55,16 @@
 
  Bytes 4 & 5 (format for federation ships)
  +---+---+---+---|---+---+---+---+  +---+---+---+---|---+---+---+---+
- | t | t | E | E | E | E | E | E |  | E | E | E | E | E | E | E | E |
+ | t | t |   | E | E | E | E | E |  | E | E | E | E | E | E | E | E |
  +---+---+---+---|---+---+---+---+  +---+---+---+---|---+---+---+---+
 
  t = number of photon torpedoes (0-3)
- E = energy (0-16383)
+ E = energy (0-8192)
 
 */
 
 #define ENT_TYPE(_p)  (*(_p) & 0xf)
-#define ENT_MARK(_p)  (*((char*)(_p)) < 0)
+#define ENT_MARKED(_p) (*((char*)(_p)) < 0)
 
 // NB: used to initialise whole byte
 #define ENT_SET_TYPE(_p, _v) *(_p) = (_v)
@@ -142,11 +142,17 @@ typedef struct
 {
     uchar               _w;
     uchar               _h;
+    int                 _score;
     const uchar*        _data;
 } EntObj;
 
-#define SCORE_KLINGON  10
+// score for exploring galaxy is sum of entities = 235
+#define SCORE_KLINGON  50
 
+#define MASK_RIGHT  1
+#define MASK_LEFT   2
+#define MASK_TOP    4
+#define MASK_BOT    8
 
 // -- data
 
@@ -157,7 +163,7 @@ extern uchar quadCounts[];
 extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
 extern unsigned int stardate;
-extern unsigned int score;
+extern int score;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
 extern const uchar fedshipRLE[];
@@ -166,8 +172,12 @@ extern const uchar fedshipRLE[];
 
 void getQuad(uchar x, uchar y, uchar z, uchar* quad, uchar** eplist);
 void genGalaxy();
+void genSector(uchar* ep);
 unsigned int rand16();
 char collision(uchar* ep1, uchar* ep2);
-uchar setSector(uchar* ep, uchar x, uchar y);
+char collisionBorder(uchar* ep);
+uchar setSector(uchar* ep, uchar x, uchar y, uchar cancross);
+uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z);
+void updateQuadrant();
 uchar distance(uchar* ep1, uchar* ep2);
-
+uchar getWidth(uchar* ep);

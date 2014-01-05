@@ -37,10 +37,11 @@ void command()
     for (;;)
     {
         cls();
-        printf("(S)hort Range Scan\n");
-        printf("(L)ong Range Scan\n");
-        printf("(W)arp\n");
-        printf("(T)orpedoes\n");
+        printf("\n  (S)hort Range Scan\n"
+               "  (L)ong Range Scan\n"
+               "  (W)arp\n"
+               "  (P)hasers\n"
+               "  (T)orpedoes\n");
         conn();
     }
 }
@@ -52,8 +53,10 @@ static const char* msgTable[] =
     "Destroyed",
     "No Torpedoes",
     "Docked",
+    "Returned to Starfleet HQ",
     "Out of Energy. You die drifting through space",
-    "Ship and crew killed in battle."
+    "Ship and crew killed in battle",
+    "You are relieved of command"
 };
 
 void messageCode(uchar mc)
@@ -150,6 +153,9 @@ void docCommand()
         // full house
         ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
         messageCode(MSG_CODE_DOCKED);
+
+        if (QX == 7 && QY == 7 && QZ == 2)
+            endgame(MSG_CODE_ENDGAME_RESIGN);
     }
 }
 
@@ -185,6 +191,7 @@ void conn()
             c = srScan(0);
             if (c) goto again;
             break;
+        case 'P':
         case 'T':
             c = srScan(c);
             if (c) goto again;

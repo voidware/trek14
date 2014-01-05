@@ -25,7 +25,6 @@
 char srScan(char k);
 void drawEnt(uchar* ep);
 void undrawEnt(uchar* ep);
-uchar moveEnt(uchar* ep, char dx, char dy);
+char moveEnt(uchar* ep, char dx, char dy);
 void showState();
 void fillbg(char x, char y);
-void updateQuadrant();

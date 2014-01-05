@@ -42,8 +42,9 @@ static void fillBgPixel(char x, char y)
     fillbg(x>>1, div3tab[y]);
 }
 
-static uchar* torpCollide(uchar x, uchar y)
+static uchar* torpCollide(uchar* ep, uchar x, uchar y)
 {
+    // do we collide with anything at (x,y) other than `ep'
     uchar** qp;
     uchar torp[ENT_SIZE];
 
@@ -56,14 +57,15 @@ static uchar* torpCollide(uchar x, uchar y)
     // search current quadrant table for collision with this fake entity
     for (qp = quadrant; *qp; ++qp)
     {
-        if (collision(torp, *qp) > 0)
+        if (ep != *qp && collision(torp, *qp))
             return *qp;
     }  
     return 0;
 }
 
 
-static uchar* trackPoint(uchar sx, uchar sy,
+static uchar* trackPoint(uchar* ep,
+                         uchar sx, uchar sy,
                          int s, int c,
                          plotfn* plot,
                          plotfn* unplot)
@@ -77,8 +79,8 @@ static uchar* trackPoint(uchar sx, uchar sy,
     dy = SIGN(s);
     dx = SIGN(c);
 
-    s = ABS(s);
-    c = ABS(c);
+    if (s < 0) s = -s;
+    if (c < 0) c = -c;
     
     while ((char)sx >= 0 && sy > 2 && sy < 45)
     {
@@ -86,14 +88,18 @@ static uchar* trackPoint(uchar sx, uchar sy,
         
         if (plot)
         {
-            int i;
+            uchar i;
             for (i = 0; i < 10; ++i)
                 (*plot)(sx, sy);
         }
 
-        hit = torpCollide(sx, sy);
+        hit = torpCollide(ep, sx, sy);
 
-        if (unplot) (*unplot)(sx, sy);
+        if (unplot)
+        {
+            (*unplot)(sx, sy);
+            drawEnt(ep);
+        }
         
         if (hit) return hit;
 
@@ -123,6 +129,33 @@ static uchar* trackPoint(uchar sx, uchar sy,
     return 0;
 }
 
+static void corner(uchar* ep, int dir, uchar* x, uchar* y)
+{
+    // find corner of ship to launch from
+
+    uchar sx, sy;
+    char w;
+
+    ENT_SXY(ep, sx, sy);
+    sy *= 3;
+    ++sy;
+    w = getWidth(ep);
+    sx -= (w>>1) + 1;
+    ++w;
+    if (dir <= 170)
+    {
+        sx += w;
+    }
+    else if (dir > 180)
+    {
+        ++sy;
+        if (dir > 190) sx += w;
+    }
+    *x = sx<<1;
+    *y = sy;
+}
+
+
 void phasers(uchar* ep, unsigned int e, uchar type)
 {
     // entity `ep' fire phasers at `type' energy `e'
@@ -133,36 +166,29 @@ void phasers(uchar* ep, unsigned int e, uchar type)
     {
         if (ENT_TYPE(*qp) == type)
         {
-            uchar sx, sy;
+            uchar x, y;
             uchar ex, ey;
-            char dw;
-            unsigned int dam;
             uchar* hit;
 
-            ENT_SXY(ep, sx, sy);
+            corner(ep, 0, &x, &y);
+
             ENT_SXY(*qp, ex, ey);
-
-            dw = objTable[ENT_TYPE(ep)]._w>>1;
-            if (sx <= ex) sx += dw;  // front the front
-            else sx -= dw + 1; // from the back (+1 for even)
-
-            // convert to pixels
-            sx <<= 1;
-            sy = sy*3+1; // take mid point
-
+            
             // convert to pixel and subtract to form dx & dy
-            ex = ex*2 - sx;
-            ey = sy - (ey*3 + 1);
-
-            hit = trackPoint(sx, sy, (char)ey, (char)ex, 0, 0);
+            ex = ex*2 - x;
+            ey = y - (ey*3 + 1);
+            
+            hit = trackPoint(ep, x, y, (char)ey, (char)ex, 0, 0);
 
             if (hit == *qp)
             {
+                unsigned int dam;
+            
                 // do we have enough energy, if so subtract it.
                 if (enoughEnergy(ep, e))
                 {
-                    trackPoint(sx, sy, (char)ey, (char)ex, setPixel, 0);
-                    trackPoint(sx, sy, (char)ey, (char)ex, 0, fillBgPixel);
+                    trackPoint(ep, x, y, (char)ey, (char)ex, setPixel, 0);
+                    trackPoint(ep, x, y, (char)ey, (char)ex, 0, fillBgPixel);
 
                     // calculate effective damage
                     // damage = E*exp(-dist/32)
@@ -191,30 +217,26 @@ void phasers(uchar* ep, unsigned int e, uchar type)
 }
 
 
-
 void torps(uchar* ep, int dir)
 {
     // entity `ep' fire one torpedo in `dir'ection
 
-    uchar sx, sy;
-    char dw;
     short s, c;
     uchar* hit;
+    uchar x, y;
+
+    corner(ep, dir, &x, &y);
     
     // convert direction to [-180, +180]
     if (dir > 180) dir -= 360;
 
     // tan(dir degrees)
     tanfxDeg(dir, &s, &c);
-
-    ENT_SXY(ep, sx, sy);
     
-    dw = objTable[ENT_TYPE(ep)]._w>>1;
-    if (ABS(dir) <= 90) sx += dw;  // front the front
-    else sx -= dw + 1; // from the back (+1 for even width)
+    // adjust for pixel aspect ratio
+    s /= 2;
 
-    // convert to pixel position and track 
-    hit = trackPoint(sx<<1, sy*3+1, s, c, setPixel, fillBgPixel);
+    hit = trackPoint(ep, x, y, s, c, setPixel, fillBgPixel);
     if (hit)
     {
         if (takeEnergy(hit, 5000))
