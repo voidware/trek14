@@ -239,7 +239,7 @@ void torps(uchar* ep, int dir)
     hit = trackPoint(ep, x, y, s, c, setPixel, fillBgPixel);
     if (hit)
     {
-        if (takeEnergy(hit, 5000))
+        if (takeEnergy(hit, 4000))
             drawEnt(hit);        
     }
 }

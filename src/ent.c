@@ -383,7 +383,9 @@ void genGalaxy()
     // XX should be zero anyway once we clear BSS
     memzero(galaxy, sizeof(galaxy));
 
-    stardate = 20130; // 2014.0 - 10 (adjust for bogus warp to start)
+    // (adjust for bogus warp to start)
+    stardate = STARDATE_START - STARDATE_WARP; 
+
     galaxyEnd = galaxy;
 
     // we are the first entity in the table

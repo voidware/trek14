@@ -122,7 +122,22 @@ void showState()
     unsigned int d;
 
     // advance time `here, since we always refresh the status line each move
-    ++stardate;
+    if (++stardate > STARDATE_END)
+    {
+        // overdue
+        messageCode(MSG_CODE_RETURN_HQ);
+
+        // get a grace period to return, otherwise score suffers
+        if (stardate > STARDATE_END + STARDATE_GRACE)
+        {
+            score -= 10;
+            if (score < 0)
+            {
+                score = 0;
+                endgame(MSG_CODE_ENDGAME_RELIEVED);
+            }
+        }
+    }
 
     d = stardate/10;
     printfat(34, 0, "E:%-4d T:%d D:%d.%d",

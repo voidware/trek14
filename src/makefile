@@ -49,7 +49,10 @@ trek14.ihx : $(OBJS)
 	$(LD) $(LDFLAGS) -i trek14.ihx $(OBJS)
 
 trek14.cmd: trek14.cas
-	../tools/trld trek14.cas trek14.cmd
+	../tools/trld/trld trek14.cas trek14.cmd
+
+trek14.zip: 
+	(cd ..; zip -r trek14.zip readme.md emu doc src tools -x \*win32\* -x \*TAGS\*)
 
 clean:
 	rm -f *.rel
@@ -61,5 +64,6 @@ clean:
 	rm -f *.map
 	rm -f *.asm
 	rm -f *.sym
+
 
 

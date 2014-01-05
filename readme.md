@@ -90,26 +90,9 @@ Other Federation ships may be encountered in the galaxy. Sometimes these come un
 
 Federation ships have up to twice the energy capacity of enemies. Phases are the enemy's only weapon (although they might ram you!). Phaser damage decays linearly with distance. A quadrant is about the max distance a phaser can be effective, whereas photon torpedoes may penetrate adjacent quadrants - watch out you don't blow up something by accident! You may be court martialed.
 
+### The Manual
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+For more details, see doc/manual.txt
 
 
 

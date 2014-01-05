@@ -154,6 +154,11 @@ typedef struct
 #define MASK_TOP    4
 #define MASK_BOT    8
 
+#define STARDATE_START 20140
+#define STARDATE_END 21000
+#define STARDATE_GRACE 100
+#define STARDATE_WARP 10
+
 // -- data
 
 extern uchar galaxy[];

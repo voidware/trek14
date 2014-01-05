@@ -42,8 +42,8 @@ void warp(uchar x, uchar y, uchar z)
             // we are the first entry in the galaxy
             setQuadrant(galaxy, x, y, z);
             
-            // takes 10 units to warp (+1 for this move)
-            stardate += 9;
+            // takes time to warp (+1 for this move)
+            stardate += STARDATE_WARP - 1;
 
             // position in quadrant without collision
             genSector(galaxy);

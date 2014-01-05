@@ -40,5 +40,6 @@ void messageCode(uchar mc);
 #define MSG_CODE_ENDGAME_EXPIRE 6
 #define MSG_CODE_ENDGAME_KILLED 7
 #define MSG_CODE_ENDGAME_RELIEVED 8
+#define MSG_CODE_RETURN_HQ 9
 
 

@@ -56,7 +56,8 @@ static const char* msgTable[] =
     "Returned to Starfleet HQ",
     "Out of Energy. You die drifting through space",
     "Ship and crew killed in battle",
-    "You are relieved of command"
+    "You are relieved of command",
+    "You are ordered to return to HQ, Quadrant 7,7,2",
 };
 
 void messageCode(uchar mc)
