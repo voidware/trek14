@@ -24,6 +24,7 @@ void command();
 void conn();
 void phaserCommand();
 void baseLine();
+void endgame(uchar msg);
 
 void docCommand();
 void torpCommand();
@@ -35,5 +36,7 @@ void messageCode(uchar mc);
 #define MSG_CODE_DESTROYED 2
 #define MSG_CODE_NO_TORPS 3
 #define MSG_CODE_DOCKED 4
+#define MSG_CODE_ENDGAME_EXPIRE 5
+#define MSG_CODE_ENDGAME_KILLED 6
 
 

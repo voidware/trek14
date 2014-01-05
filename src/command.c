@@ -32,7 +32,6 @@
 #include "enemy.h"
 #include "command.h"
 
-
 void command()
 {
     for (;;)
@@ -46,22 +45,36 @@ void command()
     }
 }
 
+static const char* msgTable[] = 
+{
+    "Not Enough Energy",
+    "No Target",
+    "Destroyed",
+    "No Torpedoes",
+    "Docked",
+    "Out of Energy. You die drifting through space",
+    "Ship and crew killed in battle."
+};
 
 void messageCode(uchar mc)
 {
-    static const char* msgTable[] = 
-    {
-        "Not Enough Energy",
-        "No Target",
-        "Destroyed",
-        "No Torpedoes",
-        "Docked",
-    };
 
     baseLine();
     outs(msgTable[mc]);
     outs(", captain!");
 
+}
+
+void endgame(uchar msg)
+{
+    cls();
+    
+    setcursor(3,3);
+    outs(msgTable[msg]);
+    
+    printf("\n   Your score is %d\n", score);
+
+    while (1) ;
 }
 
 void baseLine()

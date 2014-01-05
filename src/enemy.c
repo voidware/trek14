@@ -170,8 +170,13 @@ void enemyMove()
 void removeEnt(uchar *ep)
 {
     undrawEnt(ep);
-    memmove(ep, ep + ENT_SIZE, galaxyEnd - ep - ENT_SIZE);
+
+    // adjust score
+    if (ENT_TYPE(ep) == ENT_TYPE_KLINGON)
+        score += SCORE_KLINGON;
+
     galaxyEnd -= ENT_SIZE;
+    memmove(ep, ep + ENT_SIZE, galaxyEnd - ep);
 
     // rebuild quadrant content
     updateQuadrant();
@@ -201,6 +206,9 @@ uchar takeEnergy(uchar* ep, unsigned int d)
             messageCode(MSG_CODE_DESTROYED);
             removeEnt(ep);
         }
+        else
+            endgame(d < 2 ? MSG_CODE_ENDGAME_EXPIRE : MSG_CODE_ENDGAME_KILLED);
+
         return 0;
     }
     return 1;

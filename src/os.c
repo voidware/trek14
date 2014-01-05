@@ -49,7 +49,13 @@ char getkey()
 
 char inkey()
 {
-    return getkey();
+    char c;
+
+    do 
+    {
+        c = getkey();
+    } while (c == '\n');
+    return c;
 }
 
 void setcursor(uchar x, uchar y)

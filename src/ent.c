@@ -29,6 +29,7 @@
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
 unsigned int stardate;
+unsigned int score;
 const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
 
 // current location
@@ -147,6 +148,7 @@ char collision(uchar* ep1, uchar* ep2)
     w1 = objTable[ENT_TYPE(ep1)]._w;
     ENT_SXY(ep1, x1, y1);
 
+    // logical draw pos
     x1 -= (w1>>1); 
 
     // overlap quadrant edge
@@ -245,6 +247,7 @@ void genGalaxy()
     // XX should be zero anyway once we clear BSS
     memzero(galaxy, sizeof(galaxy));
 
+    score = 0;
     stardate = 20130; // 2014.0 - 10 (adjust for bogus warp to start)
     galaxyEnd = galaxy;
 

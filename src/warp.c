@@ -51,13 +51,12 @@ void warp(uchar x, uchar y, uchar z)
 
             // takes 10 units to warp (+1 for this move)
             stardate += 9;
-        
+
+            // refresh content of quadrant
             updateQuadrant();
 
         }
         else
-        {
             messageCode(MSG_CODE_INSUFENERGY);
-        }
     }
 }

@@ -66,8 +66,8 @@
 #define ENT_TYPE(_p)  (*(_p) & 0xf)
 #define ENT_MARK(_p)  (*((char*)(_p)) < 0)
 
-// NB: never change type
-#define ENT_SET_TYPE(_p, _v) *(_p) |= (_v)
+// NB: used to initialise whole byte
+#define ENT_SET_TYPE(_p, _v) *(_p) = (_v)
 #define ENT_SET_MARK(_p)   *(_p) |= 0x80
 #define ENT_CLEAR_MARK(_p)  *(_p) &= 0x7f
 
@@ -145,6 +145,8 @@ typedef struct
     const uchar*        _data;
 } EntObj;
 
+#define SCORE_KLINGON  10
+
 
 // -- data
 
@@ -155,6 +157,7 @@ extern uchar quadCounts[];
 extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
 extern unsigned int stardate;
+extern unsigned int score;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
 extern const uchar fedshipRLE[];

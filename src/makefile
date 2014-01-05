@@ -14,7 +14,7 @@ ASFLAGS = -l
 #LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7600
 
 # 48k dos machine
-LDFLAGS = -mjwx -b _CODE=0x5200  -b _DATA=0xE600
+LDFLAGS = -mjwx -b _CODE=0x5200  -b _DATA=0xF600
 
 OBJS = \
 	crt0.rel \

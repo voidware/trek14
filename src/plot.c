@@ -148,6 +148,7 @@ void plotVLine(uchar x, uchar y1, uchar y2, uchar c)
 
 }
 
+#if 0
 void plotLine(char x1, char y1, char x2, char y2, plotfn* fn)
 {
     // draw line (x1, y1) to (x2, y2) inclusive
@@ -215,6 +216,7 @@ void plotLine(char x1, char y1, char x2, char y2, plotfn* fn)
 	}
     }
 }
+#endif
 
 void drawRLE(char x, char y, const uchar* dp, uchar c)
 {
