@@ -31,6 +31,13 @@ typedef int int16;
 #define VIDEND ((char*)0x3fff)
 #define CURMEM ((char**)0x4020)
 
+#define HIGH48K ((char*)0xFFFF)
+#define HIGH32K 0xBFFF
+#define HIGH16K 0x7FFF
+
+// TRSDOS and LDOS location of HIGH$
+#define DOS_HIGH ((int*)0x4049)
+
 #define ABSC(_c) ((char)(_c) < 0 ? -(_c) : (_c))
 #define ABS(_c) ((_c) < 0 ? -(_c) : (_c))
 

@@ -28,10 +28,48 @@
 
 init:
 
+        ;; save the original stack area 
         ld     (_exit+1),sp
+
+        ;; find the top of memory for the new stack
+        ;; first check the LDOS/TRDOS HIGH$ location (valid if DOS loaded)
+        ;; If this is non-zero, use it.
+        ;;
+        ;; HIGH$ variable suggestion and info from Tony Duell. Thanks!
+        ;; 
+        ;; Otherwise see 48k, 32k, 16k has RAM by modifiying it.
+
+        ld      hl,#0x4049      ;LDOS/TRSDOS HIGH$
+        ld      e,(hl)
+        inc     hl
+        ld      d,(hl)
+        ex      de,hl           ;hl = HIGH$
+        ld      a,h
+        or      a,l
+        jr      NZ,00100$       ; high != 0, so use it
+
+        ;; check 48 top of ram
+        ld      hl,#0xffff       ;48k top
+        ld      a,(hl)
+        inc     a
+        ld      (hl),a          ; top + 1 -> top
+        sub     a,(hl)          ; changed?
+        jr      Z,00100$        ; yes, hl is top
+
+        ;; check 32k top of ram
+        ld      hl,#0xbfff       ;32k top
+        ld      a,(hl)
+        inc     a
+        ld      (hl),a          ; top + 1 -> top
+        sub     a,(hl)          ; changed?
+        jr      Z,00100$        ; yes, hl is top
+
+        ;; otherwise assume 16k
+        ld      hl,#0x7fff      
         
-	;; Stack at the top of memory.
-	ld	sp,#0xffff      ;48k
+00100$:
+
+        ld      sp,hl
 
         ;; Initialise global variables
         call    gsinit
