@@ -82,15 +82,19 @@ uchar getline(char* buf, uchar nmax)
 
 #else
 
+// trs80
+
 void outchar(char c)
 {
     // print `c' at current cursor position
-    // uses AF, DE, IY
+    // uses AF, DE, BC, HL
 
     __asm
-    ld	iy,#2
-    add	iy,sp
-    ld	a,0(iy)
+    pop hl
+    pop bc
+    push bc
+    push hl
+    ld a,c
     call #0x33
     __endasm;
 }
@@ -139,7 +143,7 @@ void setcursor(uchar x, uchar y)
 {
     // 0x4020
     char** p = CURMEM;
-    *p = VIDRAM + ((int)y<<6) + x;
+    *p = VIDRAM + ((int)y<<6) + (int)x;
 }
 
 void getcursor(uchar* x, uchar* y)
@@ -160,7 +164,7 @@ void cls()
 
 void outcharat(uchar x, uchar y, uchar c)
 {
-    *(VIDRAM + ((int)y<<6) + x) = c;
+    *(VIDRAM + ((int)y<<6) + (int)x) = c;
 }
 
 #endif

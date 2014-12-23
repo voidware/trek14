@@ -6,15 +6,16 @@ CC = sdcc
 AS = sdasz80
 LD = sdldz80
 DEBUG = 
-OPT = 
-CFLAGS = -mz80 $(DEBUG)
+OPT2 = --max-allocs-per-node 100000
+OPT = --opt-code-size 
+CFLAGS = -mz80 $(OPT) $(DEBUG)
 ASFLAGS = -l
 
 #16k machine
 #LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7600
 
 # 48k dos machine
-LDFLAGS = -mjwx -b _CODE=0x5200  -b _DATA=0xF600
+LDFLAGS = -mjwx -b _CODE=0x5200  #-b _DATA=0xF600
 
 OBJS = \
 	crt0.rel \
@@ -64,6 +65,13 @@ clean:
 	rm -f *.map
 	rm -f *.asm
 	rm -f *.sym
+
+cleanall: clean
+	rm -f *.cmd
+	rm -f *.cas
+
+
+
 
 
 
