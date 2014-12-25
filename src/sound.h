@@ -20,31 +20,10 @@
  * IN THE SOFTWARE.
  */
 
-#include "defs.h"
-#include "os.h"
-#include "libc.h"
-#include "ent.h"
-#include "command.h"
-#include "sound.h"
+#ifndef __sound_h__
+#define __sound_h__
 
-void main()
-{
-    // initialise our own mini-clib
-    libcInit();
+extern void bit_sound(int duration, int frequency);
+extern void playNotes(const char* m);
 
-    cls();
-    outs("Trek 2014!\n");
-
-    playNotes("14tF6uEb9D3C2dBbAAb21Gb3"
-              "F6uF9Eb3D2CdBb"
-              "A21Ab3G9A3"
-              "BuCD2EFG6G#18d"
-              "Ab9Bb3uCDbEb2FGbAb6A18d"
-              );
-
-    outs("generating galaxy...\n");
-    genGalaxy();
-    outs("done\n");
-
-    command();
-}
+#endif // __sound_h__

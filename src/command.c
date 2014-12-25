@@ -66,7 +66,6 @@ void messageCode(uchar mc)
     baseLine();
     outs(msgTable[mc]);
     outs(", captain!");
-
 }
 
 void endgame(uchar msg)
@@ -158,15 +157,6 @@ void docCommand()
         if (QX == 7 && QY == 7 && QZ == 2)
             endgame(MSG_CODE_ENDGAME_RESIGN);
     }
-}
-
-static void printfat2(uchar x, uchar y, const char* fmt)
-{
-    // printf at (x,y) character position
-    // NB: text is automatically flushed (without need for "\n")
-    
-    setcursor(0, 15);
-    outs("Hello World");
 }
 
 // mr spock, you have the conn :-)

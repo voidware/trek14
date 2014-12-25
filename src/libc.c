@@ -637,6 +637,13 @@ static usmint _doFormat(StreamOutFn sf, void* ctx, const char* fmt, va_list args
                 l = i; // length
                 emitNumBuf = 1;
             }
+            else if (*p == 'c')
+            {
+                // char still pushed as a int
+                unsigned int val = va_arg(args, unsigned int);
+                (*sf)(ctx, val);
+                ++n;
+            }
             else 
             {
                 (*sf)(ctx, *p);

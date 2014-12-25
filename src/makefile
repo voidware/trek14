@@ -30,11 +30,13 @@ OBJS = \
 	ent.rel \
 	os.rel \
 	utils.rel \
+	sound.rel \
 	libc.rel \
 	libcbase.rel \
 	crtcall.rel \
-	divunsigned.rel \
 	mul.rel \
+	divunsigned.rel \
+	soundbit.rel \
 
 %.rel: %.c
 	$(CC) $(CFLAGS) -c $< 
