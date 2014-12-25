@@ -35,11 +35,11 @@ void main()
     cls();
     outs("Trek 2014!\n");
 
-    playNotes("14tF6uEb9D3C2dBbAAb21Gb3"
-              "F6uF9Eb3D2CdBb"
+    playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"
+              "F6F+9Eb3D2CB-b"
               "A21Ab3G9A3"
-              "BuCD2EFG6G#18d"
-              "Ab9Bb3uCDbEb2FGbAb6A18d"
+              "BC+D2EFG6G#18"
+              "Ab-9Bb3C+DEb2FGbAb6A18"
               );
 
     outs("generating galaxy...\n");

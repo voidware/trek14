@@ -46,22 +46,8 @@
 #define NOTE_AS 	466.163761616   
 #define NOTE_B  	493.883301378     
 
-// next octave
-#define NOTE_C1         523.2511306011972693557
-#define NOTE_C1S        554.3652619537441924975728
-#define NOTE_D1         587.329535834815120525566
-#define NOTE_D1S        622.2539674441618214727431
-#define NOTE_E1         659.2551138257398594716832
-#define NOTE_F1         698.4564628660077688907502
-#define NOTE_F1S        739.9888454232687978673908
-#define NOTE_G1         783.9908719634985881713988
-#define NOTE_G1S        830.6093951598902770448834
-#define NOTE_A1         880.000
-#define NOTE_A1S        932.327523036179832814406
-#define NOTE_B1         987.766602512248223661509
-
 #define RND(_x)     ((int)((_x) + 0.5))
-#define TSTATE(_n)  RND(BASE_TSTATES/_n - 29.5)
+#define TSTATE(_n)  RND(BASE_TSTATES/_n)
 
 typedef struct
 {
@@ -84,19 +70,6 @@ static const Note notes[] =
     { 'A', RND(NOTE_A), TSTATE(NOTE_A) },
     { 'A', RND(NOTE_AS), TSTATE(NOTE_AS) },
     { 'B', RND(NOTE_B), TSTATE(NOTE_B) },
-
-    { 'C', RND(NOTE_C1), TSTATE(NOTE_C1) },
-    { 'C', RND(NOTE_C1S), TSTATE(NOTE_C1S) },
-    { 'D', RND(NOTE_D1), TSTATE(NOTE_D1) },
-    { 'D', RND(NOTE_D1S), TSTATE(NOTE_D1S) },
-    { 'E', RND(NOTE_E1), TSTATE(NOTE_E1) },
-    { 'F', RND(NOTE_F1), TSTATE(NOTE_F1) },
-    { 'F', RND(NOTE_F1S), TSTATE(NOTE_F1S) },
-    { 'G', RND(NOTE_G1), TSTATE(NOTE_G1) },
-    { 'G', RND(NOTE_G1S), TSTATE(NOTE_G1S) },
-    { 'A', RND(NOTE_A1), TSTATE(NOTE_A1) },
-    { 'A', RND(NOTE_A1S), TSTATE(NOTE_A1S) },
-    { 'B', RND(NOTE_B1), TSTATE(NOTE_B1) },
 };
 
 // play melodies. eg:
@@ -115,11 +88,11 @@ void playNotes(const char* m)
     // u = up octave, d = down octave
     // t sets initial tempo divider
 
-    const Note* octave = notes;
     const Note* n = 0;
     uchar dt = 2;
     uchar dt2 = 0;
     uchar tempo = 12;
+    char u = 0;
     
     for (;;)
     {
@@ -129,24 +102,44 @@ void playNotes(const char* m)
         {
             if (n)
             {
+                uint a, b;
+                char u2;
+                
                 if (dt2)
                     dt = dt2;
             
                 dt2 = 0;
-                bit_sound(dt*n->_freq/tempo, n->_tstates);
+
+                a = dt*n->_freq;
+                b = n->_tstates;
+
+                u2 = u;
+                while (u2 > 0)
+                {
+                    --u2;
+                    a <<= 1;
+                    b >>= 1;
+                }
+                while (u2 < 0)
+                {
+                    ++u2;
+                    a >>= 1;
+                    b <<= 1;
+                }
+                bit_sound(a/tempo, b - 30);
             }
 
             if (!c) break;
-            for (n = octave; n->_note != c; ++n) ;
+            for (n = notes; n->_note != c; ++n) ;
         }
         if (c == '#')
             ++n;
         if (c == 'b')
             --n;
-        if (c == 'u')
-            octave += 12;
-        if (c == 'd')
-            octave -= 12;
+        if (c == '+')
+            ++u;
+        if (c == '-')
+            --u;
         if (isdigit(c))
             dt2 = 10*dt2 + (c - '0');
         if (c == 't')
