@@ -35,12 +35,14 @@ void main()
     cls();
     outs("Trek 2014!\n");
 
+#ifdef NDEBUG
     playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"
               "F6F+9Eb3D2CB-b"
               "A21Ab3G9A3"
               "BC+D2EFG6G#18"
               "Ab-9Bb3C+DEb2FGbAb6A18"
               );
+#endif
 
     outs("generating galaxy...\n");
     genGalaxy();

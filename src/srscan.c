@@ -31,6 +31,8 @@
 #include "srscan.h"
 #include "enemy.h"
 #include "command.h"
+#include "warp.h"
+#include "sound.h"
 
 void fillbg(char x, char y)
 {
@@ -64,6 +66,8 @@ void undrawEnt(uchar* ep)
         fillbg(sx++, sy);
     }
 }
+
+
 
 char moveEnt(uchar* ep, char dx, char dy)
 {
@@ -105,6 +109,8 @@ char moveEnt(uchar* ep, char dx, char dy)
         {
             x = sx<<1;
             y = sy*3;
+
+            // move two pixels, either right of left
             moveRLE(x, y, obj->_data, (dx < 0));            
             moveRLE(x+dx, y, obj->_data, (dx < 0));            
             if (dx < 0)
@@ -145,6 +151,48 @@ void showState()
              d, (stardate - d*10));
 }
 
+static void animateOut()
+{
+    // draw warp out animation with sound
+    
+    uchar x, y;
+    const EntObj* obj = objTable + ENT_TYPE_FEDERATION;
+    uchar w2 = obj->_w;
+    int f = 600;
+    int df = 10;
+    uchar n;
+
+    // current sector
+    ENT_SXY(galaxy, x, y);
+    x -= w2>>1; // left position
+
+    n = 63 - x - w2; // -1 for first movement
+    
+    // convert to pixels
+    x <<= 1;
+    y *= 3;
+
+    for (;;)
+    {
+        if (n > 0)
+        {
+            --n;
+            x += 2;
+            drawRLE(x, y, obj->_data, 1);
+        }
+
+        // make the sound increase in pitch until it reaches a final point
+        // if we've finished moving, then we're done
+        bit_sound(6, f);
+        f -= df;
+        if (f < 100)
+        {
+            if (!n) break;
+            f = 100;
+        }
+    }
+}
+
 char srScan(char k)
 {
     // short range scan.
@@ -163,17 +211,21 @@ char srScan(char k)
     setcursor(0,1);
     for (i = 64*7; i > 0; --i) { outchar('.'); outchar(' '); }
 
-    // draw items in this quadrant
+    // draw items in this quadrant. Assume here, `quadrant' is correctly
+    // setup
     epp = quadrant;
     while (*epp)
         drawEnt(*epp++);
     
+    // enter interactive loop on SR view
     for (;;)
     {
         char dx, dy;
 
+        // operate command passed in, if any
         if (k) { c = k; k = 0; }
         else c = inkey();
+        
         if (!c) continue;
 
         dx = 0;
@@ -186,6 +238,7 @@ char srScan(char k)
             dy = -1;
         else if (c == KEY_ARROW_DOWN)
             dy = 1;
+
         else if (c == ' ')
         {
             // dummy move!
@@ -202,6 +255,15 @@ char srScan(char k)
         {
             torpCommand();
         }
+        else if ((c & 0x7f) == 'W')
+        {
+            if (c != 'W' || warpCommand())
+            {
+                animateOut();
+                warp();
+            }
+            goto again; // new quadrant
+        }
         else break;
 
         if (moveEnt(galaxy, dx, dy) < 0)
@@ -210,7 +272,10 @@ char srScan(char k)
             goto again;
         }
 
+        // any enemies here get a turn
         enemyMove();
+
+        // update the state
         showState();
     }
 

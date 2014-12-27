@@ -112,6 +112,7 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
     {
         if (ENT_QX(ep) == x && ENT_QY(ep) == y && ENT_QZ(ep) == z)
         {
+            // now seen if not already, increase explore score
             if (!ENT_MARKED(ep))
             {
                 ENT_SET_MARK(ep);
@@ -213,6 +214,7 @@ uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z)
         ENT_SET_QY(ep, y);
         ENT_SET_QZ(ep, z);
 
+        // setting our quadrant?
         if (ep == galaxy)
         {
             // update current location variables
@@ -376,6 +378,18 @@ void clearMarks()
     } 
 }
 
+uchar enoughEnergy(uchar* ep, unsigned int d)
+{
+    // reduce energy by `d' if possible
+    int e = ENT_ENERGY(ep) - d;
+    if (e >= 0)
+    {
+        ENT_SET_ENERGY(ep, e);
+        return 1;
+    }
+    return 0;
+}
+
 void genGalaxy()
 {
     uchar i;
@@ -457,7 +471,9 @@ void genGalaxy()
 
     // +1 for starfleet HQ, not to count
     score = -1;
-    warp(QX, QY, QZ);
+
+    // warp to QX, QY, QZ
+    warp(); 
 }
 
 

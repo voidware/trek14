@@ -28,3 +28,4 @@ void undrawEnt(uchar* ep);
 char moveEnt(uchar* ep, char dx, char dy);
 void showState();
 void fillbg(char x, char y);
+

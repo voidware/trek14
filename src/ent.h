@@ -23,7 +23,7 @@
 /* Galactic entities!
  *
  * An entity and its data are stored in 5 bytes as follows. The macros below
- * perform the actual bit banging. The layout is only assumed through the 
+ * perform the actual bit banging. The layout is assumed only through the 
  * macros.
 
  Byte1:
@@ -186,3 +186,4 @@ uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z);
 void updateQuadrant();
 uchar distance(uchar* ep1, uchar* ep2);
 uchar getWidth(uchar* ep);
+uchar enoughEnergy(uchar* ep, unsigned int d);

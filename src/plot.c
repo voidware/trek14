@@ -103,7 +103,6 @@ void plotSpan(char x, char y, uchar n, uchar c)
 
     k = n>>1;
 
-    // have two loops, for set and unset
     mask = bothCol[q];
     while (k)
     {
@@ -248,7 +247,7 @@ void drawRLE(char x, char y, const uchar* dp, uchar c)
 
 void moveRLE(char x, char y, const uchar* dp, uchar left)
 {
-    // moves RLE sprite from (x,y) to (x-1, y)
+    // moves RLE sprite from (x,y) to (x-1, y) if `left'
     // or from (x,y) to (x+1, y)
 
     uchar pair;

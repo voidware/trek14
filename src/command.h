@@ -28,6 +28,7 @@ void endgame(uchar msg);
 
 void docCommand();
 void torpCommand();
+char warpCommand();
 
 void messageCode(uchar mc);
 

@@ -49,9 +49,9 @@ void command()
 static const char* msgTable[] = 
 {
     "Not Enough Energy",
-    "No Target",
+    "No enemies",
     "Destroyed",
-    "No Torpedoes",
+    "No torpedoes",
     "Docked",
     "Returned to Starfleet HQ",
     "Out of Energy. You die drifting through space",
@@ -87,14 +87,23 @@ void baseLine()
     clearline();
 }
 
-void warpCommand()
+char warpCommand()
 {
     int x, y, z;
+    char v;
     
     baseLine();
     printf("Location: "); flush();
     scanf("%d,%d,%d", &x, &y, &z);
-    warp(x,y,z);
+    v = canwarp(x,y,z);
+    if (v)
+    {
+        // our new position after warp
+        QX = x;
+        QY = y;
+        QZ = z;
+    }
+    return v;
 }
 
 void phaserCommand()
@@ -185,8 +194,13 @@ void conn()
             lrScan();
             break;
         case 'W':
-            warpCommand();
-            // fall through
+            if (warpCommand())
+            {
+                // complete warp command on SR view
+                c = srScan('W' | 0x80); 
+                if (c) goto again;            
+            }
+            break;
         case 'S':
             c = srScan(0);
             if (c) goto again;

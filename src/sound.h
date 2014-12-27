@@ -26,4 +26,6 @@
 extern void bit_sound(int duration, int frequency);
 extern void playNotes(const char* m);
 
+extern void warpsound(int length);
+
 #endif // __sound_h__

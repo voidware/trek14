@@ -22,6 +22,7 @@ _bit_sound::
           push de
           push bc
 
+        ;; HL=freq, DE=duration
 __beeper::
           ld   a,l
           srl  l
@@ -47,7 +48,6 @@ __beeper::
           jp   nz,.behllp
           xor  #sndbit_mask
 
-.beeppatch:
           out  (sndbit_port),a
 
           ld   b,h
@@ -67,6 +67,7 @@ __beeper::
           jp   (iy)
 
 
+.if 0
 ; zap sound
 _fx2::
           ld    a,#1
@@ -83,18 +84,18 @@ _fx2::
 
 ; wibble up sound
 _fx5::
-          ld    b,#1  
+          ld    b,#1            ;number of times
 .fx5_1:   push  bc  
-          ld    hl,#1200  
-          ld    de,#6  
+          ld    hl,#1200        ;freq
+          ld    de,#6           ;dt
 .fx5_2:   push  hl  
           push  de  
           call  __beeper  
           pop   de  
           pop   hl  
           ld    bc,#100  
-          and   a  
-          sbc   hl,bc  
+          and   a               ;clr cy
+          sbc   hl,bc           ;freq -= 100
           jr    nc,.fx5_2  
           pop   bc  
           djnz  .fx5_1  
@@ -139,7 +140,6 @@ _zap1::
           djnz  .zap1_1
           jp    __bit_close
 
-.if 0
 ; sort of clakson sound. not very good
 _clackson::
           ld      a,#1
@@ -162,10 +162,8 @@ _clackson::
           ld      l,#255
           djnz    .clackson_loop
           jp    __bit_close
-.endif
+        
 
-
-.if 0          
 ; kind of high pitched ring sound
 _zap3::
           ld    a,#1
@@ -192,10 +190,7 @@ _zap3::
           pop   bc
           djnz  .zap3_1
           jp    __bit_close
-.endif
           
-
-.if 0          
 ; a kind of wibble
 _warpcall::
           ld    hl,#1600  
@@ -228,7 +223,6 @@ _warpcall::
           add   hl,de  
           ld    (.warps+1),hl  
           ret   
-.endif
 
 ; long explosion sound          
 _explosion::
@@ -397,3 +391,5 @@ _blast::
           ld      l,#0
           djnz    .u2_loop
           jp	__bit_close
+
+.endif

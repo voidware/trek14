@@ -27,12 +27,10 @@
 #include "libc.h"
 #include "utils.h"
 #include "ent.h"
-#include "warp.h"
 #include "command.h"
 #include "srscan.h"
 #include "phasers.h"
 #include "enemy.h"
-
 
 uchar* findClosest(uchar* kp, uchar type)
 {
@@ -208,17 +206,6 @@ void removeEnt(uchar *ep)
     updateQuadrant();
 }
 
-uchar enoughEnergy(uchar* ep, unsigned int d)
-{
-    // reduce energy by `d' if possible
-    int e = ENT_ENERGY(ep) - d;
-    if (e >= 0)
-    {
-        ENT_SET_ENERGY(ep, e);
-        return 1;
-    }
-    return 0;
-}
 
 uchar takeEnergy(uchar* ep, unsigned int d)
 {

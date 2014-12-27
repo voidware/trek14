@@ -20,4 +20,5 @@
  * IN THE SOFTWARE.
  */
 
-void warp(uchar x, uchar y, uchar z);
+char canwarp(uchar x, uchar y, uchar z);
+void warp();

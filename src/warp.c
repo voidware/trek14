@@ -25,30 +25,41 @@
 #include "libc.h"
 #include "utils.h"
 #include "ent.h"
-#include "srscan.h"
 #include "command.h"
-#include "enemy.h"
 #include "warp.h"
 
-void warp(uchar x, uchar y, uchar z)
+char canwarp(uchar x, uchar y, uchar z)
 {
-    if (x < 8 && y < 8 && z <= 2)
+    // can we warp to (x,y,z) ?
+    // if we can, subtract energy needed.
+
+    char v = (x < 8 && y < 8 && z <= 2);
+    
+    if (v)
     {
-        // do we have enough energy
+        // warp costs the "manhattan distance"
         uchar d = ABSC(QX - x) + ABSC(QY - y) + ABSC(QZ - z);
         
-        if (enoughEnergy(galaxy, ((int)d)*100))
+        if (!enoughEnergy(galaxy, ((int)d)*100))
         {
-            // we are the first entry in the galaxy
-            setQuadrant(galaxy, x, y, z);
-            
-            // takes time to warp (+1 for this move)
-            stardate += STARDATE_WARP - 1;
-
-            // position in quadrant without collision
-            genSector(galaxy);
-        }
-        else
             messageCode(MSG_CODE_INSUFENERGY);
+            v = 0;
+        }
     }
+    return v;
+}
+
+void warp()
+{
+    // warp to QX, QY, QZ
+    // ASSUME we can warp and energy needed is already taken
+
+    // we are the first entry in the galaxy
+    setQuadrant(galaxy, QX, QY, QZ);
+        
+    // takes time to warp (adjusted by 1 for this move)
+    stardate += STARDATE_WARP - 1;
+    
+    // set position in quadrant without collision
+    genSector(galaxy);
 }
