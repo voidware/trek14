@@ -30,6 +30,7 @@
 #include "srscan.h"
 #include "enemy.h"
 #include "phasers.h"
+#include "sound.h"
 
 static void setPixel(char x, char y)
 {
@@ -188,6 +189,12 @@ void phasers(uchar* ep, unsigned int e, uchar type)
                 if (enoughEnergy(ep, e))
                 {
                     trackPoint(ep, x, y, (char)ey, (char)ex, setPixel, 0);
+
+                    if (ep == galaxy)
+                        blastsound(255);
+                    else
+                        zapsound(); 
+
                     trackPoint(ep, x, y, (char)ey, (char)ex, 0, fillBgPixel);
 
                     // calculate effective damage
@@ -202,7 +209,7 @@ void phasers(uchar* ep, unsigned int e, uchar type)
                     dam = (e*4)/(expfixed(dam)>>5);
 
                     // true if still there
-                    if (takeEnergy(hit, dam))
+                    if (hitEnergy(hit, dam))
                         // re-draw enemy
                         drawEnt(hit);
                     else 
@@ -239,7 +246,7 @@ void torps(uchar* ep, int dir)
     hit = trackPoint(ep, x, y, s, c, setPixel, fillBgPixel);
     if (hit)
     {
-        if (takeEnergy(hit, 4000))
+        if (hitEnergy(hit, 4000))
             drawEnt(hit);        
     }
 }

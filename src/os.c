@@ -228,37 +228,28 @@ uchar getline2(char* buf, uchar nmax)
 }
 #endif
 
-#if 0
-void clearlineend()
+void clearline()
 {
     // clear from current cursor to end of line
     // leave cursor where it is
 #ifndef _WIN32
-    char* cp = *CURMEM;
-    while (((int)cp) & 63) *cp++ = ' ';
+    uchar x, y;
+    char* cp;
+
+    cp = *CURMEM;
+    getcursor(&x, &y);
+
+    x = 64 - x;
+    while (x)
+    {
+        --x;
+        *cp++ = ' ';
+    }
 #endif    
 }
-#endif
 
-void clearline()
-{
-#ifndef _WIN32
-    // clear from current cursor to start of line
-    // set cursor to start of line
-    char** cpp = CURMEM;
-    char* cp = *cpp;
 
-    for (;;)
-    {
-        *cp = ' ';
-        if (!(((int)cp) & 63))
-            break;
-        --cp;
-    }
-    
-    *cpp = cp;
-#endif
-}
+
 
 
 

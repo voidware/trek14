@@ -32,6 +32,8 @@
 #include "enemy.h"
 #include "command.h"
 #include "warp.h"
+#include "damage.h"
+#include "lrscan.h"
 #include "sound.h"
 
 void fillbg(char x, char y)
@@ -67,8 +69,6 @@ void undrawEnt(uchar* ep)
     }
 }
 
-
-
 char moveEnt(uchar* ep, char dx, char dy)
 {
     // move entity `ep' by `dx' `dy' & redraw
@@ -88,7 +88,7 @@ char moveEnt(uchar* ep, char dx, char dy)
     c = setSector(ep, sx+dx, sy+dy, 1);
 
     // if ok, but not crossed border
-    if (!c) 
+    if (!c && opCheckSR()) 
     {
         uchar x, y;
         const EntObj* obj = objTable + ENT_TYPE(ep);
@@ -123,27 +123,13 @@ char moveEnt(uchar* ep, char dx, char dy)
     return c;
 }
 
+
 void showState()
 {
     unsigned int d;
-
-    // advance time `here, since we always refresh the status line each move
-    if (++stardate > STARDATE_END)
-    {
-        // overdue
-        messageCode(MSG_CODE_RETURN_HQ);
-
-        // get a grace period to return, otherwise score suffers
-        if (stardate > STARDATE_END + STARDATE_GRACE)
-        {
-            score -= 10;
-            if (score < 0)
-            {
-                score = 0;
-                endgame(MSG_CODE_ENDGAME_RELIEVED);
-            }
-        }
-    }
+        
+    // advance time here, when we refresh the state
+    tick();
 
     d = stardate/10;
     printfat(34, 0, "E:%-4d T:%d D:%d.%d",
@@ -158,8 +144,8 @@ static void animateOut()
     uchar x, y;
     const EntObj* obj = objTable + ENT_TYPE_FEDERATION;
     uchar w2 = obj->_w;
-    int f = 600;
-    int df = 10;
+    int f = 1000;
+    uchar df = 10;
     uchar n;
 
     // current sector
@@ -171,19 +157,20 @@ static void animateOut()
     // convert to pixels
     x <<= 1;
     y *= 3;
+    n <<= 1;
 
     for (;;)
     {
         if (n > 0)
         {
             --n;
-            x += 2;
+            ++x;
             drawRLE(x, y, obj->_data, 1);
         }
 
         // make the sound increase in pitch until it reaches a final point
         // if we've finished moving, then we're done
-        bit_sound(6, f);
+        bit_sound(4, f);
         f -= df;
         if (f < 100)
         {
@@ -202,6 +189,8 @@ char srScan(char k)
     int i;
     char c;
 
+    mline = 15;
+
  again:
     
     printfat(0,0, "Short Range Scan, Quadrant %d %d %d", 
@@ -211,11 +200,14 @@ char srScan(char k)
     setcursor(0,1);
     for (i = 64*7; i > 0; --i) { outchar('.'); outchar(' '); }
 
-    // draw items in this quadrant. Assume here, `quadrant' is correctly
-    // setup
-    epp = quadrant;
-    while (*epp)
-        drawEnt(*epp++);
+    if (opCheckSR())
+    {
+        // draw items in this quadrant. Assume here, `quadrant' is correctly
+        // setup
+        epp = quadrant;
+        while (*epp)
+            drawEnt(*epp++);
+    }
     
     // enter interactive loop on SR view
     for (;;)
@@ -224,10 +216,8 @@ char srScan(char k)
 
         // operate command passed in, if any
         if (k) { c = k; k = 0; }
-        else c = inkey();
+        else c = getkey();
         
-        if (!c) continue;
-
         dx = 0;
         dy = 0;
         if (c == KEY_ARROW_LEFT)
@@ -266,14 +256,20 @@ char srScan(char k)
         }
         else break;
 
-        if (moveEnt(galaxy, dx, dy) < 0)
+        if ((dx || dy) && opCheck(L_IMPULSE))
         {
-            // crossed border
-            goto again;
+            if (moveEnt(galaxy, dx, dy) < 0)
+            {
+                // crossed border
+                goto again;
+            }
         }
 
         // any enemies here get a turn
         enemyMove();
+
+        // redraw blank SR
+        if (!opCheckSR()) goto again;
 
         // update the state
         showState();

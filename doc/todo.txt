@@ -1,4 +1,4 @@
-* game ends at 2100 and you are recalled to HQ.
+* explosion
 * romulans
 * class M planets.
 * collide damage
@@ -7,6 +7,4 @@
 * cannot blow up anything in a quadrant with a M planet.
 * black hole
 * quasars
-* damage to ship.
-* repair
 * ships computer

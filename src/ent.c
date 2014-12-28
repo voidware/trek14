@@ -25,6 +25,7 @@
 #include "libc.h"
 #include "utils.h"
 #include "warp.h"
+#include "damage.h"
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
@@ -381,8 +382,10 @@ void clearMarks()
 uchar enoughEnergy(uchar* ep, unsigned int d)
 {
     // reduce energy by `d' if possible
+    // return non-zero if ok.
+
     int e = ENT_ENERGY(ep) - d;
-    if (e >= 0)
+    if (e > 0)
     {
         ENT_SET_ENERGY(ep, e);
         return 1;
@@ -468,6 +471,9 @@ void genGalaxy()
     }
 
     clearMarks();
+    
+    // start with everything operational
+    repairAll();
 
     // +1 for starfleet HQ, not to count
     score = -1;

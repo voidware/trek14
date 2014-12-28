@@ -66,12 +66,39 @@ __beeper::
           inc  c
           jp   (iy)
 
+        ; long explosion sound          
+_explosionSound::
+          ld     a,#1
+          ld	hl,#1
+.expl:
+          push    hl
+          push    af
+          ld      a,#sndbit_mask
+          ld      h,#0
+          and     (hl)
+          ld      l,a
+          pop     af
+          xor     l
+          out  (sndbit_port),a
+          pop     hl
+          push    af
+          ld      b,h
+          ld      c,l
+.dly:     dec     bc
+          ld      a,b
+          or      c
+          jr      nz,.dly
+          pop     af
+          
+          inc     hl
+          bit     1,h
+          jr      z,.expl
+          jp	__bit_close
 
-.if 0
-; zap sound
-_fx2::
+        ; zap sound
+_zapsound::
           ld    a,#1
-          ld    e,#150  
+          ld    e,#100
 .fx2_1:
           out  (sndbit_port),a
 
@@ -81,6 +108,53 @@ _fx2::
           inc   e  
           jr    nz,.fx2_1  
           jp    __bit_close
+
+        ; sort of laser blast sound
+; blastsound(length)
+_blastsound::
+          pop     hl
+          pop     bc
+          push    bc
+          push    hl
+          ld      a,#230
+          ld      (.u2_FR_1+1),a
+          xor     a
+          ld      (.u2_FR_2+1),a
+          ld      a,#1
+.U2_LENGHT:
+          ld      b,c
+          ld      c,#sndbit_port
+.u2_loop:
+          dec     h
+          jr      nz,.u2_jump
+          push    af
+          ld      a,(.u2_FR_1+1)
+          inc     a
+          ld      (.u2_FR_1+1),a
+          pop     af
+          xor     #sndbit_mask
+          out  (c),a
+.u2_FR_1:
+          ld      h,#50
+.u2_jump:
+          inc     l
+          jr      nz,.u2_loop
+          push    af
+          ld      a,(.u2_FR_2+1)
+          inc     a
+          ld      (.u2_FR_2+1),a
+          pop     af
+          xor     #sndbit_mask
+          out  (c),a
+.u2_FR_2:
+          ld      l,#0
+          djnz    .u2_loop
+          jp	__bit_close
+
+
+
+.if 0
+
 
 ; wibble up sound
 _fx5::
@@ -224,35 +298,6 @@ _warpcall::
           ld    (.warps+1),hl  
           ret   
 
-; long explosion sound          
-_explosion::
-          ld     a,#1
-          ld	hl,#1
-.expl:
-          push    hl
-          push    af
-          ld      a,#sndbit_mask
-          ld      h,#0
-          and     (hl)
-          ld      l,a
-          pop     af
-          xor     l
-          out  (sndbit_port),a
-          pop     hl
-          push    af
-          ld      b,h
-          ld      c,l
-.dly:     dec     bc
-          ld      a,b
-          or      c
-          jr      nz,.dly
-          pop     af
-          
-          inc     hl
-          bit     1,h
-          jr      z,.expl
-          jp	__bit_close
-
 ; like a sort of alarm power up or something??
 _squoink::
           ld      a,#230
@@ -288,108 +333,6 @@ _squoink::
 .qi_FR_2:
           ld      l,#0
           djnz    .qi_loop
-          jp	__bit_close
-
-; warp sound
-; warpsound(length)
-_warpsound::
-          pop     hl
-          pop     bc
-          push    bc
-          push    hl
-          ld      a,#230
-          ld      (.t2_FR_1+1),a
-          xor     a
-          ld      (.t2_FR_2+1),a
-
-          ld      a,#1
-.T2_LENGHT:
-          ld      b,c
-          ld      c,#sndbit_port
-.t2_loop:
-          dec     h
-          jr      nz,.t2_jump
-          xor     #sndbit_mask
-
-          out  (c),a
-
-          push    bc
-          ld      b,#250
-.wait1:
-          djnz    .wait1
-          pop     bc
-          xor     #sndbit_mask
-
-          out  (c),a
-
-.t2_FR_1:
-          ld      h,#230
-.t2_jump:
-          inc     l
-          jr      nz,.t2_loop
-          push    af
-          ld      a,(.t2_FR_2+1)
-          inc     a
-          ld      (.t2_FR_2+1),a
-          pop     af
-          xor     #sndbit_mask
-
-          out  (c),a
-
-          push    bc
-          ld      b,#200
-.wait2:
-          djnz    .wait2
-          pop     bc
-          xor     #sndbit_mask
-
-          out  (c),a
-
-.t2_FR_2:
-          ld      l,#0
-          djnz    .t2_loop
-          jp	__bit_close
-
-; sort of laser blast sound
-; blast(length)
-_blast::
-          pop     hl
-          pop     bc
-          push    bc
-          push    hl
-          ld      a,#230
-          ld      (.u2_FR_1+1),a
-          xor     a
-          ld      (.u2_FR_2+1),a
-          ld      a,#1
-.U2_LENGHT:
-          ld      b,c
-          ld      c,#sndbit_port
-.u2_loop:
-          dec     h
-          jr      nz,.u2_jump
-          push    af
-          ld      a,(.u2_FR_1+1)
-          inc     a
-          ld      (.u2_FR_1+1),a
-          pop     af
-          xor     #sndbit_mask
-          out  (c),a
-.u2_FR_1:
-          ld      h,#50
-.u2_jump:
-          inc     l
-          jr      nz,.u2_loop
-          push    af
-          ld      a,(.u2_FR_2+1)
-          inc     a
-          ld      (.u2_FR_2+1),a
-          pop     af
-          xor     #sndbit_mask
-          out  (c),a
-.u2_FR_2:
-          ld      l,#0
-          djnz    .u2_loop
           jp	__bit_close
 
 .endif

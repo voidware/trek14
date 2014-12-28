@@ -33,5 +33,5 @@ void cls();
 void outs(const char* s);
 uchar getline2(char* buf, uchar nmax);
 void clearline();
-void clearlineend();
+
 

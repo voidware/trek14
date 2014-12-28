@@ -27,8 +27,9 @@
 #include "ent.h"
 #include "plot.h"
 #include "command.h"
+#include "damage.h"
 
-void lrScan()
+uchar lrScan()
 {
     // long range scan
 
@@ -38,6 +39,8 @@ void lrScan()
 
     // counts for each type
     uchar quad[ENT_TYPE_COUNT];
+
+    if (!opCheck(L_SCANL)) return 0;
 
     cls();
     printf("Long Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
@@ -109,5 +112,6 @@ void lrScan()
         printfat(cx, cy + 2, "%2d", (int)(QZ+1));
         cy += 4;
     }
+    return 1;
 }
 

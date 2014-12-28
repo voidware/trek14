@@ -20,5 +20,5 @@
  * IN THE SOFTWARE.
  */
 
-void lrScan();
+uchar lrScan();
 

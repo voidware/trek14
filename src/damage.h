@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Voidware Ltd.
+ * Copyright (c) 2014 Voidware Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,33 +20,20 @@
  * IN THE SOFTWARE.
  */
 
-void command();
-void conn();
-void phaserCommand();
-void baseLine();
-void endgame(uchar msg);
-void tick();
+// operations ordered by repair importance  
+#define L_SHIELDS       0
+#define L_SCANS         1
+#define L_IMPULSE       2
+#define L_TORPS         3
+#define L_WARP          4
+#define L_PHASERS       5
+#define L_SCANL         6
+#define L_COUNT         7
 
-void docCommand();
-void torpCommand();
-char warpCommand();
-
-void messageCode(uchar mc);
-void message(const char*);
-
-extern uchar mline;
-
-#define MSG_CODE_INSUFENERGY  0
-#define MSG_CODE_NO_TARGET 1
-#define MSG_CODE_DESTROYED 2
-#define MSG_CODE_NO_TORPS 3
-#define MSG_CODE_DOCKED 4
-#define MSG_CODE_ENDGAME_RESIGN 5
-#define MSG_CODE_ENDGAME_EXPIRE 6
-#define MSG_CODE_ENDGAME_KILLED 7
-#define MSG_CODE_ENDGAME_RELIEVED 8
-#define MSG_CODE_RETURN_HQ 9
-#define MSG_CODE_SHIELDS_GONE 10
-#define MSG_CODE_SHIELDS_OK 11
-
-
+void repairAll();
+void opTick();
+void takeDamage(int dam);
+uchar operational(uchar i);
+uchar opCheck(uchar i);
+void repair(uchar r);
+uchar opCheckSR();

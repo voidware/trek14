@@ -31,6 +31,8 @@
 #include "srscan.h"
 #include "phasers.h"
 #include "enemy.h"
+#include "damage.h"
+#include "sound.h"
 
 uchar* findClosest(uchar* kp, uchar type)
 {
@@ -92,16 +94,12 @@ static void klingonFire(uchar* kp, uchar dist)
     if (ke >= ENT_ENERGYK_LIMIT/2)
     {
         uchar pow = 1;
-        while (dist > 0)
-        {
-            pow <<= 1;
-            dist >>= 1;
-        }
+        while (pow < dist) pow <<= 1; // 2^k >= dist
+        
         if (!(rand16() & (pow-1)))
         {
-            // keep 256
-            unsigned int e = ke - 256;
-            phasers(kp, e, ENT_TYPE_FEDERATION);
+            // fire all energy, but keep 256
+            phasers(kp, ke - 256, ENT_TYPE_FEDERATION);
         }
     }
 }
@@ -111,14 +109,19 @@ static int klingonRecharge(uchar* kp)
     uchar* star;
     int e = ENT_DAT(kp);
 
+    // small recharge each move
+    e += 100;
+
     star = findClosest(kp, ENT_TYPE_STAR);
     if (star)
     {
         // recharge from the star
         e += ENT_DAT(star);
-        if (e > ENT_ENERGYK_LIMIT) e = ENT_ENERGYK_LIMIT;
-        ENT_SET_DAT(kp, e);
     }
+    
+    e &= ENT_ENERGYK_LIMIT-1; // power of 2
+    ENT_SET_DAT(kp, e);
+
     return e;
 }
 
@@ -206,24 +209,56 @@ void removeEnt(uchar *ep)
     updateQuadrant();
 }
 
+uchar hitEnergy(uchar* ep, unsigned int d)
+{
+    // hit with `d' units of energy
+    // return 0 if `ep' expires.
+
+    uchar you = ep == galaxy;
+    uchar u = enoughEnergy(ep, d);
+
+    if (u > 0)
+    {
+        if (you)
+            takeDamage(d);
+    }
+    else
+    {
+        if (you)
+        {
+            // you've been killed
+            endgame(MSG_CODE_ENDGAME_KILLED);
+        }
+        else
+        {
+            // destroyed an enemy
+            messageCode(MSG_CODE_DESTROYED);
+            removeEnt(ep);
+            
+            explosionSound();
+        }
+    }
+    return u;
+}
 
 uchar takeEnergy(uchar* ep, unsigned int d)
 {
     // return 0 if `ep' expires.
 
-    if (!enoughEnergy(ep, d))
+    uchar u = enoughEnergy(ep, d);
+    if (!u)
     {
         // blow up!
         if (ep != galaxy) 
         {
-            messageCode(MSG_CODE_DESTROYED);
+            // enemy ran out of energy and disappears
             removeEnt(ep);
         }
         else
-            endgame(d < 2 ? MSG_CODE_ENDGAME_EXPIRE : MSG_CODE_ENDGAME_KILLED);
-
-        return 0;
+        {
+            endgame(MSG_CODE_ENDGAME_EXPIRE);
+        }
     }
-    return 1;
+    return u;
 }
 

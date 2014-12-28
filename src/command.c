@@ -31,6 +31,9 @@
 #include "phasers.h"
 #include "enemy.h"
 #include "command.h"
+#include "damage.h"
+
+uchar mline;
 
 void command()
 {
@@ -58,13 +61,25 @@ static const char* msgTable[] =
     "Ship and crew killed in battle",
     "You are relieved of command",
     "You are ordered to return to HQ, Quadrant 7,7,2",
+    "Shields Buckling",
+    "Shields Holding",
 };
+
+void msgLine()
+{
+    setcursor(0, mline);
+    clearline();
+}
+
+void message(const char* m)
+{
+    msgLine();
+    outs(m);
+}
 
 void messageCode(uchar mc)
 {
-
-    baseLine();
-    outs(msgTable[mc]);
+    message(msgTable[mc]);
     outs(", captain!");
 }
 
@@ -80,79 +95,90 @@ void endgame(uchar msg)
     while (1) ;
 }
 
+
 void baseLine()
 {
-    // prompt at the base of the screen, clearing anything already there
-    setcursor(63, 15);
+    // set cursor for command input. always the base of the screen
+    setcursor(0, 15);
     clearline();
+}
+
+void cMessage(const char* s)
+{
+    baseLine();
+    outs(s);
 }
 
 char warpCommand()
 {
     int x, y, z;
-    char v;
-    
-    baseLine();
-    printf("Location: "); flush();
-    scanf("%d,%d,%d", &x, &y, &z);
-    v = canwarp(x,y,z);
+    char v = opCheck(L_WARP);
+
     if (v)
     {
-        // our new position after warp
-        QX = x;
-        QY = y;
-        QZ = z;
+        cMessage("Location: ");
+        scanf("%d,%d,%d", &x, &y, &z);
+        v = canwarp(x,y,z);
+        if (v)
+        {
+            // our new position after warp
+            QX = x;
+            QY = y;
+            QZ = z;
+        }
     }
     return v;
 }
 
 void phaserCommand()
 {
-    int e;
-    
-    if (quadCounts[ENT_TYPE_KLINGON])
+    if (opCheck(L_PHASERS))
     {
-        baseLine();
-        printf("Energy: "); flush();
-        scanf("%d", &e);
-
-        if (e > 0)
+        if (quadCounts[ENT_TYPE_KLINGON])
         {
-            if (e <= ENT_ENERGY(galaxy))
+            int e;
+            cMessage("Energy: ");
+            scanf("%d", &e);
+
+            if (e > 0)
             {
-                phasers(galaxy, e, ENT_TYPE_KLINGON);
-                showState();
+                if (e <= ENT_ENERGY(galaxy))
+                {
+                    phasers(galaxy, e, ENT_TYPE_KLINGON);
+                    showState();
+                }
+                else
+                    messageCode(MSG_CODE_INSUFENERGY);
             }
-            else
-                messageCode(MSG_CODE_INSUFENERGY);
         }
+        else
+            messageCode(MSG_CODE_NO_TARGET);
     }
-    else
-        messageCode(MSG_CODE_NO_TARGET);
 }
 
 void torpCommand()
 {
     // fire torpedo
-    int dir;
 
-    int t = ENT_TORPS(galaxy);
-    if (t > 0)
+    if (opCheck(L_TORPS))
     {
-        baseLine();
-        printf("Direction: "); flush();
-        scanf("%d", &dir);
-
-        // if out of range, abort command
-        if (dir >= 0 && dir <= 360)
+        uchar t = ENT_TORPS(galaxy);
+        if (t > 0)
         {
-            ENT_SET_TORPS(galaxy, t-1);
-            torps(galaxy, dir);
+            int dir;
+            message("Direction: ");
+            scanf("%d", &dir);
+
+            // if out of range, abort command
+            if (dir >= 0 && dir <= 360)
+            {
+                ENT_SET_TORPS(galaxy, t-1);
+                torps(galaxy, dir);
+            }
         }
+        else
+            messageCode(MSG_CODE_NO_TORPS);
     }
-    else
-        messageCode(MSG_CODE_NO_TORPS);
-    
 }
 
 void docCommand()
@@ -161,6 +187,7 @@ void docCommand()
     {
         // full house
         ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
+        repairAll();
         messageCode(MSG_CODE_DOCKED);
 
         if (QX == 7 && QY == 7 && QZ == 2)
@@ -168,47 +195,77 @@ void docCommand()
     }
 }
 
+void tick()
+{
+    static int recalled;
+
+    // general ship repair
+    repair(10);
+    
+    // advance time
+    if (++stardate > STARDATE_END)
+    {
+        if (!recalled)
+        {
+            // overdue
+            messageCode(MSG_CODE_RETURN_HQ);
+            recalled = 1;
+        }
+
+        // get a grace period to return, otherwise score suffers
+        if (stardate > STARDATE_END + STARDATE_GRACE)
+        {
+            score -= 10;
+            if (score < 0)
+            {
+                score = 0;
+                endgame(MSG_CODE_ENDGAME_RELIEVED);
+            }
+        }
+    }
+}
+
+
 // mr spock, you have the conn :-)
 void conn()
 {
+    char c, k;
     char buf[4];
-    char c;
-
+    
+    k = 0;
+    
     do
     {
-        printfat(0, 15, "Command: ");
-        getline2(buf, sizeof(buf));
-    
-        c = buf[0];
-
-        // clear bottom line
-        baseLine();
-
-    again:
-
-        if (islower(c)) c = _toupper(c);
-
+        if (k) { c = k; k = 0; }
+        else
+        {
+            cMessage("Command: ");
+            getline2(buf, sizeof(buf));
+            c = buf[0];
+            if (islower(c)) c = _toupper(c);
+        }
+        
+        mline = 14;
+        
         switch (c)
         {
         case 'L':
             lrScan();
+            tick();
             break;
         case 'W':
             if (warpCommand())
             {
                 // complete warp command on SR view
-                c = srScan('W' | 0x80); 
-                if (c) goto again;            
+                k = srScan('W' | 0x80); 
             }
             break;
         case 'S':
-            c = srScan(0);
-            if (c) goto again;
+            k = srScan(0);
             break;
         case 'P':
         case 'T':
-            c = srScan(c);
-            if (c) goto again;
+            k = srScan(c);
             break;
         default:
             c = 0;
