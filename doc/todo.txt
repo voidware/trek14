@@ -1,4 +1,11 @@
-* explosion
+* explosion animation
+* consider one-on-one battle screens
+* red alert sound
+* klingons hide behind planets
+* torps drift with distance if less than 100% operational
+* chance of phaser miss more if less operational
+* cannot phaser through obstacles.
+* large planets and stars
 * romulans
 * class M planets.
 * collide damage

@@ -22,6 +22,8 @@
 
 // quadrant view
 
+extern uchar redrawsr;
+
 char srScan(char k);
 void drawEnt(uchar* ep);
 void undrawEnt(uchar* ep);

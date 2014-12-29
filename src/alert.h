@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Voidware Ltd.
+ * Copyright (c) 2015 Voidware Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -18,9 +18,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
+ * 
+ * contact@voidware.com
  */
 
-void enemyMove();
-uchar hitEnergy(uchar* ep, unsigned int d);
-uchar findAdjacent(uchar* ep, uchar type);
+void alert(const char* msg, uchar len);
+void alert2(const char* msg1, const char* msg2, uchar len);
 

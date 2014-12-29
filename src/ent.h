@@ -169,6 +169,7 @@ extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
 extern unsigned int stardate;
 extern int score;
+extern uchar alertLevel;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
 extern const uchar fedshipRLE[];
@@ -187,3 +188,6 @@ void updateQuadrant();
 uchar distance(uchar* ep1, uchar* ep2);
 uchar getWidth(uchar* ep);
 uchar enoughEnergy(uchar* ep, unsigned int d);
+uchar takeEnergy(uchar* ep, unsigned int d);
+void removeEnt(uchar *ep);
+

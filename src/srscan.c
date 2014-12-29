@@ -36,6 +36,8 @@
 #include "lrscan.h"
 #include "sound.h"
 
+uchar redrawsr;
+
 void fillbg(char x, char y)
 {
     outcharat(x, y, (x & 1) ? ' ' : '.');
@@ -80,7 +82,10 @@ char moveEnt(uchar* ep, char dx, char dy)
     char c;
 
     if (!takeEnergy(ep, ABS(dx) + ABS(dy)))
+    {
+        undrawEnt(ep); // disappear!
         return 1; // run out of energy, expired
+    }
 
     ENT_SXY(ep, sx, sy);
 
@@ -194,6 +199,9 @@ char srScan(char k)
     mline = 15;
 
  again:
+
+    // we are redrawing, so clear this
+    redrawsr = 0;
     
     printfat(0,0, "Short Range Scan, Quadrant %d %d %d", 
              (int)QX, (int)QY, (int)QZ);
@@ -277,7 +285,7 @@ char srScan(char k)
         }
 
         // redraw blank SR
-        if (!opCheckSR()) goto again;
+        if (!opCheckSR() || redrawsr) goto again;
 
         // update the state
         showState();

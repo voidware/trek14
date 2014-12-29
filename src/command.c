@@ -208,6 +208,12 @@ void tick()
 {
     static int recalled;
 
+    if (alertLevel)
+    {
+        // running cost 10 units per tick extra if in red alert
+        takeEnergy(galaxy, 10);
+    }
+
     // general ship repair
     opTick();
     

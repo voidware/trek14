@@ -21,9 +21,12 @@ _bit_sound::
           push hl
           push de
           push bc
+          xor  a                ; not wide
 
         ;; HL=freq, DE=duration
+        ;; preserve the wide-char bits in a (if any)
 __beeper::
+          push af
           ld   a,l
           srl  l
           srl  l
@@ -33,7 +36,9 @@ __beeper::
           ld   b,#0
           ld   iy,#.beixp3      
           add  iy,bc
-          ld   a,#1
+          pop  af
+          push af
+          or   a,#1
 .beixp3:
           nop
           nop
@@ -56,7 +61,7 @@ __beeper::
           jr   nz,.be_again
           ld   a,d
           or   e
-          jr   z,__bit_close
+          jr   z,.be_end
           ld   a,c
           ld   c,l
           dec  de
@@ -65,6 +70,11 @@ __beeper::
           ld   c,l
           inc  c
           jp   (iy)
+.be_end:
+          pop  af
+          and  #0x8c            ; clear mask bits
+          out  (sndbit_port),a
+          ret
 
         ; long explosion sound          
 _explosionSound::
@@ -154,15 +164,28 @@ _blastsound::
 
 
         ; alert sound
+        ;;  alertsound(wide)
 _alertsound::
 ;Strange squeak hl=300,de=2
 ;Game up hl=300,de=10 inc de
 ;-like a PACMAN sound
+          pop   bc
+          pop   hl
+          push  hl
+          push  bc
+          ld    a,l
+          and   a,#1
+          sla   a
+          sla   a
+          sla   a               ; wide to bit 3
           ld    b,#1  
-.fx6_1:   push  bc  
+.fx6_1:
+          push  bc  
+          push  af
           ld    hl,#300  
           ld    de,#10
-.fx6_2:   push  hl
+.fx6_2:
+          push  hl
           push  de
           call  __beeper  
           pop   de
@@ -172,6 +195,7 @@ _alertsound::
           and   a
           sbc   hl,bc
           jr    nc,.fx6_2
+          pop   af
           pop   bc
           djnz  .fx6_1
           ret 

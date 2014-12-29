@@ -27,6 +27,8 @@
 #include "command.h"
 #include "damage.h"
 #include "sound.h"
+#include "alert.h"
+#include "srscan.h"
 
 #define OP_MIN  0x80
 #define OPERATIONAL(_i)  (operations[_i] >= OP_MIN)
@@ -91,8 +93,10 @@ void subop(uchar op, int val)
     if (u >= OP_MIN && v < OP_MIN)
     {
         // emit message
-        opCheck(op);
-        alertsound();
+        alert2(opTable[op], " inoperative", 2);
+
+        // signal we should redraw SR view
+        redrawsr = 1;
     }
 }
 
@@ -153,7 +157,7 @@ void takeDamage(int dam)
         {
             SET_SHIELD_ENERGY(0);
             messageCode(MSG_CODE_SHIELDS_GONE);
-            alertsound();
+            alertsound(0);
         }
 
         dm = dam + 1;

@@ -26,6 +26,7 @@
 #include "utils.h"
 #include "warp.h"
 #include "damage.h"
+#include "command.h"
 
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
@@ -36,10 +37,12 @@ const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
 // current location
 uchar QX, QY, QZ;
 
+// current alert level (0 = normal, red alert)
+uchar alertLevel;
+
 // entities in current quadrant
 uchar quadCounts[ENT_TYPE_COUNT];
 uchar* quadrant[ENT_QUAD_MAX];
-
 
 // RLE sprites
 static const uchar base[] = { 0x33, 0x00, 0x01,
@@ -393,6 +396,45 @@ uchar enoughEnergy(uchar* ep, unsigned int d)
     return 0;
 }
 
+uchar takeEnergy(uchar* ep, unsigned int d)
+{
+    // return 0 if `ep' expires.
+
+    uchar u = enoughEnergy(ep, d);
+    if (!u)
+    {
+        // blow up!
+        if (ep != galaxy) 
+        {
+            // enemy ran out of energy and disappears
+            removeEnt(ep);
+        }
+        else
+        {
+            endgame(MSG_CODE_ENDGAME_EXPIRE);
+        }
+    }
+    return u;
+}
+
+void removeEnt(uchar *ep)
+{
+    // adjust score
+    score += objTable[ENT_TYPE(ep)]._score;
+    if (score < 0)
+    {
+        score = 0;
+        endgame(MSG_CODE_ENDGAME_RELIEVED);
+    }
+
+    galaxyEnd -= ENT_SIZE;
+    memmove(ep, ep + ENT_SIZE, galaxyEnd - ep);
+
+    // rebuild quadrant content
+    updateQuadrant();
+}
+
+
 void genGalaxy()
 {
     uchar i;
@@ -429,7 +471,7 @@ void genGalaxy()
     // generate starfleet HQ
     genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1, 1);
     
-    // change location to be our quadrant
+    // put HQ in our start quadrant
     setQuadrant(galaxyEnd, QX, QY, QZ);
     galaxyEnd += ENT_SIZE; 
 
@@ -477,6 +519,9 @@ void genGalaxy()
 
     // +1 for starfleet HQ, not to count
     score = -1;
+
+    // no red alert yet
+    alertLevel = 0;
 
     // warp to QX, QY, QZ
     warp(); 

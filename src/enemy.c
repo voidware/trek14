@@ -190,24 +190,6 @@ void enemyMove()
     }
 }
 
-void removeEnt(uchar *ep)
-{
-    undrawEnt(ep);
-
-    // adjust score
-    score += objTable[ENT_TYPE(ep)]._score;
-    if (score < 0)
-    {
-        score = 0;
-        endgame(MSG_CODE_ENDGAME_RELIEVED);
-    }
-
-    galaxyEnd -= ENT_SIZE;
-    memmove(ep, ep + ENT_SIZE, galaxyEnd - ep);
-
-    // rebuild quadrant content
-    updateQuadrant();
-}
 
 uchar hitEnergy(uchar* ep, unsigned int d)
 {
@@ -233,6 +215,9 @@ uchar hitEnergy(uchar* ep, unsigned int d)
         {
             // destroyed an enemy
             messageCode(MSG_CODE_DESTROYED);
+
+            // XX need explosion here.
+            undrawEnt(ep);
             removeEnt(ep);
             
             explosionSound();
@@ -241,24 +226,4 @@ uchar hitEnergy(uchar* ep, unsigned int d)
     return u;
 }
 
-uchar takeEnergy(uchar* ep, unsigned int d)
-{
-    // return 0 if `ep' expires.
-
-    uchar u = enoughEnergy(ep, d);
-    if (!u)
-    {
-        // blow up!
-        if (ep != galaxy) 
-        {
-            // enemy ran out of energy and disappears
-            removeEnt(ep);
-        }
-        else
-        {
-            endgame(MSG_CODE_ENDGAME_EXPIRE);
-        }
-    }
-    return u;
-}
 

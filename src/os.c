@@ -162,6 +162,13 @@ void cls()
     __endasm;
 }
 
+void random()
+{
+    __asm
+    call #0x1d3
+    __endasm;
+}
+
 void outcharat(uchar x, uchar y, uchar c)
 {
     *(VIDRAM + ((int)y<<6) + (int)x) = c;

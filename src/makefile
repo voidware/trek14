@@ -29,6 +29,7 @@ OBJS = \
 	trek14.rel \
 	ent.rel \
 	damage.rel \
+	alert.rel  \
 	os.rel \
 	utils.rel \
 	sound.rel \
