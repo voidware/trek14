@@ -153,6 +153,29 @@ _blastsound::
 
 
 
+        ; alert sound
+_alertsound::
+;Strange squeak hl=300,de=2
+;Game up hl=300,de=10 inc de
+;-like a PACMAN sound
+          ld    b,#1  
+.fx6_1:   push  bc  
+          ld    hl,#300  
+          ld    de,#10
+.fx6_2:   push  hl
+          push  de
+          call  __beeper  
+          pop   de
+          pop   hl
+          inc  de           ;if added in makes different sound..
+          ld    bc,#10
+          and   a
+          sbc   hl,bc
+          jr    nc,.fx6_2
+          pop   bc
+          djnz  .fx6_1
+          ret 
+
 .if 0
 
 
@@ -175,28 +198,6 @@ _fx5::
           djnz  .fx5_1  
           ret   
 
-; alert sound
-_fx6::
-;Strange squeak hl=300,de=2
-;Game up hl=300,de=10 inc de
-;-like a PACMAN sound
-          ld    b,#1  
-.fx6_1:   push  bc  
-          ld    hl,#300  
-          ld    de,#10
-.fx6_2:   push  hl
-          push  de
-          call  __beeper  
-          pop   de
-          pop   hl
-          inc  de           ;if added in makes different sound..
-          ld    bc,#10
-          and   a
-          sbc   hl,bc
-          jr    nc,.fx6_2
-          pop   bc
-          djnz  .fx6_1
-          ret 
 
 ; zap/alarm??
 _zap1::

@@ -200,7 +200,7 @@ void tick()
     static int recalled;
 
     // general ship repair
-    repair(10);
+    opTick();
     
     // advance time
     if (++stardate > STARDATE_END)

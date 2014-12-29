@@ -30,6 +30,11 @@
 #define L_SCANL         6
 #define L_COUNT         7
 
+extern uchar operations[];
+
+#define GET_SHIELD_ENERGY       (operations[L_SHIELDS]<<3)
+#define SET_SHIELD_ENERGY(_v)   operations[L_SHIELDS] = (_v)>>3
+
 void repairAll();
 void opTick();
 void takeDamage(int dam);

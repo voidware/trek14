@@ -1,4 +1,5 @@
-*** TREK14: Classic StarTrek 2014!
+TREK14: Classic StarTrek 2014!
+==============================
 
 Your mission is to explore the galaxy and destroy the 30 Klingons before
 star-date 2100.
@@ -9,10 +10,10 @@ The galaxy is a 8x8x3 grid of 192 quadrants, each of which is subdivided into
 Along with Klingons, there are also Federation bases where you can refuel, as
 well as planets and stars.
 
-* Long Range Scan
+## Long Range Scan
 
 Press "L" for long range scan, either from the command menu or short range
-scan.
+scan screen.
 
 The long range scan shows a 3x3x3 quadrant view of entities centred around your
 current location. So, for example, if you're at (1,1,1) you will see quadrants
@@ -23,21 +24,21 @@ The long range scan shows a summary of content in each quadrant, For example:
 
     F1S1P2
 
-Means, 1 `F'ederation vessel, 1 `S'tar and 2 `P'lanets. Other codes are K for
+Means, 1 *Federation* vessel, 1 *Star* and 2 *Planets*. Other codes are K for
 Klingons and B for bases.
 
-* Warp Drive
+## Warp Drive
 
 Press "W" from the command menu or short range scan.
 
 Warp drive can be used to move from one quadrant to another, it is quicker than
-impulse engines but uses more energy. it takes the same time to cross any distance with warp, but the energy varies with distance.
+impulse engines but uses more energy. it takes the same time to cross any distance with warp, but the energy varies with distance. You can cross quadrant boundaries on impulse engines, but it is slower.
 
 When prompted for the location enter the three coordinates X, Y and Z. For
 example, you start your mission in quadrant 7,7,2 - the bottom right corner of
 the galaxy.
 
-* Short Range Scan
+## Short Range Scan
 
 Press "S" from the command menu.
 
@@ -46,20 +47,20 @@ for tactical combat.
 
 Your ship can move on impulse engines left, right, up and down using the arrow
 keys. You can access most of the commands from this screen by just pressing
-their command letter.
+their command letter. Impulse movement takes one unit of energy and takes one unit of time.
 
-* Klingons
+## Klingons
 
 Klingons cluster in bunches of 1 to 3. Their ships are smaller and have less
 energy capacity than a starship. They have no photon torpedoes and rely wholly
-on phasers for weapons. Klingons can manoever slightly better on impulse
+on phasers for weapons. Klingons can manoeuvre slightly better on impulse
 engines and can move diagonally; they can close on a ship quite fast.
 
 Klingons do not retreat but they do step back somewhat to recharge. This is
 possible when a quadrant has a star. The Klingons can slowly recharge from the
 star's energy, then later come in for another attack.
 
-* Phasers
+## Phasers
 
 Press "P" from the command menu or from the short range scan.
 
@@ -75,10 +76,10 @@ The damage potential of phasers decreases with distance according to an
 exponential decay law, so that the power emitted may be as little as 10% across
 the width of a quadrant.
 
-Klingons will tend to close rapily for attack, fire at close range, then move
+Klingons will tend to close rapidly for attack, fire at close range, then move
 back somewhat, so as to inflict the most damage on their foe.
 
-* Photon Torpedoes
+## Photon Torpedoes
 
 Press "T" from the command menu or from the short range scan.
 
@@ -114,9 +115,9 @@ direction chart:
 
 
 Be careful when aiming photon torpedoes because, if you miss, you might destroy
-another object - which can result in court martial!
+a non-enemy object - which can result in court martial!
 
-* Bases
+## Bases
 
 Press "D" to dock with an adjacent base.
 
@@ -128,7 +129,27 @@ Note that the base in quadrant 7,7,2 should NOT be docked at, unless you wish
 to end your mission. This base is starfleet HQ, docking here voluntarily ends
 the mission giving your score.
 
-When stardate 2100 is reached, you will be recalled to HQ. you MUST return asap otherwise your score is affected. If you do not return, you will be relieved of command.
+When stardate 2100 is reached, you will be recalled to HQ. you _must_ return asap otherwise your score is affected. If you do not return soon enough, you will be relieved of command.
+
+## Damage
+
+The impact energy of an enemy blast must be absorbed. Ideally this energy is absorbed by your shields which take the impact energy cost from your ship's energy banks. If this energy is more than your reserves, you are destroyed.
+
+The capacity of your shields to absorb energy depends on their strength. Fully charged shields can absorb about half the total energy of a Klingon warship. However, depleted shields take time to recharge.
+
+The Shield strength is shown on the top of the short range scan as "S"
+
+Any excess impact energy than the strength of your shields results in damage to the ship. Any of the operations can be affected; scanners (both long and short range), movement including the warp drive and impulse engines as well as your ability to retaliate with photon torpedoes and phasers.
+
+For example, if the impulse engines are damaged, you cannot move around the quadrant until they are repaired - you are a sitting duck!
+
+Worse still is if the short range scanner are inoperative. In such a case you are totally blind. The scan shows an empty quadrant, with all positions unknown.
+
+Your engineering crew will work hard to restore damaged operations. They give priority to fixing your tactical display and impulse movement.
+
+Tactical combat is the crux of the game and the proving grounds of the competent captain.
+
+
 
 
 

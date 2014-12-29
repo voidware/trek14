@@ -132,8 +132,10 @@ void showState()
     tick();
 
     d = stardate/10;
-    printfat(34, 0, "E:%-4d T:%d D:%d.%d",
-             ENT_ENERGY(galaxy), ENT_TORPS(galaxy),
+    printfat(34, 0, "E:%-4d T:%d S:%d D:%d.%d",
+             ENT_ENERGY(galaxy),
+             ENT_TORPS(galaxy),
+             GET_SHIELD_ENERGY,
              d, (stardate - d*10));
 }
 

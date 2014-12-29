@@ -26,6 +26,7 @@
 #include "ent.h"
 #include "command.h"
 #include "damage.h"
+#include "sound.h"
 
 #define OP_MIN  0x80
 #define OPERATIONAL(_i)  (operations[_i] >= OP_MIN)
@@ -91,6 +92,7 @@ void subop(uchar op, int val)
     {
         // emit message
         opCheck(op);
+        alertsound();
     }
 }
 
@@ -129,15 +131,14 @@ void takeDamage(int dam)
 {
     // we've been hit with `dam' units of energy.
 
-    uchar s = operations[L_SHIELDS];
-
+    int s = GET_SHIELD_ENERGY;
+    
     // absorption of shields
-    dam -= ((int)s) << 3;
+    dam -= s;
     if (dam < 0)
     {
         // some left, give back to shields
-        operations[L_SHIELDS] = (-dam)>>3;
-
+        SET_SHIELD_ENERGY(-dam);
         messageCode(MSG_CODE_SHIELDS_OK);
     }
     else
@@ -149,7 +150,11 @@ void takeDamage(int dam)
         int dm;
 
         if (s > 0)
+        {
+            SET_SHIELD_ENERGY(0);
             messageCode(MSG_CODE_SHIELDS_GONE);
+            alertsound();
+        }
 
         dm = dam + 1;
 
@@ -183,8 +188,8 @@ void takeDamage(int dam)
 
 void opTick()
 {
-    repair(1);
-    addop(L_SHIELDS, 1);
+    repair(10);
+    addop(L_SHIELDS, 10);
 }
 
 

@@ -30,5 +30,6 @@ extern void warpsound(int length);
 extern void blastsound(int length);
 extern void zapsound();
 extern void explosionSound();
+extern void alertsound();
 
 #endif // __sound_h__
