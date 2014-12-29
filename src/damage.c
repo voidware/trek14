@@ -175,7 +175,7 @@ void takeDamage(int dam)
                 if (di[j] < di[m]) m = j;
             
             // take damage to operations i
-            dv = di[m] - dm;
+            dv = (di[m] - dm) >> 3; // amount of operational units
             dm = di[m];
             subop(i, dv);
             di[m] = 0x7fff;

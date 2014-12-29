@@ -28,11 +28,12 @@ void endgame(uchar msg);
 void tick();
 
 void docCommand();
-void torpCommand();
+uchar torpCommand();
 char warpCommand();
 
 void messageCode(uchar mc);
 void message(const char*);
+void msgLine();
 
 extern uchar mline;
 

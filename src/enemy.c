@@ -110,7 +110,7 @@ static int klingonRecharge(uchar* kp)
     int e = ENT_DAT(kp);
 
     // small recharge each move
-    e += 100;
+    e += 64;
 
     star = findClosest(kp, ENT_TYPE_STAR);
     if (star)
@@ -217,7 +217,7 @@ uchar hitEnergy(uchar* ep, unsigned int d)
     uchar you = ep == galaxy;
     uchar u = enoughEnergy(ep, d);
 
-    if (u > 0)
+    if (u)
     {
         if (you)
             takeDamage(d);

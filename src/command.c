@@ -156,14 +156,17 @@ void phaserCommand()
     }
 }
 
-void torpCommand()
+uchar torpCommand()
 {
     // fire torpedo
+    // return non-zero if successful and enemy move taken
 
-    if (opCheck(L_TORPS))
+    uchar u = opCheck(L_TORPS);
+    
+    if (u)
     {
-        uchar t = ENT_TORPS(galaxy);
-        if (t > 0)
+        u = ENT_TORPS(galaxy);
+        if (u > 0)
         {
             int dir;
             message("Direction: ");
@@ -172,13 +175,19 @@ void torpCommand()
             // if out of range, abort command
             if (dir >= 0 && dir <= 360)
             {
-                ENT_SET_TORPS(galaxy, t-1);
+                ENT_SET_TORPS(galaxy, u-1);
+
+                // allow the enemy a move *after* torpedo direction set
+                enemyMove();
+
                 torps(galaxy, dir);
             }
+            else u = 0;
         }
         else
             messageCode(MSG_CODE_NO_TORPS);
     }
+    return u;
 }
 
 void docCommand()

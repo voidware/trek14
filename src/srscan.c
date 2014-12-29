@@ -215,6 +215,7 @@ char srScan(char k)
     for (;;)
     {
         char dx, dy;
+        uchar moved = 0;
 
         // operate command passed in, if any
         if (k) { c = k; k = 0; }
@@ -245,7 +246,9 @@ char srScan(char k)
         }
         else if (c == 'T')
         {
-            torpCommand();
+            // NB: enemy move called here early to allow
+            // enemy to (maybe) dodge torpedo
+            moved = torpCommand();
         }
         else if ((c & 0x7f) == 'W')
         {
@@ -267,8 +270,11 @@ char srScan(char k)
             }
         }
 
-        // any enemies here get a turn
-        enemyMove();
+        if (!moved)
+        {
+            // any enemies here get a turn
+            enemyMove();
+        }
 
         // redraw blank SR
         if (!opCheckSR()) goto again;
