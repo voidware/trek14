@@ -170,6 +170,7 @@ extern uchar* galaxyEnd;
 extern unsigned int stardate;
 extern int score;
 extern uchar alertLevel;
+extern uchar redrawsr;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
 extern const uchar fedshipRLE[];

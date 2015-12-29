@@ -1,0 +1,3 @@
+* condition RED/GREEN displayed on status
+* revert to condition green when all enemies destoyed.
+

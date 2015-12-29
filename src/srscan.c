@@ -35,8 +35,7 @@
 #include "damage.h"
 #include "lrscan.h"
 #include "sound.h"
-
-uchar redrawsr;
+#include "alert.h"
 
 void fillbg(char x, char y)
 {
@@ -132,16 +131,30 @@ char moveEnt(uchar* ep, char dx, char dy)
 void showState()
 {
     unsigned int d;
-        
-    // advance time here, when we refresh the state
-    tick();
 
+    if (quadCounts[ENT_TYPE_KLINGON])
+    {
+        if (!alertLevel)
+        {
+            alertLevel = 1;
+            alert("Red Alert", 3);
+        }
+    }
+    else
+    {
+        if (alertLevel)
+            alert("Condition Green", 1);
+        
+        alertLevel = 0;
+    }
+        
     d = stardate/10;
-    printfat(34, 0, "E:%-4d T:%d S:%d D:%d.%d",
+    printfat(31, 0, "E:%-4d T:%d S:%d D:%d.%d %s",
              ENT_ENERGY(galaxy),
              ENT_TORPS(galaxy),
              GET_SHIELD_ENERGY,
-             d, (stardate - d*10));
+             d, (stardate - d*10),
+             (alertLevel ? "RED" : "Green"));
 }
 
 static void animateOut()
@@ -200,12 +213,14 @@ char srScan(char k)
 
  again:
 
+    tick();
+    showState();
+    
+    printfat(0,0, "Short Range Scan, Quadrant %d%d%d", 
+             (int)QX, (int)QY, (int)QZ);
+
     // we are redrawing, so clear this
     redrawsr = 0;
-    
-    printfat(0,0, "Short Range Scan, Quadrant %d %d %d", 
-             (int)QX, (int)QY, (int)QZ);
-    showState();
 
     setcursor(0,1);
     for (i = 64*7; i > 0; --i) { outchar('.'); outchar(' '); }
@@ -258,6 +273,11 @@ char srScan(char k)
             // enemy to (maybe) dodge torpedo
             moved = torpCommand();
         }
+        else if (c == 'V')
+        {
+            // XXX
+            subop(L_SCANS, 0xff);
+        }
         else if ((c & 0x7f) == 'W')
         {
             if (c != 'W' || warpCommand())
@@ -285,10 +305,14 @@ char srScan(char k)
         }
 
         // redraw blank SR
-        if (!opCheckSR() || redrawsr) goto again;
+        if (!opCheckSR()) goto again;
 
-        // update the state
         showState();
+
+        if (redrawsr) goto again;
+        
+        // update the state
+        tick();
     }
 
     return c;

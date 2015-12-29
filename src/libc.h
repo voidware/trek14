@@ -72,7 +72,7 @@ typedef StreamRec FILE;
 
 void *   memcpy(void *, const void *, size_t);
 smint    memcmp(const void *, const void *, size_t);
-void *   memset(void *, smint, size_t);
+void *   memset(void *, unsigned char, size_t);
 void*    memsetInt(void* ptr, int v, size_t n);
 char *   strcpy(char *, const char *);
 char *   strcat(char *, const char *);

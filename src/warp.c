@@ -27,7 +27,6 @@
 #include "ent.h"
 #include "command.h"
 #include "warp.h"
-#include "alert.h"
 
 char canwarp(uchar x, uchar y, uchar z)
 {
@@ -63,17 +62,4 @@ void warp()
     
     // set position in quadrant without collision
     genSector(galaxy);
-
-    if (quadCounts[ENT_TYPE_KLINGON])
-    {
-        if (!alertLevel)
-        {
-            alertLevel = 1;
-            alert("Red Alert", 3);
-        }
-    }
-    else
-    {
-        alertLevel = 0;
-    }
 }

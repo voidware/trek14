@@ -40,6 +40,9 @@ uchar QX, QY, QZ;
 // current alert level (0 = normal, red alert)
 uchar alertLevel;
 
+// need to redraw screen 
+uchar redrawsr;
+
 // entities in current quadrant
 uchar quadCounts[ENT_TYPE_COUNT];
 uchar* quadrant[ENT_QUAD_MAX];
@@ -522,7 +525,7 @@ void genGalaxy()
 
     // no red alert yet
     alertLevel = 0;
-
+    
     // warp to QX, QY, QZ
     warp(); 
 }

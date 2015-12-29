@@ -25,6 +25,7 @@
 #include "libc.h"
 #include "plot.h"
 #include "sound.h"
+#include "ent.h"
 
 
 void alert2(const char* msg1, const char* msg2, uchar len)
@@ -50,6 +51,9 @@ void alert2(const char* msg1, const char* msg2, uchar len)
     }
 
     cls();
+
+    // need to redraw
+    redrawsr = 1;
 }
 
 void alert(const char* msg, uchar len)

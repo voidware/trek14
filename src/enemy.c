@@ -38,15 +38,15 @@ uchar* findClosest(uchar* kp, uchar type)
 {
     // find the closest entity of `type' to `kp'
     uchar** epp;
-    uchar dist;
-    uchar* best = 0;
+    uchar dist = 0xff;
+    uchar* best;
 
     for (epp = quadrant; *epp; ++epp)
     {
         if (ENT_TYPE(*epp) == type)
         {
             uchar d = distance(kp, *epp);
-            if (!best || d < dist)
+            if (d <= dist)
             {
                 dist = d;
                 best = *epp;
@@ -93,6 +93,7 @@ static void klingonFire(uchar* kp, uchar dist)
     // fire if have at least half max energy
     if (ke >= ENT_ENERGYK_LIMIT/2)
     {
+        // more likely to fire the closer the distance.
         uchar pow = 1;
         while (pow < dist) pow <<= 1; // 2^k >= dist
         
@@ -125,6 +126,44 @@ static int klingonRecharge(uchar* kp)
     return e;
 }
 
+#if 0
+typedef uchar (*maxfn)(uchar*,uchar*);
+
+static uchar klingonTryMove(uchar* kp, uchar* target, maxfn fn)
+{
+    uchar sx, sy;
+    char i, j;
+    uchar best = 0;
+    char dx, dy;
+
+    ENT_SXY(kp, sx, sy);
+    for (i = -1; i <= 1; ++i)
+    {
+        for (j = -1; j <= 1; ++j)
+        {
+            if (!setSector(kp, sx + i, sy + j, 0))
+            {
+                uchar d = (*fn)(kp, target);
+                if (d >= best)
+                {
+                    dbest = d;
+                    dx = i;
+                    dy = j;
+                }
+            }
+        }
+    }
+
+    // put back in original place
+    setSector(kp, sx, sy, 0);
+
+    // then move delta (if non-zero)
+    // NB: can expire here and be deleted
+    if (moveEnt(kp, dx, dy)) return 0;
+    return 1;
+}
+#endif
+
 static uchar klingonMove(uchar* kp)
 {
     uchar* target = findClosest(kp, ENT_TYPE_FEDERATION);
@@ -133,7 +172,7 @@ static uchar klingonMove(uchar* kp)
         uchar sx, sy;
         char i, j;
         char dx, dy;
-        uchar dbest = -1;
+        uchar dbest = 0xff;
         uchar flee;
 
         // if weak, keep away and recharge
@@ -144,7 +183,10 @@ static uchar klingonMove(uchar* kp)
             // flee!
             dbest = 0;
         }
-        
+     
+        // consider adjacent sectors that we could move into.
+        // either we want to reduce the distance to the target 
+        // or increase it (fleeing).
         ENT_SXY(kp, sx, sy);
         for (i = -1; i <= 1; ++i)
         {

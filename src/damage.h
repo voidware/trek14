@@ -42,3 +42,5 @@ uchar operational(uchar i);
 uchar opCheck(uchar i);
 void repair(uchar r);
 uchar opCheckSR();
+void subop(uchar op, int val);
+

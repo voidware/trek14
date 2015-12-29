@@ -68,7 +68,7 @@ void* memmove(void* dst, const void* src, size_t n)
     return dst;
 }
 
-void* memset(void* ptr, smint v, size_t n)
+void* memset(void* ptr, unsigned char v, size_t n)
 {
     char* p = (char*)ptr;
     while (n) 

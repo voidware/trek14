@@ -82,6 +82,8 @@ uchar opCheck(uchar i)
 
 void subop(uchar op, int val)
 {
+    // subtract (16 bit) value from operation.
+    
     uchar u, v;
     if (val > 0xff) v = 0xff; // 0xff will reduce to zero anyway
     else v = val;
@@ -102,16 +104,12 @@ void subop(uchar op, int val)
 
 void repair(uchar r)
 {
-    // distribute `r' units of repair amongst defective operations.
+    // distribute `r' units of repair amongst defective operations
+    // in order of priority.
     uchar i;
-    uchar mino = 1;
     for (i = 1; i < L_COUNT; ++i)
     {
         uchar v = operations[i];
-
-        if (v < operations[mino])
-            mino = i;
-
         if (v < OP_MIN)
         {
             v = OP_MIN - v;
@@ -126,9 +124,6 @@ void repair(uchar r)
             r -= v;
         }
     }
-
-    // give any remaining repair units to the min operational
-    addop(mino, r);
 }
 
 void takeDamage(int dam)
@@ -139,9 +134,9 @@ void takeDamage(int dam)
     
     // absorption of shields
     dam -= s;
-    if (dam < 0)
+    if (dam <= 0)
     {
-        // some left, give back to shields
+        // if some left, give back to shields
         SET_SHIELD_ENERGY(-dam);
         messageCode(MSG_CODE_SHIELDS_OK);
     }
@@ -159,6 +154,13 @@ void takeDamage(int dam)
             messageCode(MSG_CODE_SHIELDS_GONE);
             alertsound(0);
         }
+
+        /* allocate the damage randomly to each operation (not shields).
+         * generate n-1 random numbers (mod dam+1).
+         * take the smallest and allocate this damage (will be <= dam)
+         * then take the next smallest and allocate this much minus previous
+         * give any remaining amount to the last
+         */
 
         dm = dam + 1;
 

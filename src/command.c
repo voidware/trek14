@@ -67,18 +67,21 @@ static const char* msgTable[] =
 
 void msgLine()
 {
+    // prepare the message line
     setcursor(0, mline);
     clearline();
 }
 
 void message(const char* m)
 {
+    // emit a given message on the message line
     msgLine();
     outs(m);
 }
 
 void messageCode(uchar mc)
 {
+    // emit a message with a code on the message line.
     message(msgTable[mc]);
     outs(", captain!");
 }
