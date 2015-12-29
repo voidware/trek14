@@ -1,3 +1,5 @@
 * condition RED/GREEN displayed on status
 * revert to condition green when all enemies destoyed.
-
+* draw explosion when enemy destroyed.
+* phasers do not lock on far away objects.
+* relieved of command for destroying planet or star.

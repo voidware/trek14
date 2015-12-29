@@ -273,11 +273,6 @@ char srScan(char k)
             // enemy to (maybe) dodge torpedo
             moved = torpCommand();
         }
-        else if (c == 'V')
-        {
-            // XXX
-            subop(L_SCANS, 0xff);
-        }
         else if ((c & 0x7f) == 'W')
         {
             if (c != 'W' || warpCommand())

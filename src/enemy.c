@@ -33,6 +33,7 @@
 #include "enemy.h"
 #include "damage.h"
 #include "sound.h"
+#include "plot.h"
 
 uchar* findClosest(uchar* kp, uchar type)
 {
@@ -126,44 +127,6 @@ static int klingonRecharge(uchar* kp)
     return e;
 }
 
-#if 0
-typedef uchar (*maxfn)(uchar*,uchar*);
-
-static uchar klingonTryMove(uchar* kp, uchar* target, maxfn fn)
-{
-    uchar sx, sy;
-    char i, j;
-    uchar best = 0;
-    char dx, dy;
-
-    ENT_SXY(kp, sx, sy);
-    for (i = -1; i <= 1; ++i)
-    {
-        for (j = -1; j <= 1; ++j)
-        {
-            if (!setSector(kp, sx + i, sy + j, 0))
-            {
-                uchar d = (*fn)(kp, target);
-                if (d >= best)
-                {
-                    dbest = d;
-                    dx = i;
-                    dy = j;
-                }
-            }
-        }
-    }
-
-    // put back in original place
-    setSector(kp, sx, sy, 0);
-
-    // then move delta (if non-zero)
-    // NB: can expire here and be deleted
-    if (moveEnt(kp, dx, dy)) return 0;
-    return 1;
-}
-#endif
-
 static uchar klingonMove(uchar* kp)
 {
     uchar* target = findClosest(kp, ENT_TYPE_FEDERATION);
@@ -232,6 +195,74 @@ void enemyMove()
     }
 }
 
+static char rand3(char* p)
+{
+    // random number -1,0,1,2
+    char c = rand16();
+    c = (c & 3) - 1;
+    if (*p < 0) c = -c;
+    return *p += c;
+}
+
+void explode(uchar* ep)
+{
+    uchar sx, sy;
+    uchar n;
+    uchar i;
+    char* p;
+    uchar h2, w2;
+    int sd;
+
+    const EntObj* eo = objTable + ENT_TYPE(ep);
+
+    // XX must be enough space to convert entity to array of pixel pairs
+    // eg enemy ship = 18 pairs.
+    char pix[24*2];
+
+    // get sector position
+    ENT_SXY(ep, sx, sy);
+
+    // half width and height in pixels
+    h2 = (eo->_h*3)>>1;
+    w2 = eo->_w;
+
+    // convert to centre pixels
+    sx = sx*2;
+    sy = sy*3 + h2;
+
+    // convert to array of pixels offset from (sx, sy)
+    n = pixelsRLE(eo->_data, pix);
+
+    // adjust for centre 
+    p = pix;
+    for (i = n; i > 0; --i)
+    {
+        *p++ -= w2;
+        *p++ -= h2;
+    }
+
+    sd = 0;
+    while (n && sd < 512)
+    {
+        char x, y;
+        p = pix;
+        for (i = 0; i < n; ++i)
+        {
+            x = sx + rand3(p++);
+            y = sy + rand3(p++);
+
+            if (x < 0 || y < 3 || y > 44)
+            {
+                // pixel died off screen
+                memmove(p - 2, p, (--n - i)<<1);
+            }
+            else
+                plot(x, y, 1);
+
+            explode_sound(++sd);
+        }
+    }
+}
 
 uchar hitEnergy(uchar* ep, unsigned int d)
 {
@@ -258,11 +289,19 @@ uchar hitEnergy(uchar* ep, unsigned int d)
             // destroyed an enemy
             messageCode(MSG_CODE_DESTROYED);
 
-            // XX need explosion here.
+            // remove from screen
             undrawEnt(ep);
-            removeEnt(ep);
+
+            // explosion with sound
+            explode(ep);
             
-            explosionSound();
+            // remove entity from table
+            removeEnt(ep);
+
+            playVictory();
+
+            // indicate screen redraw
+            redrawsr = 1;
         }
     }
     return u;

@@ -217,6 +217,42 @@ void plotLine(char x1, char y1, char x2, char y2, plotfn* fn)
 }
 #endif
 
+uchar pixelsRLE(const uchar* dp, char* pix)
+{
+    // convert a sprite into an array of pixel offsets
+    // write a number of (x,y) pairs to `pix' as offsets relative to the
+    // sprite root.
+    // return the number of pairs in the `pix' array
+    //
+    // XX ASSUME `pix' is big enough
+
+    uchar c = 0;
+    char x = 0;
+    char y = 0;
+
+    uchar pair;
+    for (;;)
+    {
+        while (pair = *dp++)
+        {
+            x += pair >> 4; // skip
+            pair &= 0xf;
+            while (pair--)
+            {
+                *pix++ = x++;
+                *pix++ = y;
+                ++c;
+            }
+        }
+        
+        // flyback
+        if (!*dp) break;
+        x -= *dp++;
+        ++y;
+    }
+    return c;
+}
+
 void drawRLE(char x, char y, const uchar* dp, uchar c)
 {
     // plot run-line encoded (RLE) sprite, colour c
@@ -228,12 +264,11 @@ void drawRLE(char x, char y, const uchar* dp, uchar c)
     // 0x00
 
     uchar pair;
-
     for (;;)
     {
         while (pair = *dp++)
         {
-            x += (pair >> 4); // skip
+            x += pair >> 4; // skip
             plotSpan(x, y, pair & 0xf, c); // plot
             x += pair & 0xf;
         }
@@ -257,7 +292,7 @@ void moveRLE(char x, char y, const uchar* dp, uchar left)
     {
         while (pair = *dp++)
         {
-            x += (pair >> 4); // skip
+            x += pair >> 4; // skip
             if (pair & 0xf)
             {
                 plot(x,y,left);

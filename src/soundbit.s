@@ -76,10 +76,14 @@ __beeper::
           out  (sndbit_port),a
           ret
 
-        ; long explosion sound          
-_explosionSound::
-          ld     a,#1
-          ld	hl,#1
+        ;;;  explode_sound(int d)
+_explode_sound::
+        pop bc
+        pop hl                  ; HL=d
+        push hl
+        push bc
+
+       ld     a,#1
 .expl:
           push    hl
           push    af
@@ -99,10 +103,6 @@ _explosionSound::
           or      c
           jr      nz,.dly
           pop     af
-          
-          inc     hl
-          bit     1,h
-          jr      z,.expl
           jp	__bit_close
 
         ; zap sound

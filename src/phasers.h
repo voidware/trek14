@@ -20,5 +20,5 @@
  * IN THE SOFTWARE.
  */
 
-void phasers(uchar* ep, unsigned int e, uchar type);
+uchar phasers(uchar* ep, unsigned int e, uchar type);
 void torps(uchar* ep, int dir);

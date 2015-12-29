@@ -25,11 +25,12 @@
 
 extern void bit_sound(int duration, int frequency);
 extern void playNotes(const char* m);
+extern void explode_sound(int d);
+extern void playVictory();
 
 extern void warpsound(int length);
 extern void blastsound(int length);
 extern void zapsound();
-extern void explosionSound();
 extern void alertsound(int wide);
 
 #endif // __sound_h__

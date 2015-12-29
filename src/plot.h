@@ -33,4 +33,5 @@ void plotVLine(uchar x, uchar y1, uchar y2, uchar c);
 
 typedef void plotfn(char x, char y);
 void plotLine(char x1, char y1, char x2, char y2, plotfn* fn);
+uchar pixelsRLE(const uchar* dp, char* pix);
 

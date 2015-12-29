@@ -84,12 +84,12 @@ static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
                               
 const EntObj objTable[] =
 {
-    { CW(12), 3, -1000, base },
-    { CW(16), 3, -1000, fedshipRLE }, 
-    { CW(6), 3, 0, star },
-    { CW(7), 3, 0, planet },
-    { CW(11), 3, SCORE_KLINGON, klingon },
-    { CW(0), 0, SCORE_KLINGON, romulan },
+    { CW(12), 1, -1000, base },
+    { CW(16), 1, -1000, fedshipRLE }, 
+    { CW(6), 1, -1000, star },
+    { CW(7), 1, -1000, planet },
+    { CW(11), 1, SCORE_KLINGON, klingon },
+    { CW(0), 1, SCORE_KLINGON, romulan },
     { 1, 1, 0, romulan }, // additional entry used for torpedo
 };
 

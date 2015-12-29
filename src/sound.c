@@ -82,6 +82,11 @@ static int divs(int a, uint b)
 }
 #endif
 
+void playVictory()
+{
+    playNotes("16tF6Eb+9D3C2Bb-AAb10");
+}
+
 void playNotes(const char* m)
 {
     // [A-G][#b]?[0-9]*

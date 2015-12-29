@@ -49,5 +49,6 @@ extern uchar mline;
 #define MSG_CODE_RETURN_HQ 9
 #define MSG_CODE_SHIELDS_GONE 10
 #define MSG_CODE_SHIELDS_OK 11
+#define MSG_CODE_PHASERS_NO_LOCK 12
 
 

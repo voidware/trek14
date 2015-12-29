@@ -63,6 +63,7 @@ static const char* msgTable[] =
     "You are ordered to return to HQ, Quadrant 7,7,2",
     "Shields Buckling",
     "Shields Holding",
+    "Phasers can't lock on",
 };
 
 void msgLine()
@@ -147,7 +148,9 @@ void phaserCommand()
             {
                 if (e <= ENT_ENERGY(galaxy))
                 {
-                    phasers(galaxy, e, ENT_TYPE_KLINGON);
+                    if (!phasers(galaxy, e, ENT_TYPE_KLINGON))
+                        messageCode(MSG_CODE_PHASERS_NO_LOCK);
+                    
                     showState();
                 }
                 else
@@ -236,6 +239,7 @@ void tick()
             score -= 10;
             if (score < 0)
             {
+                // did not return to starbase
                 score = 0;
                 endgame(MSG_CODE_ENDGAME_RELIEVED);
             }

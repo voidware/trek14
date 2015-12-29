@@ -157,11 +157,12 @@ static void corner(uchar* ep, int dir, uchar* x, uchar* y)
 }
 
 
-void phasers(uchar* ep, unsigned int e, uchar type)
+uchar phasers(uchar* ep, unsigned int e, uchar type)
 {
     // entity `ep' fire phasers at `type' energy `e'
     
     uchar** qp;
+    uchar c = 0;
 
     for (qp = quadrant; *qp; ++qp)
     {
@@ -184,34 +185,41 @@ void phasers(uchar* ep, unsigned int e, uchar type)
             if (hit == *qp)
             {
                 unsigned int dam;
-            
+
+                // calculate effective damage if we hit
+                // damage = E*exp(-dist/32)
+                
+                // dist*4 = dist*128/32 (work fixed point 128)
+                dam = ((unsigned int)distance(ep, hit))<<2;
+                
+                // need to shift exp(exp) down 7 (fixed 128)
+                // but since e is 14 bits, shift up 2 to get the most
+                // accuracy.
+                dam = (e*4)/(expfixed(dam)>>5);
+
+                // only fire if damage impact is at least half energy
+                // otherwise enemy too far.
+                
                 // do we have enough energy, if so subtract it.
-                if (enoughEnergy(ep, e))
+                if (dam >= (e>>1) && enoughEnergy(ep, e))
                 {
                     trackPoint(ep, x, y, (char)ey, (char)ex, setPixel, 0);
 
-                    if (ep == galaxy)
+                    if (ep == galaxy)  // enemy fire at you sound
                         blastsound(255);
                     else
-                        zapsound(); 
+                        zapsound();  // your phaser sound
 
                     trackPoint(ep, x, y, (char)ey, (char)ex, 0, fillBgPixel);
 
-                    // calculate effective damage
-                    // damage = E*exp(-dist/32)
-                
-                    // dist*4 = dist*128/32 (work fixed point 128)
-                    dam = ((unsigned int)distance(ep, hit))<<2;
-                
-                    // need to shift exp(exp) down 7 (fixed 128)
-                    // but since e is 14 bits, shift up 2 to get the most
-                    // accuracy.
-                    dam = (e*4)/(expfixed(dam)>>5);
-
+                    ++c;
+                    
                     // true if still there
                     if (hitEnergy(hit, dam))
+                    {
                         // re-draw enemy
                         drawEnt(hit);
+                    }
                     else 
                     {
                         // destroyed, so backup one slot
@@ -221,6 +229,9 @@ void phasers(uchar* ep, unsigned int e, uchar type)
             }
         }
     }
+
+    // return the number of phasers fired
+    return c;
 }
 
 

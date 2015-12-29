@@ -140,8 +140,12 @@
 
 typedef struct 
 {
+    // width in chars
     uchar               _w;
+
+    // height in chars
     uchar               _h;
+    
     int                 _score;
     const uchar*        _data;
 } EntObj;
