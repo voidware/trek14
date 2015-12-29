@@ -90,7 +90,7 @@ void playVictory()
 void playNotes(const char* m)
 {
     // [A-G][#b]?[0-9]*
-    // u = up octave, d = down octave
+    // + = up octave, - = down octave
     // t sets initial tempo divider
 
     const Note* n = 0;

@@ -254,6 +254,9 @@ void torps(uchar* ep, int dir)
     // adjust for pixel aspect ratio
     s /= 2;
 
+    // bogus sound
+    squoink();
+
     hit = trackPoint(ep, x, y, s, c, setPixel, fillBgPixel);
     if (hit)
     {

@@ -198,10 +198,47 @@ _alertsound::
           pop   af
           pop   bc
           djnz  .fx6_1
-          ret 
+          ret
+
+        ; like a sort of alarm power up or something??
+_squoink::
+          ld      a,#230
+          ld      (.qi_FR_1+1),a
+          xor     a
+          ld      (.qi_FR_2+1),a
+          ld      a,#1
+.qi_LENGHT:
+          ld      b,#200
+          ld      c,#sndbit_port
+.qi_loop:
+          dec     h
+          jr      nz,.qi_jump
+          push    af
+          ld      a,(.qi_FR_1+1)
+          dec     a
+          ld      (.qi_FR_1+1),a
+          pop     af
+          xor     #sndbit_mask
+          out  (c),a
+.qi_FR_1:
+          ld      h,#50
+.qi_jump:
+          inc     l
+          jr      nz,.qi_loop
+          push    af
+          ld      a,(.qi_FR_2+1)
+          inc     a
+          ld      (.qi_FR_2+1),a
+          pop     af
+          xor     #sndbit_mask
+          out  (c),a
+.qi_FR_2:
+          ld      l,#0
+          djnz    .qi_loop
+          jp	__bit_close
+
 
 .if 0
-
 
 ; wibble up sound
 _fx5::
@@ -322,42 +359,4 @@ _warpcall::
           add   hl,de  
           ld    (.warps+1),hl  
           ret   
-
-; like a sort of alarm power up or something??
-_squoink::
-          ld      a,#230
-          ld      (.qi_FR_1+1),a
-          xor     a
-          ld      (.qi_FR_2+1),a
-          ld      a,#1
-.qi_LENGHT:
-          ld      b,#200
-          ld      c,#sndbit_port
-.qi_loop:
-          dec     h
-          jr      nz,.qi_jump
-          push    af
-          ld      a,(.qi_FR_1+1)
-          dec     a
-          ld      (.qi_FR_1+1),a
-          pop     af
-          xor     #sndbit_mask
-          out  (c),a
-.qi_FR_1:
-          ld      h,#50
-.qi_jump:
-          inc     l
-          jr      nz,.qi_loop
-          push    af
-          ld      a,(.qi_FR_2+1)
-          inc     a
-          ld      (.qi_FR_2+1),a
-          pop     af
-          xor     #sndbit_mask
-          out  (c),a
-.qi_FR_2:
-          ld      l,#0
-          djnz    .qi_loop
-          jp	__bit_close
-
 .endif

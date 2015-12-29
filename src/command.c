@@ -32,6 +32,7 @@
 #include "enemy.h"
 #include "command.h"
 #include "damage.h"
+#include "sound.h"
 
 uchar mline;
 
@@ -39,6 +40,8 @@ void command()
 {
     for (;;)
     {
+        playNotes("+1G"); // nameE
+
         cls();
         printf("\n  (S)hort Range Scan\n"
                "  (L)ong Range Scan\n"
@@ -148,6 +151,9 @@ void phaserCommand()
             {
                 if (e <= ENT_ENERGY(galaxy))
                 {
+                    // doesnt work properly
+                    //playNotes("CE+F-B+D-F#B+"); // nameP, C, L, B, G, K,  D
+                    //playNotes("CE++F--B++D-F#-B+"); // nameP, C, L, B, G, K,  D
                     if (!phasers(galaxy, e, ENT_TYPE_KLINGON))
                         messageCode(MSG_CODE_PHASERS_NO_LOCK);
                     

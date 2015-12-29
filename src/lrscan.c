@@ -28,6 +28,7 @@
 #include "plot.h"
 #include "command.h"
 #include "damage.h"
+#include "sound.h"
 
 uchar lrScan()
 {
@@ -87,6 +88,8 @@ uchar lrScan()
                         if (*cp)
                         {
                             bp[1] = '0' + *cp;
+                            if (*bp == 'K')
+                                playNotes("18t+EC"); // nameF, nameH
                         }
                         else
                         {

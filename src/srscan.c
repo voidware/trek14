@@ -154,7 +154,7 @@ void showState()
              ENT_TORPS(galaxy),
              GET_SHIELD_ENERGY,
              d, (stardate - d*10),
-             (alertLevel ? "RED" : "Green"));
+             (alertLevel ? "RED " : "Green"));
 }
 
 static void animateOut()

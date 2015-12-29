@@ -3,3 +3,4 @@
 * draw explosion when enemy destroyed.
 * phasers do not lock on far away objects.
 * relieved of command for destroying planet or star.
+* extra sounds
