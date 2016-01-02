@@ -21,9 +21,9 @@ The program will begin. The galaxy is generated and then you enter the main game
 
 ## Using an Emulator
 
-If you don't have a real trs80 model 1 handy, you can run the game in an emulator. There are many excellent emulators around for the machine and even some web based ones.
+If you don't have a real trs80 handy, you can run the game in an emulator. There are many excellent emulators around for the machine and even some web based ones.
 
-I use the open source SDLTRS emulator, which is free and you can compile it yourself from scratch. There is a windows binary in the "emu" directory for convenience.
+I use the open source SDLTRS emulator, which is free and you can compile it yourself from scratch. There is a windows binary in the "emu" directory for convenience source code [here](https://github.com/voidware/sdltrswin).
 
 From the "src" directory, start the emulator like this:
 

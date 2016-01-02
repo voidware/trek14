@@ -58,6 +58,11 @@ trek14.ihx : $(OBJS)
 trek14.cmd: trek14.cas
 	../tools/trld/trld trek14.cas trek14.cmd
 
+trek14.dsk: trek14.cmd
+	rm -f trek14.dsk
+	cp ../emu/blank.dsk trek14.dsk
+	../tools/trswrite -o trek14.dsk trek14.cmd
+
 trek14.zip: 
 	(cd ..; zip -r trek14.zip readme.md emu doc src tools -x \*win32\* -x \*TAGS\*)
 

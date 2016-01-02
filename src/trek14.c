@@ -34,7 +34,7 @@ void main()
 
     cls();
     outs("Trek 2014!\n");
-    outs("generating galaxy...\n");
+    outs("Generating Galaxy...\n");
 
 #if 1
     playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"

@@ -242,7 +242,11 @@ char srScan(char k)
 
         // operate command passed in, if any
         if (k) { c = k; k = 0; }
-        else c = getkey();
+        else
+        {
+            c = getkey();
+            if (islower(c)) c = _toupper(c);
+        }
         
         dx = 0;
         dy = 0;

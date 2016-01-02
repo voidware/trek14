@@ -87,7 +87,7 @@ void messageCode(uchar mc)
 {
     // emit a message with a code on the message line.
     message(msgTable[mc]);
-    outs(", captain!");
+    outs(", Captain!");
 }
 
 void endgame(uchar msg)
