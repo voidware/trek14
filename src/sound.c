@@ -25,11 +25,12 @@
 #include "libc.h"
 #include "sound.h"
 
-#define BASE_TSTATES 221750L
+#define BASE_TSTATES_M1 221750L
+#define BASE_TSTATES_M3 257230L
 
 // frequencies for notes.
 // "A" above middle C is 440Hz.
-// f = 440 * (2^(k/12)) where k is then number of tones above or below
+// f = 440 * (2^(k/12)) where k is the number of tones above or below
 // so middle "C" is 9 tones down and therefore Fc = 440*2^(-9/12) = 261.63
 
 // standard octave
@@ -47,29 +48,31 @@
 #define NOTE_B  	493.883301378     
 
 #define RND(_x)     ((int)((_x) + 0.5))
-#define TSTATE(_n)  RND(BASE_TSTATES/_n)
+#define TSTATE1(_n)  RND(BASE_TSTATES_M1/_n)
+#define TSTATE3(_n)  RND(BASE_TSTATES_M3/_n)
 
 typedef struct
 {
     char                _note;
     unsigned int        _freq;
-    unsigned int        _tstates;
+    unsigned int        _tstatesM1;
+    unsigned int        _tstatesM3;
 } Note;
 
 static const Note notes[] =
 {
-    { 'C', RND(NOTE_C), TSTATE(NOTE_C) },
-    { 'C', RND(NOTE_CS), TSTATE(NOTE_CS) },
-    { 'D', RND(NOTE_D), TSTATE(NOTE_D) },
-    { 'D', RND(NOTE_DS), TSTATE(NOTE_DS) },
-    { 'E', RND(NOTE_E), TSTATE(NOTE_E) },
-    { 'F', RND(NOTE_F), TSTATE(NOTE_F) },
-    { 'F', RND(NOTE_FS), TSTATE(NOTE_FS) },
-    { 'G', RND(NOTE_G), TSTATE(NOTE_G) },
-    { 'G', RND(NOTE_GS), TSTATE(NOTE_GS) },
-    { 'A', RND(NOTE_A), TSTATE(NOTE_A) },
-    { 'A', RND(NOTE_AS), TSTATE(NOTE_AS) },
-    { 'B', RND(NOTE_B), TSTATE(NOTE_B) },
+    { 'C', RND(NOTE_C), TSTATE1(NOTE_C), TSTATE3(NOTE_C) },
+    { 'C', RND(NOTE_CS), TSTATE1(NOTE_CS), TSTATE3(NOTE_CS) },
+    { 'D', RND(NOTE_D), TSTATE1(NOTE_D), TSTATE3(NOTE_D) },
+    { 'D', RND(NOTE_DS), TSTATE1(NOTE_DS), TSTATE3(NOTE_DS) },
+    { 'E', RND(NOTE_E), TSTATE1(NOTE_E), TSTATE3(NOTE_E) },
+    { 'F', RND(NOTE_F), TSTATE1(NOTE_F), TSTATE3(NOTE_F) },
+    { 'F', RND(NOTE_FS), TSTATE1(NOTE_FS), TSTATE3(NOTE_FS) },
+    { 'G', RND(NOTE_G), TSTATE1(NOTE_G), TSTATE3(NOTE_G) },
+    { 'G', RND(NOTE_GS), TSTATE1(NOTE_GS), TSTATE3(NOTE_GS) },
+    { 'A', RND(NOTE_A), TSTATE1(NOTE_A), TSTATE3(NOTE_A) },
+    { 'A', RND(NOTE_AS), TSTATE1(NOTE_AS), TSTATE3(NOTE_AS) },
+    { 'B', RND(NOTE_B), TSTATE1(NOTE_B), TSTATE3(NOTE_B) },
 };
 
 // play melodies. eg:
@@ -98,6 +101,8 @@ void playNotes(const char* m)
     uchar dt2 = 0;
     uchar tempo = 12;
     char u = 0;
+
+    uchar m1 = getModel() == 1;
     
     for (;;)
     {
@@ -116,7 +121,7 @@ void playNotes(const char* m)
                 dt2 = 0;
 
                 a = dt*n->_freq;
-                b = n->_tstates;
+                b = m1 ? n->_tstatesM1 : n->_tstatesM3;
 
                 u2 = u;
                 while (u2 > 0)

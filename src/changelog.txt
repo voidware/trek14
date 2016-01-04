@@ -5,3 +5,4 @@
 * relieved of command for destroying planet or star.
 * extra sounds
 * fixed case problems.
+* working on sound for M3/M4

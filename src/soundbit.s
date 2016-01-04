@@ -2,22 +2,21 @@
 
         .area   _CODE
 
-snd_tick        .equ  0
 sndbit_mask     .equ  3
-sndbit_bit      .equ  1
 sndbit_port     .equ  255        
 
 
 __bit_close::
           xor  a
           out  (sndbit_port),a
+          ei
           ret
 
         ;;  bit_sound(duration, frequency)
 _bit_sound::
           pop bc
-          pop de
-          pop hl
+          pop de                ; duration
+          pop hl                ; freq
           push hl
           push de
           push bc
@@ -26,10 +25,13 @@ _bit_sound::
         ;; HL=freq, DE=duration
         ;; preserve the wide-char bits in a (if any)
 __beeper::
+          di
           push af
           ld   a,l
-          srl  l
-          srl  l
+          srl  h
+          rr   l
+          srl  h
+          rr   l
           cpl
           and  #3
           ld   c,a
@@ -57,7 +59,7 @@ __beeper::
 
           ld   b,h
           ld   c,a
-          bit  #sndbit_bit,a            ;if o/p go again!
+          bit  #1,a            ;if o/p go again!
           jr   nz,.be_again
           ld   a,d
           or   e
@@ -74,10 +76,12 @@ __beeper::
           pop  af
           and  #0x8c            ; clear mask bits
           out  (sndbit_port),a
+          ei
           ret
 
         ;;;  explode_sound(int d)
 _explode_sound::
+        di
         pop bc
         pop hl                  ; HL=d
         push hl
@@ -107,6 +111,7 @@ _explode_sound::
 
         ; zap sound
 _zapsound::
+          di
           ld    a,#1
           ld    e,#100
 .fx2_1:
@@ -122,6 +127,7 @@ _zapsound::
         ; sort of laser blast sound
 ; blastsound(length)
 _blastsound::
+          di
           pop     hl
           pop     bc
           push    bc
@@ -160,7 +166,6 @@ _blastsound::
           ld      l,#0
           djnz    .u2_loop
           jp	__bit_close
-
 
 
         ; alert sound
@@ -202,6 +207,7 @@ _alertsound::
 
         ; like a sort of alarm power up or something??
 _squoink::
+          di
           ld      a,#230
           ld      (.qi_FR_1+1),a
           xor     a
@@ -236,7 +242,6 @@ _squoink::
           ld      l,#0
           djnz    .qi_loop
           jp	__bit_close
-
 
 .if 0
 

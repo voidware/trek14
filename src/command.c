@@ -152,7 +152,6 @@ void phaserCommand()
                 if (e <= ENT_ENERGY(galaxy))
                 {
                     // doesnt work properly
-                    //playNotes("CE+F-B+D-F#B+"); // nameP, C, L, B, G, K,  D
                     //playNotes("CE++F--B++D-F#-B+"); // nameP, C, L, B, G, K,  D
                     if (!phasers(galaxy, e, ENT_TYPE_KLINGON))
                         messageCode(MSG_CODE_PHASERS_NO_LOCK);

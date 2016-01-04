@@ -217,6 +217,43 @@ void outPort(uchar port, uchar val)
 
 void setModel(uchar m)
 {
+ // from gp2000:
+ //
+ // Putting 0 out port 0x84 will put a Model 4 into Model III mode. You'll be
+ // changing the way memory is mapped so TRSDOS (or LSDOS) won't work once you
+ // start messing with port 0x84 so interrupts should be disabled.
+ // 
+ // The bottom 2 bits of port 0x84 select the memory map:
+ // 
+ // 00 - Model III memory map (ROM, keyboard, video in the expected locations).
+ // 01 - Model III without ROM (keyboard and video mapped in per Model III, but first 14 KB is RAM)
+ // 10 - Model 4 -- all memory is RAM except 0xf400 - 0xf7ff for keyboard, 0xf800 - 0xffff video RAM.
+ // 11 - All RAM
+ // 
+ // Bit 2 of 0x84 is set to turn on 80 column mode. Bit 3 for inverse video
+ // (characters 0x80 - 0xff display as inverted versions of characters 0x00 -
+ // 0x7f). Bit 7 of 0x84 selects the video page which gives you access to the
+ // other KB of video memory if you're in Model III mode or swaps the pages in
+ // Model 4 mode. I can never remember exactly how it works, but if you're in map
+ // 2 and 0xf800 - 0xffff isn't mapping nicely to the display then try setting
+ // that bit.
+ // 
+ // The remaining 3 bits of 0x84 are for accessing the other 64KB of RAM if you
+ // have 128KB.
+
+ // In terms of speed, the Model I's Z-80 runs at 1.77408 MHz and the Model III is
+ // only a bit faster at 2.02752 MHz.
+ // 
+ // The Model 4 can run at twice the speed of a Model III depending on the
+ // version. Sending 0x40 to port 0xec will double the clock rate, but on earlier
+ // models will impose 2 or 1 extra T-States per M1 cycle (which is kinda per
+ // instruction but not exactly). Since you run at slower speeds I assume you'd
+ // just as well run a Model 4 at Model III speeds by sending 0 to port 0xec.
+ // 
+ // In any case, your sound delay loops will have to use about 1.16 more clocks on
+ // the Model III to sound the same as the Model I.
+
+
     if (m == 3)
         outPort(0x84, 0);
 }
