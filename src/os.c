@@ -96,7 +96,7 @@ void outchar(char c)
     push hl
     ld a,c
     call #0x33
-    __endasm;
+   __endasm;
 }
 
 char inkey()
@@ -172,6 +172,53 @@ void random()
 void outcharat(uchar x, uchar y, uchar c)
 {
     *(VIDRAM + ((int)y<<6) + (int)x) = c;
+}
+
+uchar getModel()
+{
+    // code thanks to gp2000
+    // return 1, 3 or 4 for Model I, III or 4.
+
+    __asm
+	in	a,(0xff)	; read OUTMOD latches
+	ld	b,a		; save original settings
+	ld	c,#0x60
+	xor	c		; invert CPU Fast, DISWAIT
+	out	(0xec),a	; set latches
+	in	a,(0xff)	; read latches
+	xor	c		; flip to original value
+	xor	b		; compare against original
+	ld	c,#0xec
+	out	(c),b		; return original settings
+	rlca
+	rlca
+	jr	nc,m4		; CPU Fast unchanged, must be Model 4
+	rlca
+	ld	l,#3
+	ret	nc		; DISWAIT same, Model III
+	ld	l,#1		; otherwise, its a Model I
+	ret
+m4:	ld	l,#4
+	ret
+     __endasm;
+}
+
+void outPort(uchar port, uchar val)
+{
+    __asm
+        pop hl          ; ret
+        pop bc          ; port->c, val->b
+        push bc
+        push hl
+        out (c),b
+        ret
+    __endasm;
+}
+
+void setModel(uchar m)
+{
+    if (m == 3)
+        outPort(0x84, 0);
 }
 
 #endif

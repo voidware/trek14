@@ -29,12 +29,22 @@
 
 void main()
 {
+    uchar m;
+
+    m = getModel();
+    if (m == 4)
+    {
+        // put into model 3 mode
+        setModel(3);
+    }
+
     // initialise our own mini-clib
     libcInit();
 
     cls();
     outs("Trek 2014!\n");
     outs("Generating Galaxy...\n");
+
 
 #if 1
     playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"

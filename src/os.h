@@ -28,6 +28,9 @@ uchar getline(char* buf, uchar nmax);
 void setcursor(uchar x, uchar y);
 void getcursor(uchar* x, uchar* y);
 void cls();
+void outPort(uchar port, uchar val);
+uchar getModel();
+void setModel(uchar m);
 
 
 void outs(const char* s);
