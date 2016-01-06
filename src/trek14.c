@@ -37,6 +37,11 @@ void main()
         // put into model 3 mode
         setModel(3);
     }
+    else if (m == 1)
+    {
+        // HACK to prevent the sound routines from enabling interrupts
+        clobber_rti();
+    }
     
     // initialise our own mini-clib
     libcInit();

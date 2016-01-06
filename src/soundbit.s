@@ -3,12 +3,20 @@
         .area   _CODE
 
 sndbit_mask     .equ  3
-sndbit_port     .equ  255        
+sndbit_port     .equ  255
 
+
+;;;  XX HACK to clobber the EI instruction at the __rti function
+_clobber_rti::
+         ld iy,#__rti
+         ld (iy),#0             ; nop
+         ret
 
 __bit_close::
           xor  a
           out  (sndbit_port),a
+
+__rti::
           ei
           ret
 
@@ -74,8 +82,7 @@ __beeper::
           pop  af
           and  #0x8c            ; clear mask bits
           out  (sndbit_port),a
-          ei
-          ret
+          jp   __rti
 
         ;;;  explode_sound(int d)
 _explode_sound::
