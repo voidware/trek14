@@ -98,7 +98,7 @@ void subop(uchar op, int val)
         alert2(opTable[op], " inoperative", 2);
 
         // signal we should redraw SR view
-        redrawsr = 1;
+        redrawsr = true;
     }
 }
 

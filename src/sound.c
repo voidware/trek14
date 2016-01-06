@@ -99,7 +99,7 @@ void playNotes(const char* m)
     const Note* n = 0;
     uchar dt = 2;
     uchar dt2 = 0;
-    uchar tempo = 12;
+    uint tempo = 12;
     char u = 0;
 
     uchar m1 = getModel() == 1;
@@ -116,9 +116,10 @@ void playNotes(const char* m)
                 char u2;
                 
                 if (dt2)
+                {
                     dt = dt2;
-            
-                dt2 = 0;
+                    dt2 = 0;
+                }
 
                 a = dt*n->_freq;
                 b = m1 ? n->_tstatesM1 : n->_tstatesM3;

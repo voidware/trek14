@@ -71,19 +71,18 @@ typedef StreamRec FILE;
 #define EOF    (-1)
 
 void *   memcpy(void *, const void *, size_t);
-smint    memcmp(const void *, const void *, size_t);
-void *   memset(void *, unsigned char, size_t);
+//void *   memset(void *, unsigned char, size_t);
 void*    memsetInt(void* ptr, int v, size_t n);
 char *   strcpy(char *, const char *);
 char *   strcat(char *, const char *);
-smint    strcmp(const char *, const char *);
+//smint    strcmp(const char *, const char *);
 size_t   strlen(const char *);
-void *   memmove(void *, const void *, size_t);
+//void *   memmove(void *, const void *, size_t);
 
 char*    strchr(const char*, smint);
 smint    stricmp(const char*, const char*);
 char*    strncat(char*, const char*, size_t);
-smint    strncmp(const char*, const char*, size_t);
+//smint    strncmp(const char*, const char*, size_t);
 smint    strnicmp(const char* s1, const char* s2, size_t n);
 char*    strncpy(char*, const char*, size_t);
 char*    strrchr(const char*, smint);

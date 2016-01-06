@@ -36,7 +36,6 @@ void main()
     {
         // put into model 3 mode
         setModel(3);
-        
     }
     
     // initialise our own mini-clib

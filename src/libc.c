@@ -41,7 +41,6 @@ void* memcpy(void* dst, const void* src, size_t n)
     }
     return dst;
 }
-#endif
 
 void* memmove(void* dst, const void* src, size_t n)
 {
@@ -80,7 +79,7 @@ void* memset(void* ptr, unsigned char v, size_t n)
 }
 
 
-#if 0
+
 void* memsetInt(void* ptr, int v, size_t n)
 {
     // use `int' at a time rather than char. 
@@ -92,7 +91,6 @@ void* memsetInt(void* ptr, int v, size_t n)
     }
     return ptr;
 }
-#endif
 
 size_t strlen(const char* s)
 {
@@ -105,7 +103,6 @@ size_t strlen(const char* s)
     return l;
 }
 
-#if 0
 char* strcpy(char* dst, const char* src)
 {
     char* p = dst;

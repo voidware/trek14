@@ -28,10 +28,8 @@ __beeper::
           di
           push af
           ld   a,l
-          srl  h
-          rr   l
-          srl  h
-          rr   l
+          srl  l
+          srl  l
           cpl
           and  #3
           ld   c,a

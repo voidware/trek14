@@ -20,6 +20,9 @@
  * IN THE SOFTWARE.
  */
 
+#include <stdbool.h>
+#include <string.h> 
+
 typedef unsigned char uchar;
 typedef unsigned int uint;
 

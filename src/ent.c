@@ -41,7 +41,7 @@ uchar QX, QY, QZ;
 uchar alertLevel;
 
 // need to redraw screen 
-uchar redrawsr;
+bool redrawsr;
 
 // entities in current quadrant
 uchar quadCounts[ENT_TYPE_COUNT];
@@ -113,7 +113,7 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
     // eplist (optional) is a list of ent pointers, objects in this quadrant
     
     uchar* ep = galaxy;
-    memzero(quadCounts, ENT_TYPE_COUNT);
+    memset(quadCounts, 0, ENT_TYPE_COUNT);
     
     while (ep != galaxyEnd)
     {
@@ -443,7 +443,7 @@ void genGalaxy()
     uchar i;
         
     // XX should be zero anyway once we clear BSS
-    memzero(galaxy, sizeof(galaxy));
+    memset(galaxy, 0, sizeof(galaxy));
 
     // (adjust for bogus warp to start)
     stardate = STARDATE_START - STARDATE_WARP; 

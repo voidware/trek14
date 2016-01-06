@@ -301,7 +301,7 @@ uchar hitEnergy(uchar* ep, unsigned int d)
             playVictory();
 
             // indicate screen redraw
-            redrawsr = 1;
+            redrawsr = true;
         }
     }
     return u;

@@ -220,7 +220,7 @@ char srScan(char k)
              (int)QX, (int)QY, (int)QZ);
 
     // we are redrawing, so clear this
-    redrawsr = 0;
+    redrawsr = false;
 
     setcursor(0,1);
     for (i = 64*7; i > 0; --i) { outchar('.'); outchar(' '); }
