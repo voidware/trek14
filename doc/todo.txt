@@ -1,7 +1,5 @@
-* explosion animation
 * consider one-on-one battle screens
-* red alert sound
-* klingons hide behind planets
+* klingons hide behind planets (shadow tactics)
 * torps drift with distance if less than 100% operational
 * chance of phaser miss more if less operational
 * cannot phaser through obstacles.
