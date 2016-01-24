@@ -31,9 +31,14 @@ void main()
 {
     uchar m;
 
+    // initialise our own mini-clib
+    libcInit();
+
     m = getModel();
-    if (m == 4)
+    if (m >= 4)
     {
+        hookClockInts();
+    
         // put into model 3 mode
         setModel(3);
     }
@@ -42,14 +47,11 @@ void main()
         // HACK to prevent the sound routines from enabling interrupts
         clobber_rti();
     }
-    
-    // initialise our own mini-clib
-    libcInit();
 
     cls();
+    
     outs("Trek 2014!\n");
     outs("Generating Galaxy...\n");
-
 
 #if 1
     playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"

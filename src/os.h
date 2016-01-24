@@ -31,6 +31,7 @@ void cls();
 void outPort(uchar port, uchar val);
 uchar getModel();
 void setModel(uchar m);
+void hookClockInts();
 
 
 void outs(const char* s);

@@ -215,6 +215,31 @@ void outPort(uchar port, uchar val)
     __endasm;
 }
 
+void hookClockInts()
+{
+    __asm
+        di
+
+        ;; XXX hack disable clock ints for now...
+        xor  a
+        out  (0xe0),a
+        ei
+        ret
+
+      ld      hl,(0x4013)
+      ld      (.clockchain+1),hl
+      ld      hl,#.clockirq
+      ld      (0x4013),hl
+      ei
+      ret
+
+.clockirq:
+.clockchain:
+        jp      0
+    __endasm;
+
+}
+
 void setModel(uchar m)
 {
  // from gp2000:
@@ -255,7 +280,9 @@ void setModel(uchar m)
 
 
     if (m == 3)
-        outPort(0x84, 0);
+    {
+        outPort(0x84, 0); // 40 column
+    }
 }
 
 #endif
