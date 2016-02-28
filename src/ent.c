@@ -42,6 +42,7 @@ uchar alertLevel;
 
 // need to redraw screen 
 bool redrawsr;
+bool gameover;
 
 // entities in current quadrant
 uchar quadCounts[ENT_TYPE_COUNT];
@@ -426,17 +427,19 @@ void removeEnt(uchar *ep)
     score += objTable[ENT_TYPE(ep)]._score;
     if (score < 0)
     {
+        // attacked a planet etc.
         score = 0;
         endgame(MSG_CODE_ENDGAME_RELIEVED);
     }
+    else
+    {
+        galaxyEnd -= ENT_SIZE;
+        memmove(ep, ep + ENT_SIZE, galaxyEnd - ep);
 
-    galaxyEnd -= ENT_SIZE;
-    memmove(ep, ep + ENT_SIZE, galaxyEnd - ep);
-
-    // rebuild quadrant content
-    updateQuadrant();
+        // rebuild quadrant content
+        updateQuadrant();
+    }
 }
-
 
 void genGalaxy()
 {

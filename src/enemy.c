@@ -298,8 +298,8 @@ uchar hitEnergy(uchar* ep, unsigned int d)
             // remove entity from table
             removeEnt(ep);
 
-            playVictory();
-
+            if (!gameover) playVictory();
+                
             // indicate screen redraw
             redrawsr = true;
         }

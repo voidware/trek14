@@ -27,6 +27,31 @@
 #include "command.h"
 #include "sound.h"
 
+
+void startGame()
+{
+    cls();
+
+    //printf("\nTRS-80 Model %d\n\n\n", m);
+    
+    outs("Trek 2014!\n");
+    outs("Generating Galaxy...\n");
+
+#if 1
+    playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"
+              "F6F+9Eb3D2CB-b"
+              "A21Ab3G9A3"
+              "BC+D2EFG6G#18"
+              "Ab-9Bb3C+DEb2FGbAb6A18"
+              );
+#endif
+
+    genGalaxy();
+    outs("done\n");
+
+    command();
+}
+
 void main()
 {
     uchar m;
@@ -49,24 +74,16 @@ void main()
         clobber_rti();
     }
 
-    cls();
+    do
+    {
+        startGame();
 
-    //printf("\nTRS-80 Model %d\n\n\n", m);
-    
-    outs("Trek 2014!\n");
-    outs("Generating Galaxy...\n");
-
-#if 1
-    playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"
-              "F6F+9Eb3D2CB-b"
-              "A21Ab3G9A3"
-              "BC+D2EFG6G#18"
-              "Ab-9Bb3C+DEb2FGbAb6A18"
-              );
-#endif
-
-    genGalaxy();
-    outs("done\n");
-
-    command();
+        for (;;)
+        {
+            char c = getSingleCommand("Play Again (Y/N)? ");
+            if (c == 'N') break; // leave gameover true
+            gameover = 0;
+            if (c == 'Y') break; 
+        }
+    } while (!gameover);
 }

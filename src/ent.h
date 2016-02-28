@@ -175,6 +175,7 @@ extern unsigned int stardate;
 extern int score;
 extern uchar alertLevel;
 extern bool redrawsr;
+extern bool gameover;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
 extern const uchar fedshipRLE[];

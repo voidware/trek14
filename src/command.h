@@ -21,13 +21,13 @@
  */
 
 void command();
-void conn();
 void phaserCommand();
 void baseLine();
 void endgame(uchar msg);
 void tick();
+char getSingleCommand(const char*);
 
-void docCommand();
+void dockCommand();
 uchar torpCommand();
 char warpCommand();
 

@@ -35,10 +35,11 @@
 #include "sound.h"
 
 uchar mline;
+static uchar conn();
 
 void command()
 {
-    for (;;)
+    do 
     {
         playNotes("+1G"); // nameE
 
@@ -48,8 +49,7 @@ void command()
                "  (W)arp\n"
                "  (P)hasers\n"
                "  (T)orpedoes\n");
-        conn();
-    }
+    } while (!conn());
 }
 
 static const char* msgTable[] = 
@@ -90,19 +90,6 @@ void messageCode(uchar mc)
     outs(", Captain!");
 }
 
-void endgame(uchar msg)
-{
-    cls();
-    
-    setcursor(3,3);
-    outs(msgTable[msg]);
-    
-    printf("\n   Your score is %d\n", score);
-
-    while (1) ;
-}
-
-
 void baseLine()
 {
     // set cursor for command input. always the base of the screen
@@ -114,6 +101,28 @@ void cMessage(const char* s)
 {
     baseLine();
     outs(s);
+}
+
+char getSingleCommand(const char* msg)
+{
+    char buf[4];
+    char c;
+    cMessage(msg);
+    getline2(buf, sizeof(buf));
+    c = buf[0];
+    if (islower(c)) c = _toupper(c);
+    return c;
+}
+
+void endgame(uchar msg)
+{
+    cls();
+    
+    setcursor(3,3);
+    outs(msgTable[msg]);
+    
+    printf("\n   Your score is %d\n", score);
+    gameover = true;
 }
 
 char warpCommand()
@@ -201,7 +210,7 @@ uchar torpCommand()
     return u;
 }
 
-void docCommand()
+void dockCommand()
 {
     if (findAdjacent(galaxy, ENT_TYPE_BASE))
     {
@@ -222,6 +231,7 @@ void tick()
     if (alertLevel)
     {
         // running cost 10 units per tick extra if in red alert
+        // NB: game can end here.
         takeEnergy(galaxy, 10);
     }
 
@@ -254,10 +264,9 @@ void tick()
 
 
 // mr spock, you have the conn :-)
-void conn()
+static uchar conn()
 {
     char c, k;
-    char buf[4];
     
     k = 0;
     
@@ -265,12 +274,7 @@ void conn()
     {
         if (k) { c = k; k = 0; }
         else
-        {
-            cMessage("Command: ");
-            getline2(buf, sizeof(buf));
-            c = buf[0];
-            if (islower(c)) c = _toupper(c);
-        }
+            c = getSingleCommand("Command: ");
         
         mline = 14;
         
@@ -297,5 +301,7 @@ void conn()
         default:
             c = 0;
         }
+        if (gameover) return gameover;
     } while (c);
+    return c;
 }

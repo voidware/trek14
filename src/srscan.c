@@ -269,7 +269,7 @@ char srScan(char k)
         }
         else if (c == 'D')
         {
-            docCommand();
+            dockCommand();
         }
         else if (c == 'T')
         {
@@ -287,6 +287,8 @@ char srScan(char k)
             goto again; // new quadrant
         }
         else break;
+
+        if (gameover) return c;
 
         if ((dx || dy) && opCheck(L_IMPULSE))
         {
