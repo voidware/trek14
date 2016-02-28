@@ -35,6 +35,7 @@ void main()
     libcInit();
 
     m = getModel();
+
     if (m >= 4)
     {
         hookClockInts();
@@ -49,6 +50,8 @@ void main()
     }
 
     cls();
+
+    //printf("\nTRS-80 Model %d\n\n\n", m);
     
     outs("Trek 2014!\n");
     outs("Generating Galaxy...\n");

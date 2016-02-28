@@ -111,7 +111,7 @@ uchar lrScan()
         }
         --cx;
         printfat(cx, cy, "%2d", (int)(QZ-1));
-        printfat(cx, cy + 1, "%2d %d", (int)QZ, (int)y);
+        printfat(cx, cy + 1, "%2d %d", (int)QZ, (int)(char)y);
         printfat(cx, cy + 2, "%2d", (int)(QZ+1));
         cy += 4;
     }
