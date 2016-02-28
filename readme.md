@@ -1,8 +1,8 @@
-# Trek14: StarTrek for the TRS-80 model I
+# Trek14: StarTrek for the TRS-80
 
 ## Introduction
 
-TREK14 is a newly developed "classic startrek" game for the trs80 model I. Inspired by some of the originals, but with some new ideas.
+_TREK14_ is a newly developed "classic startrek" game for the [TRS-80](https://en.wikipedia.org/wiki/TRS-80), inspired by some of the originals, but with some new ideas.
 
 The graphics are retro and blocky, just like the orignals. 
 
@@ -10,30 +10,44 @@ The graphics are retro and blocky, just like the orignals.
 
 ## Installing/Running
 
-The binary TREK14.CAS is a trs80 model 1 SYSTEM CAS file, to be loaded through the cassette interface. Load using the following command:
+### Model I
+The binary `TREK14.CAS` is a trs-80 model I SYSTEM CAS file, to be loaded through the cassette interface. Load using the following commands:
 
-SYSTEM (enter)
-at the \*? prompt type T (enter)
-the program will load with flashing asterisks in the top right corner.
-at the next \*? prompt type / (enter)
+    SYSTEM (enter)
+    *? (press T enter)
+
+The program will load with flashing asterisks in the top right corner.
+at the next `*?` prompt type `/` (enter).
 
 The program will begin. The galaxy is generated and then you enter the main game command loop.
 
+### Model III
+
+The file `TREK14.CMD` is a binary to put put onto a floppy disk and run. Alternatively use the `TREK14.DSK` image of a floppy disk containing `TREK14/CMD`
+
+### Model IV/4P
+
+Boot into Model III mode and run as above. 
+
 ## Using an Emulator
 
-If you don't have a real trs80 handy, you can run the game in an emulator. There are many excellent emulators around for the machine and even some web based ones.
+If you don't have a real trs-80 handy, you can run the game in an emulator. There are many excellent emulators around for the machine and even some web based ones.
 
 I use the open source SDLTRS emulator, which is free and you can compile it yourself from scratch. There is a windows binary in the "emu" directory for convenience source code [here](https://github.com/voidware/sdltrswin).
 
-From the "src" directory, start the emulator like this:
+From the `src` directory, start the emulator like this (see `go.bat`)
 
      ..\emu\sdltrs -model 1 -romfile ..\emu\model1.rom -scale 2 -cassette trek14.cas
 
 SDLTRS may be configured using the menu on F7. F11 is the "turbo" button, which you may find useful for speeding up loading.
 
-For full details see:
+For full details see, http://sdltrs.sourceforge.net/
 
-    http://sdltrs.sourceforge.net/
+You can also run _trek14_ in the emulator under LDOS and LS-DOS. As a model III, run (see `go3.bat`):
+
+    ..\emu\sdltrs -model 3 -romfile3 ../emu/model3.rom -scale 2 -disk0 "../emu/ld3-531.dsk" -disk1 "trek14.dsk" -foreground 0x07e214 
+
+After this command, type `TREK14` (enter) to run.
 
 ## Compiling Trek14
 
@@ -44,9 +58,7 @@ Get your copy of the source repo with,
 
     git clone https://github.com/voidware/trek14.git
 
-The project compiles using the Small Device C Compiler (SDCC), which is free and open source,
-
-    http://sdcc.sourceforge.net/
+The project compiles using the Small Device C Compiler (SDCC), which is free and open source, http://sdcc.sourceforge.net
 
 Download and install the SDCC binaries and you're ready to go!
 
@@ -92,7 +104,8 @@ Federation ships have up to twice the energy capacity of enemies. Phases are the
 
 ### The Manual
 
-For more details, see doc/manual.txt
+For more details, see [doc/manual.txt](http://github.com/voidware/trek14/blob/master/doc/manual.txt).
+
 
 
 
