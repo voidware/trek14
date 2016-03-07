@@ -70,7 +70,7 @@ typedef StreamRec FILE;
 #define stdin  (&ioTable[0])
 #define EOF    (-1)
 
-void *   memcpy(void *, const void *, size_t);
+//void *   memcpy(void *, const void *, size_t);
 //void *   memset(void *, unsigned char, size_t);
 void*    memsetInt(void* ptr, int v, size_t n);
 char *   strcpy(char *, const char *);

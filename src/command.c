@@ -67,6 +67,7 @@ static const char* msgTable[] =
     "Shields Buckling",
     "Shields Holding",
     "Phasers can't lock on",
+    "No dock ship",
 };
 
 void msgLine()
@@ -212,7 +213,7 @@ uchar torpCommand()
 
 void dockCommand()
 {
-    if (findAdjacent(galaxy, ENT_TYPE_BASE))
+    if (adjacentTo(galaxy, ENT_TYPE_BASE))
     {
         // full house
         ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
@@ -221,6 +222,10 @@ void dockCommand()
 
         if (QX == 7 && QY == 7 && QZ == 2)
             endgame(MSG_CODE_ENDGAME_RESIGN);
+    }
+    else
+    {
+        messageCode(MSG_CODE_NO_DOCK);
     }
 }
 

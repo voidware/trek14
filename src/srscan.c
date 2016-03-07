@@ -55,27 +55,24 @@ void drawEnt(uchar* ep)
 void undrawEnt(uchar* ep)
 {
     uchar sx, sy;
-    const EntObj* eo = objTable + ENT_TYPE(ep);
-    uchar w2 = eo->_w;
-
+    uchar w = getWidth(ep);
+    
     ENT_SXY(ep, sx, sy);
 
     // adjust to left pos
-    sx -= w2>>1;
+    sx -= w>>1;
             
-    while (w2)
-    {
-        --w2;
+    while (w--)
         fillbg(sx++, sy);
-    }
 }
 
 char moveEnt(uchar* ep, char dx, char dy)
 {
     // move entity `ep' by `dx' `dy' & redraw
-    // return >0, expired
+    // return >0, collision
     // return <0 border crossed
     // return 0, ok
+    // return 127 => expired
 
     uchar sx, sy;
     char c;
@@ -83,7 +80,7 @@ char moveEnt(uchar* ep, char dx, char dy)
     if (!takeEnergy(ep, ABS(dx) + ABS(dy)))
     {
         undrawEnt(ep); // disappear!
-        return 1; // run out of energy, expired
+        return 127; // run out of energy, expired
     }
 
     ENT_SXY(ep, sx, sy);
@@ -103,11 +100,8 @@ char moveEnt(uchar* ep, char dx, char dy)
         if (dy)
         {
             drawEnt(ep);
-            while (w2)
-            {
-                --w2;
+            while (w2--)
                 fillbg(sx++, sy);
-            }
         }
         else if (dx)
         {
@@ -127,10 +121,10 @@ char moveEnt(uchar* ep, char dx, char dy)
     return c;
 }
 
-
 void showState()
 {
-    unsigned int d;
+    uint d;
+    uchar sx, sy;
 
     if (quadCounts[ENT_TYPE_KLINGON])
     {
@@ -149,7 +143,13 @@ void showState()
     }
         
     d = stardate/10;
-    printfat(31, 0, "E:%-4d T:%d S:%d D:%d.%d %s",
+
+    ENT_SXY(galaxy, sx, sy);
+
+    // text follows this:
+    // "Short Range Scan, Quad %d%d%d.",
+    printfat(27, 0, "%02d%02d E:%-4d T:%d S:%d D:%d.%d %s",
+             (int)sx, (int)sy,
              ENT_ENERGY(galaxy),
              ENT_TORPS(galaxy),
              GET_SHIELD_ENERGY,
@@ -215,8 +215,8 @@ char srScan(char k)
 
     tick();
     showState();
-    
-    printfat(0,0, "Short Range Scan, Quadrant %d%d%d", 
+
+    printfat(0,0, "Short Range Scan, Quad %d%d%d.",
              (int)QX, (int)QY, (int)QZ);
 
     // we are redrawing, so clear this

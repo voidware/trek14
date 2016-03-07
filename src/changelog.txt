@@ -1,3 +1,6 @@
+* bugfix in K slow recharge
+* K recharge from stars
+* enemy nagivation AI
 * condition RED/GREEN displayed on status
 * revert to condition green when all enemies destoyed.
 * draw explosion when enemy destroyed.

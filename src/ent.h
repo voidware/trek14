@@ -196,4 +196,4 @@ uchar getWidth(uchar* ep);
 uchar enoughEnergy(uchar* ep, unsigned int d);
 uchar takeEnergy(uchar* ep, unsigned int d);
 void removeEnt(uchar *ep);
-
+uchar adjacentTo(uchar* ep, uchar type);

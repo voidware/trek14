@@ -46,6 +46,8 @@ OBJS = \
 %.rel: %.s
 	$(AS) $(ASFLAGS) -o $@ $< 
 
+all: trek14.dsk
+
 trek14.cas: trek14.ihx
 	../tools/mksys/mksys trek14.ihx trek14.cas
 
@@ -64,6 +66,8 @@ trek14.dsk: trek14.cmd
 trek14.zip: 
 	(cd ..; zip -r trek14.zip readme.md emu doc src tools -x \*win32\* -x \*TAGS\*)
 
+.PHONY:	 clean cleanall tags
+
 clean:
 	rm -f *.rel
 	rm -f *.lk
@@ -80,7 +84,8 @@ cleanall: clean
 	rm -f *.cas
 
 
-
+tags:
+	ctags -e *.h *.c
 
 
 

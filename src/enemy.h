@@ -22,5 +22,4 @@
 
 void enemyMove();
 uchar hitEnergy(uchar* ep, unsigned int d);
-uchar findAdjacent(uchar* ep, uchar type);
 

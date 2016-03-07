@@ -40,6 +40,7 @@ char canwarp(uchar x, uchar y, uchar z)
         // warp costs the "manhattan distance"
         uchar d = ABSC(QX - x) + ABSC(QY - y) + ABSC(QZ - z);
         
+        // we are the first entry in the galaxy
         if (!enoughEnergy(galaxy, ((int)d)*100))
         {
             messageCode(MSG_CODE_INSUFENERGY);

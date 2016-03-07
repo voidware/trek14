@@ -35,58 +35,212 @@
 #include "sound.h"
 #include "plot.h"
 
-uchar* findClosest(uchar* kp, uchar type)
-{
-    // find the closest entity of `type' to `kp'
-    uchar** epp;
-    uchar dist = 0xff;
-    uchar* best;
+// working buffer for ai 
+static uchar abuf[1024];
 
+static uchar setMap(uchar* map, uchar x, uchar y)
+{
+    // `map' is 128 bytes of memory representing one bit for every
+    // sector location x in [0,63] y in [0,15]
+
+    // set location but return original value.
+    
+    uchar q = (y<<3) + (x>>3);
+    uchar m = 1<<(x & 7);
+    uchar r = map[q] & m;
+    map[q] |= m;
+    return r;
+}
+
+static uchar getMap(uchar* map, uchar x, uchar y)
+{
+    return map[(y<<3) + (x>>3)] & (1<<(x & 7));
+}
+
+typedef struct
+{
+    uchar*      map;
+    uchar       sp;
+    uchar       xt;
+    uchar       yt;
+    char        dx;
+    char        dy;
+    uchar       x1;
+    uchar       y1;
+    uchar*      visit;
+    uchar*      target;
+    
+} routing;
+
+static void prepSectorBuf(routing* rt, uchar* src, uchar type)
+{
+    // prepare a bit buffer with the sector barrier map
+    // also identify the target
+    
+    uchar** epp;
+    uchar sw = getWidth(src);
+
+    memset(rt->map, 0, 128);
     for (epp = quadrant; *epp; ++epp)
     {
+        uchar x, y;
+        
+        // we are not a barrier!
+        if (*epp == src) continue;
+        
+        ENT_SXY(*epp, x, y);
+        
         if (ENT_TYPE(*epp) == type)
         {
-            uchar d = distance(kp, *epp);
-            if (d <= dist)
-            {
-                dist = d;
-                best = *epp;
-            }
-        }        
-    }  
-    return best;
-}
-
-uchar findAdjacent(uchar* ep, uchar type)
-{
-    // is entity `ep' adjacent to one of `type'
-    uchar sx, sy;
-    char i, j;
-    
-    ENT_SXY(ep, sx, sy);
-    for (i = -1; i <= 1; ++i)
-    {
-        for (j = -1; j <= 1; ++j)
+            // set target, also not a barrier
+            rt->xt = x;
+            rt->yt = y;
+            rt->target = *epp;
+        }
+        else
         {
-            char c = setSector(ep, sx + i, sy + j, 0);
-            if (c > 0) 
-            {
-                // hit something not boundary
-                if (c-1 == type)
-                {
-                    // that will do
-                    return 1;
-                }
-            }
+            uchar w = getWidth(*epp);
 
-            // restore
-            setSector(ep, sx, sy, 0);
+            // barrier left = left dest + right source
+            x -= (w>>1) + (sw - (sw>>1) - 1);
+            
+            // void region size = source right + barrier w + source left
+            w += sw-1;
+            
+            // otherwise set as barrier width w
+            // ASSUME barriers are only 1 high.
+            while (w--)
+                setMap(rt->map, x++, y);
         }
     }
-    return 0;
 }
 
-static void klingonFire(uchar* kp, uchar dist)
+static uchar distm(char x1, char y1, char x2, char y2)
+{
+    char dx = x1 - x2;
+    char dy = y1 - y2;
+    if (dx < 0) dx = -dx;
+    if (dy < 0) dy = -dy;
+    return dx + dy;
+}
+
+static uchar push(routing* rt, uchar x, uchar y, uchar d, uchar src)
+{
+    uchar* a = abuf + (((int)rt->sp)<<2);
+    if (a > abuf + sizeof(abuf) - 4) return 0;
+
+    *a++ = x;
+    *a++ = y;
+    *a++ = d;
+    *a = src;
+    ++rt->sp;
+    return 1;
+}
+
+static const char xytable[] =
+{
+    -1, -1, 0, -1, 1, -1,
+    -1, 0, 1, 0,
+    -1, 1, 0, 1, 1, 1,
+};
+
+static void router(routing* rt)
+{
+    uchar d = 0;
+    uchar d2 = 0;
+    
+    for (;;)
+    {
+        uchar k;
+        uchar ks;
+        uchar ke;
+        uint j;
+
+        if (d == d2)
+        {
+            ks = 0;
+            ke = rt->sp;
+            d = 127; // max
+            j = 0;
+
+            // find overall min
+            for (k = 0; k < ke; ++k, j+=4)
+            {
+                // min node not yet expanded
+                if (abuf[j+2] < d && !getMap(rt->map, abuf[j], abuf[j+1]))
+                    d = abuf[j+2];
+                
+            }
+            d2 = d;
+            if (d == 127)
+                return; // did not find any new routes
+        }
+        else
+        {
+            // min is in new range
+            ks = ke;
+            ke = rt->sp;
+            d = d2;
+        }
+        
+        j = ((int)ks)<<2;        
+        for (k = ks; k < ke; ++k, j += 4)
+        {
+            if (abuf[j+2] == d)
+            {
+                char xb = abuf[j];
+                char yb = abuf[j+1];
+                uchar i;
+
+                // mark expanded
+                if (setMap(rt->map, xb, yb)) continue;
+                
+                for (i = 0; i < sizeof(xytable); i += 2)
+                {
+                    char x = xb + xytable[i];
+                    char y = yb + xytable[i+1];
+                    
+                    if (x >= 0 && x < 64 && y >= 0 && y < 16)
+                    {
+                        uchar di = distm(x, y, rt->xt, rt->yt);
+                        if (!di)
+                        {
+                            // unwind 
+                            for (;;)
+                            {
+                                x = abuf[j];
+                                y = abuf[j+1];
+                                //printfat(x, y, "x");
+                                j = ((int)abuf[j+3])<<2;
+                                if (!j)
+                                {
+                                    rt->dx = x - rt->x1;
+                                    rt->dy = y - rt->y1;    
+                                    break;
+                                }
+                            }
+
+                            return;
+                        }
+
+                        // if not already visited, expand 
+                        if (!setMap(rt->visit, x, y))
+                        {
+                            if (di < d2) d2 = di; // find next min
+                            if (!push(rt, x, y, di, k))
+                            {
+                                //printfat(0, 0, "FAILED!\n");
+                                return; // failed
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+static void klingonFire(uchar* kp)
 {
     // consider firing
     unsigned int ke = ENT_DAT(kp);
@@ -94,6 +248,8 @@ static void klingonFire(uchar* kp, uchar dist)
     // fire if have at least half max energy
     if (ke >= ENT_ENERGYK_LIMIT/2)
     {
+        uchar dist = distance(kp, galaxy);
+
         // more likely to fire the closer the distance.
         uchar pow = 1;
         while (pow < dist) pow <<= 1; // 2^k >= dist
@@ -106,22 +262,16 @@ static void klingonFire(uchar* kp, uchar dist)
     }
 }
 
-static int klingonRecharge(uchar* kp)
+static int klingonRecharge(uchar* kp, uint de)
 {
-    uchar* star;
-    int e = ENT_DAT(kp);
-
-    // small recharge each move
-    e += 64;
-
-    star = findClosest(kp, ENT_TYPE_STAR);
-    if (star)
-    {
-        // recharge from the star
-        e += ENT_DAT(star);
-    }
+    // add energy to klingon
     
-    e &= ENT_ENERGYK_LIMIT-1; // power of 2
+    uint e = ENT_DAT(kp) + de;
+
+    // up to the limit
+    if (e >= ENT_ENERGYK_LIMIT)
+        e = ENT_ENERGYK_LIMIT-1;
+    
     ENT_SET_DAT(kp, e);
 
     return e;
@@ -129,59 +279,112 @@ static int klingonRecharge(uchar* kp)
 
 static uchar klingonMove(uchar* kp)
 {
-    uchar* target = findClosest(kp, ENT_TYPE_FEDERATION);
-    if (target)
-    {
-        uchar sx, sy;
-        char i, j;
-        char dx, dy;
-        uchar dbest = 0xff;
-        uchar flee;
+    char ttype = ENT_TYPE_FEDERATION;
+    routing rt;
 
-        // if weak, keep away and recharge
-        flee = klingonRecharge(kp) < ENT_ENERGYK_LIMIT/2;
+    rt.dx = 0;
+    rt.dy = 0;
+    
+    // if weak, keep away and recharge
+    if (klingonRecharge(kp, 32) < ENT_ENERGYK_LIMIT/2)
+    {
+        ttype = -1; // no target
         
-        if (flee)
-        {
-            // flee!
-            dbest = 0;
-        }
+        // if we have a star, head for that
+        // klingons recharge from stars
+        if (quadCounts[ENT_TYPE_STAR]) ttype = ENT_TYPE_STAR;
+    }
+
+    ENT_SXY(kp, rt.x1, rt.y1);
+    
+    if (ttype >= 0)
+    {
+        // barrier and expanded node map
+        uchar map[128];
+        uchar visit[128];
+        
+        rt.map = map;
+        rt.sp = 0;
+        rt.visit = visit;
+
+        // head for target
+        prepSectorBuf(&rt, kp, ttype);
+
+        // visit map starts same as barrier
+        memcpy(visit, map, 128);
+
+        // push initial position and mark visited
+        push(&rt, rt.x1, rt.y1, 100, 0);
+        setMap(visit, rt.x1, rt.y1);
+
+        // route to target
+        router(&rt);
+    }
+    else
+    {
+        // flee!
+        char i, j;
+        uchar dbest = 0;
      
         // consider adjacent sectors that we could move into.
-        // either we want to reduce the distance to the target 
-        // or increase it (fleeing).
-        ENT_SXY(kp, sx, sy);
+        // we want increase the distance from the target 
         for (i = -1; i <= 1; ++i)
         {
             for (j = -1; j <= 1; ++j)
             {
-                if (!setSector(kp, sx + i, sy + j, 0))
+                if (!setSector(kp, rt.x1 + i, rt.y1 + j, 0))
                 {
-                    uchar d = distance(kp, target);
-                    if (flee && d > dbest || !flee && d < dbest)
+                    uchar d = distance(kp, galaxy);
+                    if (d > dbest)
                     {
                         dbest = d;
-                        dx = i;
-                        dy = j;
+                        rt.dx = i;
+                        rt.dy = j;
                     }
                 }
             }
         }
 
         // put back in original place
-        setSector(kp, sx, sy, 0);
-
-        // then move delta (if non-zero)
-        // NB: can expire here and be deleted
-        if (moveEnt(kp, dx, dy)) return 0;
-        
-        // fire?
-        klingonFire(kp, dbest);
-
+        setSector(kp, rt.x1, rt.y1, 0);
     }
+
+    if (rt.dx || rt.dy)
+    {
+        
+        // NB: can expire here and be deleted
+        char c = moveEnt(kp, rt.dx, rt.dy);
+        
+        if (c == 127) return 0;  // expired
+
+        // bip sound as K moves
+        bit_sound(10, 1000);
+
+        if (ttype == ENT_TYPE_STAR)
+        {
+            // near enough to recharge?
+            if (collision(kp, rt.target) != 0)
+            {
+                int f = 500;
+
+                // klingons recharge from stars, collect energy
+                klingonRecharge(kp, ENT_DAT(rt.target));
+                
+                do 
+                {
+                    bit_sound(4, f);
+                    f -= 10;
+                } while (f > 100);
+            }
+        }
+    }
+ 
+    // consider firing
+    klingonFire(kp);
+    
     return 1;
 }
-
+    
 void enemyMove()
 {
     uchar** epp;

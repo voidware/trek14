@@ -140,7 +140,7 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
 
 uchar distance(uchar* ep1, uchar* ep2)
 {
-    // distance between two entities
+    // distance between two entities in the same sector
     uchar x1, y1;
     uchar x2, y2;
     ENT_SXY(ep1, x1, y1);
@@ -154,6 +154,7 @@ uchar distance(uchar* ep1, uchar* ep2)
 
 uchar getWidth(uchar* ep)
 {
+    // get width in characters
     return objTable[ENT_TYPE(ep)]._w;
 }
 
@@ -178,32 +179,61 @@ char collisionBorder(uchar* ep)
     return 0;
 }
 
+uchar adjacentTo(uchar* ep, uchar type)
+{
+    uchar** epp;
+    for (epp = quadrant; *epp; ++epp)
+    {
+        if (ENT_TYPE(*epp) == type)
+        {
+            // hit or adjacent
+            if (collision(ep, *epp))
+                return 1;
+        }
+    }
+    return 0;
+}
+
 char collision(uchar* ep1, uchar* ep2)
 {
-    // if object `ep1' overlaps `ep2'
+    // if object `ep1' overlaps or touches `ep2'
+    // 
+    // return >0 if overlaps
+    // return <0 if touches
+    // return otherwise
 
-    uchar w1, x1, y1;
-    uchar w2, x2, y2;
+    char w1, x1, y1;
+    char w2, x2, y2;
+    char d1, d2;
 
-    w1 = getWidth(ep1);
     ENT_SXY(ep1, x1, y1);
-
-    // logical draw pos
-    x1 -= (w1>>1); 
+    w1 = getWidth(ep1);
+    x1 -= w1>>1; 
 
     ENT_SXY(ep2, x2, y2);
+    w2 = getWidth(ep2);
+    x2 -= w2>>1;
 
+    d1 = x2 + w2 - x1;
+    d2 = x1 + w1 - x2;
+
+    y1 -= y2;
+    if (y1 < 0) y1 = -y1;
+    
     // for now assume everyone is the same height, so to collide they
     // must be on the same line
-    if (y1 == y2)
+    if (!y1)
     {
-        w2 = getWidth(ep2);
-        x2 -= w2>>1;
-
-        // collision!
-        if (x2 + w2 > x1 && x2 < x1 + w1) 
-            return ENT_TYPE(ep2) + 1;
+        if (d1 > 0 && d2 > 0) return 1; // overlap => collision
+        if (!d1 || !d2) return -1; // touching
+        //if (x2 + w2 > x1 && x2 < x1 + w1) return ENT_TYPE(ep2) + 1;
     }
+    else if (y1 == 1)
+    {
+        // overlap on X one line out is touching
+        if (d1 > 0 && d2 > 0) return -1; 
+    }
+
     return 0;
 }
 
@@ -310,8 +340,11 @@ uchar setSector(uchar* ep, uchar x, uchar y, uchar cancross)
         // check for collision with other entities
         for (qp = quadrant; *qp; ++qp)
         {
-            if (ep != *qp && (c = collision(ep, *qp)))
+            if (ep != *qp && collision(ep, *qp) > 0)
+            {
+                c = 1;
                 break;
+            }
         }
     }
 
@@ -331,6 +364,7 @@ void genSector(uchar* ep)
     do
     {
         // put at a random location within the quadrant avoiding collisions
+        // and boundary overlap.
         x = rand16() & 63;
         y = rand16() & 15;
     } while (setSector(ep, x, y, 0));
@@ -360,10 +394,8 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax, uchar tmin)
         
     } while ((uchar)(quadCounts[type] + tmin) > tmax);
 
-    while (tmin)
+    while (tmin--)
     {
-        --tmin;
-        
         ENT_SET_TYPE(ep, type);
         ENT_SET_QX(ep, x);
         ENT_SET_QZ(ep, z);
@@ -372,7 +404,6 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax, uchar tmin)
         ep += ENT_SIZE;
     } 
 }
-
 
 void clearMarks()
 {
@@ -414,9 +445,7 @@ uchar takeEnergy(uchar* ep, unsigned int d)
             removeEnt(ep);
         }
         else
-        {
             endgame(MSG_CODE_ENDGAME_EXPIRE);
-        }
     }
     return u;
 }
@@ -477,7 +506,7 @@ void genGalaxy()
     // generate starfleet HQ
     genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1, 1);
     
-    // put HQ in our start quadrant
+    // put HQ in our start quadrant (ok to move since nothing else there)
     setQuadrant(galaxyEnd, QX, QY, QZ);
     galaxyEnd += ENT_SIZE; 
 
@@ -487,8 +516,8 @@ void genGalaxy()
     {
         // between 1 & 3 klingons
         uchar n = rand16() & 3;
-
         if (!n) continue;
+        
         if (n > i) n = i;
         
         genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 3, n);

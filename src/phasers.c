@@ -58,7 +58,7 @@ static uchar* torpCollide(uchar* ep, uchar x, uchar y)
     // search current quadrant table for collision with this fake entity
     for (qp = quadrant; *qp; ++qp)
     {
-        if (ep != *qp && collision(torp, *qp))
+        if (ep != *qp && collision(torp, *qp) > 0)
             return *qp;
     }  
     return 0;
