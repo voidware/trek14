@@ -22,4 +22,4 @@
 
 void enemyMove();
 uchar hitEnergy(uchar* ep, unsigned int d);
-
+void moveAway(uchar* kp, char x, char y, char* dx, char* dy);

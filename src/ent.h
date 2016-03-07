@@ -197,3 +197,4 @@ uchar enoughEnergy(uchar* ep, unsigned int d);
 uchar takeEnergy(uchar* ep, unsigned int d);
 void removeEnt(uchar *ep);
 uchar adjacentTo(uchar* ep, uchar type);
+char distm(char x1, char y1, char x2, char y2);

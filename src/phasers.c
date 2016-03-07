@@ -254,14 +254,33 @@ void torps(uchar* ep, int dir)
     // adjust for pixel aspect ratio
     s /= 2;
 
+    // figure out what we hit without drawing anything
+    hit = trackPoint(ep, x, y, s, c, 0, 0);
+
+    if (hit)
+    {
+        if (ENT_TYPE(hit) == ENT_TYPE_KLINGON)
+        {
+            uchar sx, sy;
+            char dx, dy;
+            
+            ENT_SXY(ep, sx, sy);
+            
+            // dodge?
+            moveAway(hit, sx, sy, &dx, &dy);
+            
+            // can expire here
+            moveEnt(hit, dx, dy);
+        }
+    }
+
     // bogus sound
     squoink();
 
     hit = trackPoint(ep, x, y, s, c, setPixel, fillBgPixel);
     if (hit)
     {
-        if (hitEnergy(hit, 4000))
-            drawEnt(hit);        
+        if (hitEnergy(hit, 4000)) drawEnt(hit);        
     }
 }
 

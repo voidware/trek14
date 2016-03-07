@@ -28,7 +28,7 @@ void tick();
 char getSingleCommand(const char*);
 
 void dockCommand();
-uchar torpCommand();
+void torpCommand();
 char warpCommand();
 
 void messageCode(uchar mc);

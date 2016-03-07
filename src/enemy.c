@@ -115,15 +115,6 @@ static void prepSectorBuf(routing* rt, uchar* src, uchar type)
     }
 }
 
-static uchar distm(char x1, char y1, char x2, char y2)
-{
-    char dx = x1 - x2;
-    char dy = y1 - y2;
-    if (dx < 0) dx = -dx;
-    if (dy < 0) dy = -dy;
-    return dx + dy;
-}
-
 static uchar push(routing* rt, uchar x, uchar y, uchar d, uchar src)
 {
     uchar* a = abuf + (((int)rt->sp)<<2);
@@ -137,6 +128,7 @@ static uchar push(routing* rt, uchar x, uchar y, uchar d, uchar src)
     return 1;
 }
 
+//  XY displacements for the 8 surrounding locations
 static const char xytable[] =
 {
     -1, -1, 0, -1, 1, -1,
@@ -277,8 +269,41 @@ static int klingonRecharge(uchar* kp, uint de)
     return e;
 }
 
+void moveAway(uchar* kp, char x, char y, char* dx, char* dy)
+{
+    // best direction to move kp away from (x,y)
+    char sx, sy;
+    uchar i;
+    uchar dbest = 0;
+    
+    ENT_SXY(kp, sx, sy);
+    *dx = 0;
+    *dy = 0;
+
+    for (i = 0; i < sizeof(xytable); i += 2)
+    {
+        char x1 = sx + xytable[i];
+        char y1 = sy + xytable[i+1];
+        if (!setSector(kp, x1, y1, 0))
+        {
+            uchar d = distm(x1, y1, x, y);
+            if (d > dbest)
+            {
+                dbest = d;
+                *dx = xytable[i];
+                *dy = xytable[i+1];
+            }
+        }
+    }
+    
+    // put back in original place
+    setSector(kp, sx, sy, 0);
+}
+
 static uchar klingonMove(uchar* kp)
 {
+    // AI for Klingon movement
+    
     char ttype = ENT_TYPE_FEDERATION;
     routing rt;
 
@@ -299,7 +324,9 @@ static uchar klingonMove(uchar* kp)
     
     if (ttype >= 0)
     {
-        // barrier and expanded node map
+        // barrier and expanded node map.
+        // This two maps are bitmaps of the sector locations
+        // XX dangerously using too much stack here.
         uchar map[128];
         uchar visit[128];
         
@@ -322,36 +349,12 @@ static uchar klingonMove(uchar* kp)
     }
     else
     {
-        // flee!
-        char i, j;
-        uchar dbest = 0;
-     
-        // consider adjacent sectors that we could move into.
-        // we want increase the distance from the target 
-        for (i = -1; i <= 1; ++i)
-        {
-            for (j = -1; j <= 1; ++j)
-            {
-                if (!setSector(kp, rt.x1 + i, rt.y1 + j, 0))
-                {
-                    uchar d = distance(kp, galaxy);
-                    if (d > dbest)
-                    {
-                        dbest = d;
-                        rt.dx = i;
-                        rt.dy = j;
-                    }
-                }
-            }
-        }
-
-        // put back in original place
-        setSector(kp, rt.x1, rt.y1, 0);
+        // run away!
+        moveAway(kp, rt.x1, rt.y1, &rt.dx, &rt.dy);
     }
 
     if (rt.dx || rt.dy)
     {
-        
         // NB: can expire here and be deleted
         char c = moveEnt(kp, rt.dx, rt.dy);
         

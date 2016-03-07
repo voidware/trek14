@@ -140,7 +140,7 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
 
 uchar distance(uchar* ep1, uchar* ep2)
 {
-    // distance between two entities in the same sector
+    // approx Euclidean distance between two entities in the same sector
     uchar x1, y1;
     uchar x2, y2;
     ENT_SXY(ep1, x1, y1);
@@ -150,6 +150,16 @@ uchar distance(uchar* ep1, uchar* ep2)
     if ((char)(x2 -= x1) < 0) x2 = -x2;
     if ((char)(y2 -= y1) < 0) y2 = -y2;
     return x2 + y2 - (((x2>y2) ? y2 : x2) >> 1);
+}
+
+char distm(char x1, char y1, char x2, char y2)
+{
+    // Manhattan distance
+    char dx = x1 - x2;
+    char dy = y1 - y2;
+    if (dx < 0) dx = -dx;
+    if (dy < 0) dy = -dy;
+    return dx + dy;
 }
 
 uchar getWidth(uchar* ep)
@@ -474,9 +484,6 @@ void genGalaxy()
 {
     uchar i;
         
-    // XX should be zero anyway once we clear BSS
-    memset(galaxy, 0, sizeof(galaxy));
-
     // (adjust for bogus warp to start)
     stardate = STARDATE_START - STARDATE_WARP; 
 
@@ -497,7 +504,7 @@ void genGalaxy()
     QZ = 2;
 
     // populate bases
-    for (i = 0; i < 5; ++i)
+    for (i = 0; i < 9; ++i)
     {
         genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1, 1);
         galaxyEnd += ENT_SIZE; 
@@ -511,16 +518,14 @@ void genGalaxy()
     galaxyEnd += ENT_SIZE; 
 
     // populate klingons
-    i = 30;
+    i = 50;
     while (i > 0)
     {
-        // between 1 & 3 klingons
-        uchar n = rand16() & 3;
-        if (!n) continue;
-        
+        // between 1 & 4 klingons
+        uchar n = (rand16() & 3) + 1;
         if (n > i) n = i;
         
-        genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 3, n);
+        genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 4, n);
         
         while (n)
         {
@@ -536,7 +541,7 @@ void genGalaxy()
     // populate planets & stars
     for (i = 0; i < 100; ++i)
     {
-        genEntLocation(galaxyEnd, ENT_TYPE_STAR, 1, 1);
+        genEntLocation(galaxyEnd, ENT_TYPE_STAR, 2, 1);
 
         // give stars a random energy between 128 and 256
         // this energy can be drawn by enemies to recharge
@@ -546,6 +551,14 @@ void genGalaxy()
         genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 3, 1);
         galaxyEnd += ENT_SIZE;
     }
+
+    while (galaxyEnd < galaxy + sizeof(galaxy))
+    {
+        // fill up with planets
+        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 5, 1);        
+        galaxyEnd += ENT_SIZE;
+    }
+
 
     clearMarks();
     

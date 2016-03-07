@@ -9,7 +9,8 @@
 * collide damage
 * klingons cross quadrant boundaries
 * torpedoes to damage entities in adjacent quadrants.
-* cannot blow up anything in a quadrant with a M planet.
 * black hole
 * quasars
 * ships computer
+* K attack bases
+
