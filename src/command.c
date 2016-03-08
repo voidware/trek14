@@ -68,10 +68,10 @@ static const char* crewTable[] =
 
 static const char* msgTable[] = 
 {
-    "^6: Not Enough Energy, ^2",
+    "^6: [Insufficient|Not Enough] Energy, ^2",
     "^5: No enemies here, ^1!",
     "Destroyed!",
-    "^5: No torpedoes, ^1",
+    "^5: [No torpedoes[ left|]|Out of torpedoes], ^1",
     "^6: Docked, ^2",
     "Returned to Starfleet HQ",
     "Out of Energy. You die drifting through space",
@@ -81,9 +81,9 @@ static const char* msgTable[] =
     "^4: Shields Buckling, ^0!",
     "^4: Shields Holding, ^0",
     "^5: Phasers can't lock on, ^1!",
-    "[^4: [No dock ship|You canny dock], ^0!|^8: Are you feeling ok, ^2?]",
+    "^4: [No dock ship|You canny dock], ^0!",
     "^6: ^2, you are relieved of command pending court martial.",
-    "^6: You blew it up. your command is suspended."
+    "^6: You [violated the prime directive.|blew it up!] Your command is suspended."
 };
 
 static void emitStory(const char* m, Story* st)
@@ -205,7 +205,8 @@ void phaserCommand()
 
             if (e > 0)
             {
-                if (e <= ENT_ENERGY(galaxy))
+                // ensure keep some back.
+                if (e <= (int)(ENT_ENERGY(galaxy) - 200))
                 {
                     // doesnt work properly
                     //playNotes("CE++F--B++D-F#-B+"); // nameP, C, L, B, G, K,  D
