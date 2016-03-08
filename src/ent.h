@@ -138,6 +138,12 @@
 #define ENT_TYPE_TORPEDO 6
 #define ENT_TYPE_COUNT 6
 
+// total of entities should not exceed ENT_COUNT_MAX
+#define TOTAL_BASES     10
+#define TOTAL_KLINGONS  50
+#define TOTAL_PLANETS   100
+#define TOTAL_STARS     100
+
 typedef struct 
 {
     // width in chars
@@ -150,8 +156,11 @@ typedef struct
     const uchar*        _data;
 } EntObj;
 
-// score for exploring galaxy is sum of entities = 235
+
 #define SCORE_KLINGON  50
+
+// every entity when seen gives a small score
+#define SCORE_EXPLORE   1
 
 #define MASK_RIGHT  1
 #define MASK_LEFT   2

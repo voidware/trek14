@@ -22,7 +22,6 @@
 
 void command();
 void phaserCommand();
-void baseLine();
 void endgame(uchar msg);
 void tick();
 char getSingleCommand(const char*);
@@ -33,9 +32,6 @@ char warpCommand();
 
 void messageCode(uchar mc);
 void message(const char*);
-void msgLine();
-
-extern uchar mline;
 
 #define MSG_CODE_INSUFENERGY  0
 #define MSG_CODE_NO_TARGET 1
@@ -51,5 +47,7 @@ extern uchar mline;
 #define MSG_CODE_SHIELDS_OK 11
 #define MSG_CODE_PHASERS_NO_LOCK 12
 #define MSG_CODE_NO_DOCK 13
+#define MSG_CODE_COURT_MARTIAL 14
+#define MSG_CODE_INCOMPETENCE 15
 
 

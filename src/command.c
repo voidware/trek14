@@ -33,8 +33,8 @@
 #include "command.h"
 #include "damage.h"
 #include "sound.h"
+#include "story.h"
 
-uchar mline;
 static uchar conn();
 
 void command()
@@ -52,28 +52,67 @@ void command()
     } while (!conn());
 }
 
+static const char* crewTable[] = 
+{
+    "Capn'", // 0
+    "Keptin",  // 1
+    "Captain", // 2
+    "?", // 3
+    "Scotty",  // 4
+    "Chekov",  // 5 weapons
+    "Spock",  //6
+    "Uhura", // 7
+    "Bones", // 8
+    "Sulu", // 9 helmsman
+};
+
 static const char* msgTable[] = 
 {
-    "Not Enough Energy",
-    "No enemies",
-    "Destroyed",
-    "No torpedoes",
-    "Docked",
+    "^6: Not Enough Energy, ^2",
+    "^5: No enemies here, ^1!",
+    "Destroyed!",
+    "^5: No torpedoes, ^1",
+    "^6: Docked, ^2",
     "Returned to Starfleet HQ",
     "Out of Energy. You die drifting through space",
     "Ship and crew killed in battle",
-    "You are relieved of command",
-    "You are ordered to return to HQ, Quadrant 7,7,2",
-    "Shields Buckling",
-    "Shields Holding",
-    "Phasers can't lock on",
-    "No dock ship",
+    "^6: ^2, you are relieved of command.", // for disobeying orders
+    "^7: ^2, Starfleet orders you to return to HQ, Quadrant 7,7,2.",
+    "^4: Shields Buckling, ^0!",
+    "^4: Shields Holding, ^0",
+    "^5: Phasers can't lock on, ^1!",
+    "[^4: [No dock ship|You canny dock], ^0!|^8: Are you feeling ok, ^2?]",
+    "^6: ^2, you are relieved of command pending court martial.",
+    "^6: You blew it up. your command is suspended."
 };
 
-void msgLine()
+static void emitStory(const char* m, Story* st)
+{
+    st->sub[0] = crewTable;
+    st->subSize[0] = DIM(crewTable);
+    st->sub[1] = msgTable;
+    st->subSize[1] = DIM(msgTable);
+    story(m, st);    
+}
+
+static void emitStoryCmd(const char* m)
+{
+    Story st;
+    memset(&st, 0, sizeof(st));
+    emitStory(m, &st);    
+}
+
+static void emitStoryCmdM(uchar mc)
+{
+    char buf[16];
+    sprintf(buf, "^b%d", (int)mc);
+    emitStoryCmd(buf);
+}
+
+static void msgLine()
 {
     // prepare the message line
-    setcursor(0, mline);
+    setcursor(0, 15);
     clearline();
 }
 
@@ -81,27 +120,21 @@ void message(const char* m)
 {
     // emit a given message on the message line
     msgLine();
-    outs(m);
+    emitStoryCmd(m);
 }
 
 void messageCode(uchar mc)
 {
     // emit a message with a code on the message line.
-    message(msgTable[mc]);
-    outs(", Captain!");
-}
-
-void baseLine()
-{
-    // set cursor for command input. always the base of the screen
-    setcursor(0, 15);
-    clearline();
+    msgLine();
+    emitStoryCmdM(mc);
 }
 
 void cMessage(const char* s)
 {
-    baseLine();
-    outs(s);
+    // set cursor for command input. always the base of the screen
+    msgLine();
+    emitStoryCmd(s);
 }
 
 char getSingleCommand(const char* msg)
@@ -117,12 +150,25 @@ char getSingleCommand(const char* msg)
 
 void endgame(uchar msg)
 {
+    char buf[16];
+    Story st;
+    memset(&st, 0, sizeof(st));
+    st.wrap = 55;
+    st.lmargin = 3;
+
     cls();
-    
-    setcursor(3,3);
-    outs(msgTable[msg]);
-    
-    printf("\n   Your score is %d\n", score);
+
+    sprintf(buf, "\n\n^b%d", (int)msg);
+    emitStory(buf, &st);
+
+    if (msg == MSG_CODE_ENDGAME_RESIGN)
+    {
+        // score review
+        story("\n\nAdmiral [Fitzpatrick|Komack|Westervliet|Barstow|Fitzgerald] here,\nAfter reviewing your tapes and logs, I [can only|must|have to] recommend that you be demoted.", &st);
+    }
+
+    if (score < 0) score = 0;
+    printf("\n\n   Your score is %d\n", score);
     gameover = true;
 }
 
@@ -133,7 +179,7 @@ char warpCommand()
 
     if (v)
     {
-        cMessage("Location: ");
+        cMessage("^9, Location: ");
         scanf("%d,%d,%d", &x, &y, &z);
         v = canwarp(x,y,z);
         if (v)
@@ -154,7 +200,7 @@ void phaserCommand()
         if (quadCounts[ENT_TYPE_KLINGON])
         {
             int e;
-            cMessage("Energy: ");
+            cMessage("^5, Energy: ");
             scanf("%d", &e);
 
             if (e > 0)
@@ -189,7 +235,7 @@ void torpCommand()
         if (u > 0)
         {
             int dir;
-            message("Direction: ");
+            message("^5, Direction: ");
             scanf("%d", &dir);
 
             // if out of range, abort command
@@ -252,8 +298,7 @@ void tick()
             score -= 10;
             if (score < 0)
             {
-                // did not return to starbase
-                score = 0;
+                // did not return to HQ.
                 endgame(MSG_CODE_ENDGAME_RELIEVED);
             }
         }
@@ -273,8 +318,6 @@ static uchar conn()
         if (k) { c = k; k = 0; }
         else
             c = getSingleCommand("Command: ");
-        
-        mline = 14;
         
         switch (c)
         {

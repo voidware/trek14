@@ -28,6 +28,7 @@
 #include "damage.h"
 #include "command.h"
 
+
 uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
 unsigned int stardate;
@@ -85,6 +86,8 @@ static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
                               
 const EntObj objTable[] =
 {
+    // high negative scores will ensure the game ends if you
+    // destroy them
     { CW(12), 1, -1000, base },
     { CW(16), 1, -1000, fedshipRLE }, 
     { CW(6), 1, -1000, star },
@@ -124,7 +127,7 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
             if (!ENT_MARKED(ep))
             {
                 ENT_SET_MARK(ep);
-                ++score;
+                score += SCORE_EXPLORE;
             }
 
             if (eplist)
@@ -463,12 +466,13 @@ uchar takeEnergy(uchar* ep, unsigned int d)
 void removeEnt(uchar *ep)
 {
     // adjust score
-    score += objTable[ENT_TYPE(ep)]._score;
+    uchar t = ENT_TYPE(ep);
+    score += objTable[t]._score;
     if (score < 0)
     {
         // attacked a planet etc.
-        score = 0;
-        endgame(MSG_CODE_ENDGAME_RELIEVED);
+        endgame(t == ENT_TYPE_BASE ? 
+                MSG_CODE_COURT_MARTIAL : MSG_CODE_INCOMPETENCE);
     }
     else
     {
@@ -504,7 +508,7 @@ void genGalaxy()
     QZ = 2;
 
     // populate bases
-    for (i = 0; i < 9; ++i)
+    for (i = 0; i < TOTAL_BASES-1; ++i)
     {
         genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1, 1);
         galaxyEnd += ENT_SIZE; 
@@ -518,7 +522,7 @@ void genGalaxy()
     galaxyEnd += ENT_SIZE; 
 
     // populate klingons
-    i = 50;
+    i = TOTAL_KLINGONS;
     while (i > 0)
     {
         // between 1 & 4 klingons
@@ -538,8 +542,8 @@ void genGalaxy()
         }
     }
 
-    // populate planets & stars
-    for (i = 0; i < 100; ++i)
+    // populate stars
+    for (i = 0; i < TOTAL_STARS; ++i)
     {
         genEntLocation(galaxyEnd, ENT_TYPE_STAR, 2, 1);
 
@@ -547,18 +551,23 @@ void genGalaxy()
         // this energy can be drawn by enemies to recharge
         ENT_SET_DAT(galaxyEnd, (rand16() & 127) + 128);
         galaxyEnd += ENT_SIZE;
+    }
 
+    // populate planets
+    for (i = 0; i < TOTAL_PLANETS; ++i)
+    {
         genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 3, 1);
         galaxyEnd += ENT_SIZE;
     }
 
+#if 0
     while (galaxyEnd < galaxy + sizeof(galaxy))
     {
         // fill up with planets
         genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 5, 1);        
         galaxyEnd += ENT_SIZE;
     }
-
+#endif
 
     clearMarks();
     

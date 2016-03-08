@@ -39,6 +39,7 @@ OBJS = \
 	libc.rel \
 	libcbase.rel \
 	soundbit.rel \
+	story.rel \
 
 %.rel: %.c
 	$(CC) $(CFLAGS) -c $< 

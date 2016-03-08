@@ -810,6 +810,7 @@ smint sprintf(char* buf, const char* fmt, ...)
 
     va_start(args, fmt);
     n = _doFormat(bufStreamOutFn, &buf, fmt, args);
+    *buf = 0; // ensure terminated
     va_end(args);
 
     return (smint)n;

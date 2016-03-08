@@ -46,6 +46,8 @@ typedef int int16;
 
 #define SIGN(_c) ((_c) < 0 ? -1 : 1)
 
+#define DIM(_x)  (sizeof(_x)/sizeof((_x)[0]))
+
 #ifdef _WIN32
 #define KEY_ARROW_LEFT  '4'
 #define KEY_ARROW_RIGHT '6'

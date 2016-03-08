@@ -209,8 +209,6 @@ char srScan(char k)
     int i;
     char c;
 
-    mline = 15;
-
  again:
 
     tick();
