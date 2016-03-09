@@ -147,8 +147,8 @@ void outchar(char c)
         {
             // scroll
             memmove(VIDRAM, VIDRAM + 64, VIDSIZE-64);
-            memset(VIDRAM + VIDSIZE - 64, ' ', 64);
-            a = VIDSIZE - 64;
+            lastLine();
+            return;
         }
     }
     else if (c == '\r')
@@ -182,6 +182,7 @@ void cls()
 {
     memset(VIDRAM, ' ', VIDSIZE);
     cursorPos = 0;
+    setWide(0);
 }
 
 void random()
@@ -366,14 +367,12 @@ uchar getline2(char* buf, uchar nmax)
 }
 #endif
 
-void clearline()
+void lastLine()
 {
-    // clear from current cursor to end of line
-    // leave cursor where it is
+    // put the cursor on the last line and clear it
 
-    uint a = cursorPos;
-    uchar x = 64 - (a & 63);
-    memset(VIDRAM + a, ' ', (int)x);
+    memset(VIDRAM + VIDSIZE - 64, ' ', 64);
+    cursorPos = VIDSIZE - 64;
 }
 
 void setWide(uchar v)

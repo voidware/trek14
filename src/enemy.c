@@ -168,7 +168,10 @@ static void router(routing* rt)
             }
             d2 = d;
             if (d == 127)
+            {
+                //printfat(15,15, "CAN'T ROUTE!\n");
                 return; // did not find any new routes
+            }
         }
         else
         {
@@ -224,8 +227,9 @@ static void router(routing* rt)
                             if (di < d2) d2 = di; // find next min
                             if (!push(rt, x, y, di, k))
                             {
-                                //printfat(0, 0, "FAILED!\n");
-                                return; // failed
+                                // failed, out of working buffer
+                                //printfat(15,15, "FAILED!\n");
+                                return; 
                             }
                         }
                     }
@@ -485,6 +489,10 @@ uchar hitEnergy(uchar* ep, unsigned int d)
     {
         if (you)
             takeDamage(d);
+        else
+        {
+            messageCode(MSG_CODE_SURVIVED_HIT);
+        }
     }
     else
     {

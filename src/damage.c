@@ -64,7 +64,7 @@ static void emitStory(const char* m)
     st.subSize[1] = DIM(opTable);
 
     // emit on the message line
-    msgLine();
+    lastLine();
     story(m, &st);    
 }
 
@@ -90,7 +90,7 @@ uchar opCheck(uchar i)
     if (!u)
     {
         char buf[64];
-        sprintf(buf, "^4: ^b%d inoperative, ^2!", (int)i);
+        sprintf(buf, "^4: ^b%d [are out|inoperative|[still |]dunny' work], ^0!", (int)i);
         emitStory(buf);
         alertsound();  // also pause
     }
@@ -112,7 +112,7 @@ void subop(uchar op, int val)
     if (u >= OP_MIN && v < OP_MIN)
     {
         // emit message
-        alert2(opTable[op], " inoperative", 2);
+        alert2(opTable[op], " Inoperative", 2);
 
         // signal we should redraw SR view
         redrawsr = true;
@@ -136,7 +136,7 @@ void repair(uchar r)
             {
                 // repaired!
                 char buf[64];
-                sprintf(buf, "^4: ^b%d now operational, ^2", (int)i);
+                sprintf(buf, "^4: ^b%d now [operational|repaired|working], ^0", (int)i);
                 emitStory(buf);
             }
             r -= v;
@@ -149,6 +149,14 @@ void takeDamage(int dam)
     // we've been hit with `dam' units of energy.
 
     int s = GET_SHIELD_ENERGY;
+    uchar i, j, m;
+
+    for (i = 1; i < 11; ++i)
+    {
+        // shake the ship
+        for (j = 0; j < 200; ++j) setWide(i & 1);
+    }
+    
     
     // absorption of shields
     dam -= s;
@@ -162,7 +170,6 @@ void takeDamage(int dam)
     {
         // residual damage goes to operations
         int di[L_COUNT-2];
-        uchar i, j, m;
         int dv;
         int dm;
 

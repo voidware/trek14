@@ -32,7 +32,6 @@ char warpCommand();
 
 void messageCode(uchar mc);
 void message(const char*);
-void msgLine();
 
 extern const char* crewTable[];
 
@@ -52,5 +51,6 @@ extern const char* crewTable[];
 #define MSG_CODE_NO_DOCK 13
 #define MSG_CODE_COURT_MARTIAL 14
 #define MSG_CODE_INCOMPETENCE 15
+#define MSG_CODE_SURVIVED_HIT 16
 
 

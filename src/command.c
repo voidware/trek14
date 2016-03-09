@@ -78,12 +78,13 @@ static const char* msgTable[] =
     "Ship and crew killed in battle",
     "^6: ^2, you are relieved of command.", // for disobeying orders
     "^7: ^2, Starfleet orders you to return to HQ, Quadrant 7,7,2.",
-    "^4: Shields Buckling, ^0!",
-    "^4: Shields Holding, ^0",
+    "^4: Shields [Buckling|Collapsing], ^0!",
+    "^4: Shields [holding|absorbed it], ^0",
     "^5: Phasers can't lock on, ^1!",
-    "^4: [No dock ship|You canny dock], ^0!",
+    "^4: [No dock ship|Ya canny' dock], ^0!",
     "^6: ^2, you are relieved of command pending court martial.",
-    "^6: You [violated the prime directive.|blew it up!] Your command is suspended."
+    "^6: You [violated the prime directive.|blew it up!] Your command is suspended.",
+    "^6: Enemy shields absorbed impact, ^2",
 };
 
 static void emitStory(const char* m, Story* st)
@@ -109,31 +110,24 @@ static void emitStoryCmdM(uchar mc)
     emitStoryCmd(buf);
 }
 
-void msgLine()
-{
-    // prepare the message line
-    setcursor(0, 15);
-    clearline();
-}
-
 void message(const char* m)
 {
     // emit a given message on the message line
-    msgLine();
+    lastLine();
     emitStoryCmd(m);
 }
 
 void messageCode(uchar mc)
 {
     // emit a message with a code on the message line.
-    msgLine();
+    lastLine();
     emitStoryCmdM(mc);
 }
 
 void cMessage(const char* s)
 {
     // set cursor for command input. always the base of the screen
-    msgLine();
+    lastLine();
     emitStoryCmd(s);
 }
 
@@ -179,7 +173,7 @@ char warpCommand()
 
     if (v)
     {
-        cMessage("^9, Location: ");
+        cMessage("^9, [Location|Destination|Course]: ");
         scanf("%d,%d,%d", &x, &y, &z);
         v = canwarp(x,y,z);
         if (v)
@@ -236,7 +230,7 @@ void torpCommand()
         if (u > 0)
         {
             int dir;
-            message("^5, Direction: ");
+            message("^5, [Direction|Angle|Vector]: ");
             scanf("%d", &dir);
 
             // if out of range, abort command
