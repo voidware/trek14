@@ -47,22 +47,11 @@ char getkey()
     return c;
 }
 
-char inkey()
-{
-    char c;
-
-    do 
-    {
-        c = getkey();
-    } while (c == '\n');
-    return c;
-}
-
 void setcursor(uchar x, uchar y)
 {
 }
 
-void getcursor(uchar* x, uchar* y)
+static void getcursor(uchar* x, uchar* y)
 {
     *x = 0;
     *y = 0;
@@ -72,7 +61,7 @@ void cls()
 {
 }
 
-uchar getline(char* buf, uchar nmax)
+static uchar getline(char* buf, uchar nmax)
 {
     char tbuf[256];
     int m = scanf("%s", tbuf);
@@ -82,30 +71,96 @@ uchar getline(char* buf, uchar nmax)
 
 #else
 
-// trs80
+/* trs80 ----------------------------------------- */
+
+#if 0
+typedef void (*Fv)();
+typedef void (*Fvb)(uchar);
+typedef uint (*Fwbb)(uchar, uchar);
+
+uchar args[16];
+
+#define BP(_n) (args + sizeof(Fv*))[_n]
+#define WP(_n) ((uint*)(args + sizeof(Fv*)))[_n]
+
+static void callee_vb()
+{
+    (*((Fvb*)args))(BP(0));
+}
+
+static void callee_wbb()
+{
+    WP(0) = (*((Fwbb*)args))(BP(2),BP(3));
+}
+
+#define CALL_f(__f)  *((Fv**)args) = (Fv*)(__f)
+
+#define CALL_vb(_f, _a)                         \
+{                                               \
+    CALL_f(_f);                                 \
+    BP(0) = (uchar)(_a);                        \
+__asm                                           \
+    exx                                         \
+    call _callee_vb                             \
+    exx                                         \
+ __endasm;                                      \
+}
+
+#define CALL_wbb(_f, _w, _a, _b)                \
+{                                               \
+    CALL_f(_f);                                 \
+    BP(2) = (uchar)(_a);                        \
+    BP(3) = (uchar)(_b);                        \
+__asm                                           \
+    exx                                         \
+    call _callee_wbb                            \
+    exx                                         \
+ __endasm;                                      \
+    _w = WP(0);                                 \
+}
+
+#endif
+
+
+// store our own cursor position (do not use the ROM location)
+static uint cursorPos;
+
+void outcharat(uchar x, uchar y, uchar c)
+{
+    // no checking!
+    *(VIDRAM + ((int)y<<6) + (int)x) = c;
+}
 
 void outchar(char c)
 {
-    // print `c' at current cursor position
-    // uses AF, DE, BC, HL
-
-    __asm
-    pop hl
-    pop bc
-    push bc
-    push hl
-    ld a,c
-    call #0x33
-   __endasm;
-}
-
-char inkey()
-{
-    // uses AF, DE
-    __asm
-     call #0x2b
-     ld l,a
-    __endasm;
+    uint a = cursorPos;
+    
+    if (c == '\b')
+    {
+        VIDRAM[a] = ' ';
+        if (a) --a;
+    }
+    else if (c == '\n')
+    {
+        a = (a + 64) & ~63;
+        if (a >= VIDSIZE)
+        {
+            // scroll
+            memmove(VIDRAM, VIDRAM + 64, VIDSIZE-64);
+            memset(VIDRAM + VIDSIZE - 64, ' ', 64);
+            a = VIDSIZE - 64;
+        }
+    }
+    else if (c == '\r')
+    {
+        // ignore
+    }
+    else
+    {
+        VIDRAM[a] = c;
+        a = (a + 1) & (VIDSIZE-1);
+    }
+    cursorPos = a;
 }
 
 char getkey()
@@ -118,48 +173,15 @@ char getkey()
     __endasm;
 }
 
-#if 0
-uchar getline(char* buf, uchar nmax)
+void setcursor(char x, char y)
 {
-    // get whole line
-    // uses AF, DE
-    // return number of chars including terminator
-    
-    __asm
-     pop bc
-     pop hl
-     push hl
-     push bc
-     ld iy,#4
-     add iy,sp
-     ld b,0(iy)
-     call #0x40
-     ld l,b
-    __endasm;
-}
-#endif
-
-void setcursor(uchar x, uchar y)
-{
-    // 0x4020
-    char** p = CURMEM;
-    *p = VIDRAM + ((int)y<<6) + (int)x;
-}
-
-void getcursor(uchar* x, uchar* y)
-{
-    char** p = CURMEM;
-    int v = *p - VIDRAM;
-    *x = v & 63;
-    *y = v >> 6;
+    cursorPos = ((int)y<<6) + x;
 }
 
 void cls()
 {
-    // uses AF
-    __asm
-    call #0x1c9
-    __endasm;
+    memset(VIDRAM, ' ', VIDSIZE);
+    cursorPos = 0;
 }
 
 void random()
@@ -167,11 +189,6 @@ void random()
     __asm
     call #0x1d3
     __endasm;
-}
-
-void outcharat(uchar x, uchar y, uchar c)
-{
-    *(VIDRAM + ((int)y<<6) + (int)x) = c;
 }
 
 uchar getModel()
@@ -291,8 +308,19 @@ void setModel(uchar m)
 
 void outs(const char* s)
 {
+    while (*s) outchar(*s++);
+}
+
+void outsWide(const char* s)
+{
+    // arrange even location
+    if (cursorPos & 1) outchar(' ');
+    
     while (*s)
+    {
         outchar(*s++);
+        outchar(' ');
+    }
 }
 
 #ifdef _WIN32
@@ -313,33 +341,25 @@ uchar getline2(char* buf, uchar nmax)
     {
         char c;
 
-        // current cursor pos
-        char* cp = *CURMEM;
-        
         // emit prompt
-        *cp = '_';
+        VIDRAM[cursorPos] = '_';
         
         // wait for key
         c = getkey();
 
-        if (c == 0x08) // backspace
+        if (c == '\b') // backspace
         {
-            if (pos)
-            {
-                --pos;
-                *cp = ' ';
+            if (pos--)
                 outchar(c);
-            }
         }
         else 
         {
             if (pos < nmax)
             {
                 buf[pos++] = c;
-                if (c != 0xd)
-                    outchar(c);
+                outchar(c);
             }
-            if (c == 0xd) break;
+            if (c == '\r') break;
         }
     }
     return pos;
@@ -350,22 +370,20 @@ void clearline()
 {
     // clear from current cursor to end of line
     // leave cursor where it is
-#ifndef _WIN32
-    uchar x, y;
-    char* cp;
 
-    cp = *CURMEM;
-    getcursor(&x, &y);
-
-    x = 64 - x;
-    while (x)
-    {
-        --x;
-        *cp++ = ' ';
-    }
-#endif    
+    uint a = cursorPos;
+    uchar x = 64 - (a & 63);
+    memset(VIDRAM + a, ' ', (int)x);
 }
 
+void setWide(uchar v)
+{
+    // model I
+    outPort(0xFF, v ? 0x08 : 0);
+    
+    // other models
+    outPort(0xEF, v ? 0x04 : 0);
+}
 
 
 

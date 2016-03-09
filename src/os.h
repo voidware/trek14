@@ -22,19 +22,17 @@
 
 void outchar(char c);
 void outcharat(uchar x, uchar y, uchar c);
-char inkey();
 char getkey();
-uchar getline(char* buf, uchar nmax);
-void setcursor(uchar x, uchar y);
-void getcursor(uchar* x, uchar* y);
+void setcursor(char x, char y);
 void cls();
 void outPort(uchar port, uchar val);
 uchar getModel();
 void setModel(uchar m);
 void hookClockInts();
-
+void setWide(uchar v);
 
 void outs(const char* s);
+void outsWide(const char* s);
 uchar getline2(char* buf, uchar nmax);
 void clearline();
 

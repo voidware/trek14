@@ -31,23 +31,30 @@
 void alert2(const char* msg1, const char* msg2, uchar len)
 {
     uchar i;
+    uchar s1, s2;
 
     cls();
     plotHLine(0,0,127, 1);
     plotHLine(0,47,127, 1);
 
-    i = 32 - strlen(msg1);
-    if (msg2) i -= strlen(msg2);
-    setcursor(i,3);
+    s1 = strlen(msg1);
+    s2 = 0;
     
-    outchar(23);        // wide
-    outs(msg1);            
-    if (msg2) outs(msg2);
+    if (msg2) s2 = strlen(msg2);
+
+    // centre message
+    i = 32 - (s1 + s2);
+    setcursor(i,3);
+
+    outsWide(msg1);            
+    if (s2) outsWide(msg2);
     
     for (i = 0; i < len; ++i)
     {
-        alertsound(1); 
-        alertsound(0);
+        setWide(1);
+        alertsound(); 
+        setWide(0);
+        alertsound();
     }
 
     cls();

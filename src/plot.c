@@ -46,7 +46,7 @@ void plot(char x, char y, uchar c)
     // 64*(y/3) + x/2
     m = VIDRAM + ((((int)q)<<6) + (x>>1));
 
-    if (m > VIDEND) return;
+    if (m > VIDRAM + VIDSIZE) return;
 
     // remainder
     r -= q;
@@ -84,7 +84,7 @@ void plotSpan(char x, char y, uchar n, uchar c)
     // 64*(y/3) + x/2
     m = VIDRAM + ((((int)q)<<6) + (x>>1));
 
-    if (m > VIDEND) return;
+    if (m > VIDRAM + VIDSIZE) return;
 
     // remainder
     q = y - ((q<<1) + q);

@@ -31,7 +31,7 @@ extern void playVictory();
 extern void warpsound(int length);
 extern void blastsound(int length);
 extern void zapsound();
-extern void alertsound(int wide);
+extern void alertsound();
 extern void squoink();
 
 extern void clobber_rti();

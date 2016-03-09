@@ -151,13 +151,13 @@ void _story(const char* s, Story* st)
 
             // skip t terms
             n -= t;
-            while (t--) s = skipTerm(s);
+            while (t) {--t; s = skipTerm(s); }
 
             // process chosen term
             _story(s + 1, st);
 
             // skip remainder
-            while (n--) s = skipTerm(s);
+            while (n) { --n; s = skipTerm(s); }
 
             if (!*s) break;
         }
@@ -201,10 +201,7 @@ void _story(const char* s, Story* st)
                 for (;;)
                 {
                     c = *++s;
-                    if (c >= '0' && c <= '9')
-                    {
-                        v = v*10 + (c - '0');
-                    }
+                    if (c >= '0' && c <= '9') v = v*10 + (c - '0');
                     else break;
                 }
             }

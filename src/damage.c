@@ -29,6 +29,7 @@
 #include "sound.h"
 #include "alert.h"
 #include "srscan.h"
+#include "story.h"
 
 #define OP_MIN  0x80
 #define OPERATIONAL(_i)  (operations[_i] >= OP_MIN)
@@ -53,6 +54,20 @@ static const char* opTable[] =
     "Long Range Scan",
 };
 
+static void emitStory(const char* m)
+{
+    Story st;
+    memset(&st, 0, sizeof(st));
+    st.sub[0] = crewTable;
+    st.subSize[0] = 100; // plenty
+    st.sub[1] = opTable;
+    st.subSize[1] = DIM(opTable);
+
+    // emit on the message line
+    msgLine();
+    story(m, &st);    
+}
+
 void addop(uchar op, uchar v)
 {
     // add `v' units to operation `op'
@@ -74,8 +89,10 @@ uchar opCheck(uchar i)
     uchar u = OPERATIONAL(i);
     if (!u)
     {
-        message(opTable[i]);        
-        outs(" inoperative, Captain!");
+        char buf[64];
+        sprintf(buf, "^4: ^b%d inoperative, ^2!", (int)i);
+        emitStory(buf);
+        alertsound();  // also pause
     }
     return u;
 }
@@ -118,8 +135,9 @@ void repair(uchar r)
             if (OPERATIONAL(i))
             {
                 // repaired!
-                message(opTable[i]);
-                outs(" now operational, Captain");
+                char buf[64];
+                sprintf(buf, "^4: ^b%d now operational, ^2", (int)i);
+                emitStory(buf);
             }
             r -= v;
         }
@@ -152,7 +170,7 @@ void takeDamage(int dam)
         {
             SET_SHIELD_ENERGY(0);
             messageCode(MSG_CODE_SHIELDS_GONE);
-            alertsound(0);
+            alertsound();
         }
 
         /* allocate the damage randomly to each operation (not shields).

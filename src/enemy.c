@@ -109,8 +109,11 @@ static void prepSectorBuf(routing* rt, uchar* src, uchar type)
             
             // otherwise set as barrier width w
             // ASSUME barriers are only 1 high.
-            while (w--)
+            while (w)
+            {
+                --w;
                 setMap(rt->map, x++, y);
+            }
         }
     }
 }
@@ -119,12 +122,12 @@ static uchar push(routing* rt, uchar x, uchar y, uchar d, uchar src)
 {
     uchar* a = abuf + (((int)rt->sp)<<2);
     if (a > abuf + sizeof(abuf) - 4) return 0;
-
+    ++rt->sp;
+    
     *a++ = x;
     *a++ = y;
     *a++ = d;
     *a = src;
-    ++rt->sp;
     return 1;
 }
 
@@ -338,7 +341,7 @@ static uchar klingonMove(uchar* kp)
         prepSectorBuf(&rt, kp, ttype);
 
         // visit map starts same as barrier
-        memcpy(visit, map, 128);
+        memmove(visit, map, 128);
 
         // push initial position and mark visited
         push(&rt, rt.x1, rt.y1, 100, 0);

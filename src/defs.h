@@ -31,8 +31,7 @@ typedef unsigned int uint16;
 typedef int int16;
 
 #define VIDRAM ((char*)0x3c00)
-#define VIDEND ((char*)0x3fff)
-#define CURMEM ((char**)0x4020)
+#define VIDSIZE 1024
 
 #define HIGH48K ((char*)0xFFFF)
 #define HIGH32K 0xBFFF
@@ -59,4 +58,7 @@ typedef int int16;
 #define KEY_ARROW_UP 91
 #define KEY_ARROW_DOWN 10
 #endif
+
+//#pragma callee_saves outchar
+
 

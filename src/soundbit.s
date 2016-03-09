@@ -28,12 +28,16 @@ _bit_sound::
           push hl
           push de
           push bc
-          xor  a                ; not wide
 
         ;; HL=freq, DE=duration
-        ;; preserve the wide-char bits in a (if any)
+        ;; preserve the wide-char bits for model I
 __beeper::
           di
+          in   a,(#0xff)      ; current wide status (model I)
+          and  #0x40
+          srl  a
+          srl  a
+          srl  a                ; wide bit into bit 3
           push af
           ld   a,l
           srl  l
@@ -174,20 +178,11 @@ _blastsound::
 
 
         ; alert sound
-        ;;  alertsound(wide)
 _alertsound::
 ;Strange squeak hl=300,de=2
 ;Game up hl=300,de=10 inc de
 ;-like a PACMAN sound
-          pop   bc
-          pop   hl
-          push  hl
-          push  bc
-          ld    a,l
-          and   a,#1
-          sla   a
-          sla   a
-          sla   a               ; wide to bit 3
+          xor   a
           ld    b,#1  
 .fx6_1:
           push  bc  

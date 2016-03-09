@@ -52,7 +52,7 @@ void command()
     } while (!conn());
 }
 
-static const char* crewTable[] = 
+const char* crewTable[] = 
 {
     "Capn'", // 0
     "Keptin",  // 1
@@ -109,7 +109,7 @@ static void emitStoryCmdM(uchar mc)
     emitStoryCmd(buf);
 }
 
-static void msgLine()
+void msgLine()
 {
     // prepare the message line
     setcursor(0, 15);

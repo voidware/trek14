@@ -6,8 +6,8 @@ CC = sdcc
 AS = sdasz80
 LD = sdldz80
 DEBUG = 
-OPT2 = --max-allocs-per-node 100000
-OPT = --opt-code-size 
+OPT2 = --max-allocs-per-node 100000 
+OPT = --opt-code-size
 CFLAGS = -mz80 --std-sdcc99 $(OPT) $(DEBUG)
 ASFLAGS = -l
 

@@ -32,6 +32,9 @@ char warpCommand();
 
 void messageCode(uchar mc);
 void message(const char*);
+void msgLine();
+
+extern const char* crewTable[];
 
 #define MSG_CODE_INSUFENERGY  0
 #define MSG_CODE_NO_TARGET 1
