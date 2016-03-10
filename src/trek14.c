@@ -27,8 +27,7 @@
 #include "command.h"
 #include "sound.h"
 
-
-void startGame()
+static void startGame()
 {
     cls();
 
@@ -54,26 +53,11 @@ void startGame()
 
 void main()
 {
-    uchar m;
-
     // initialise our own mini-clib
     libcInit();
 
-    m = getModel();
-
-    if (m >= 4)
-    {
-        hookClockInts();
+    initModel();
     
-        // put into model 3 mode
-        setModel(3);
-    }
-    else if (m == 1)
-    {
-        // HACK to prevent the sound routines from enabling interrupts
-        clobber_rti();
-    }
-
     do
     {
         startGame();

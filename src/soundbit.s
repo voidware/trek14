@@ -37,7 +37,7 @@ __beeper::
           and  #0x40
           srl  a
           srl  a
-          srl  a                ; wide bit into bit 3
+          srl  a                ; wide bit into bit 3 (other models ignored) 
           push af
           ld   a,l
           srl  l

@@ -102,8 +102,6 @@ void playNotes(const char* m)
     uint tempo = 12;
     char u = 0;
 
-    uchar m1 = getModel() == 1;
-    
     for (;;)
     {
         char c = *m++;
@@ -122,8 +120,7 @@ void playNotes(const char* m)
                 }
 
                 a = dt*n->_freq;
-                b = m1 ? n->_tstatesM1 : n->_tstatesM3;
-
+                b = TRSModel == 1 ? n->_tstatesM1 : n->_tstatesM3;
                 u2 = u;
                 while (u2 > 0)
                 {

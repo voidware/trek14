@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "os.h"
+#include "sound.h" // clobber_rti
 
 // ---- OS FUNCTIONS -----------------------------------------------------
 
@@ -125,6 +126,9 @@ __asm                                           \
 // store our own cursor position (do not use the ROM location)
 static uint cursorPos;
 
+// what model? (set up by initModel)
+uchar TRSModel;
+
 void outcharat(uchar x, uchar y, uchar c)
 {
     // no checking!
@@ -192,7 +196,7 @@ void random()
     __endasm;
 }
 
-uchar getModel()
+static uchar getModel()
 {
     // code thanks to gp2000
     // return 1, 3 or 4 for Model I, III or 4.
@@ -217,11 +221,10 @@ uchar getModel()
 	ld	l,#1		; otherwise, its a Model I
 	ret
 m4:	ld	l,#4
-	ret
      __endasm;
 }
 
-void outPort(uchar port, uchar val)
+static void outPort(uchar port, uchar val)
 {
     __asm
         pop hl          ; ret
@@ -229,11 +232,21 @@ void outPort(uchar port, uchar val)
         push bc
         push hl
         out (c),b
-        ret
     __endasm;
 }
 
-void hookClockInts()
+static uchar inPort(uchar port)
+{
+    __asm
+        pop hl          ; ret
+        pop bc          ; port->c
+        push bc
+        push hl
+        in  l,(c)
+    __endasm;
+}
+
+static void hookClockInts()
 {
     __asm
         di
@@ -258,7 +271,15 @@ void hookClockInts()
 
 }
 
-void setModel(uchar m)
+static void setSpeed(uchar fast)
+{
+    if (TRSModel > 1)
+    {
+        outPort(0xec, fast ? 0x40 : 0);
+    }
+}
+
+static void setModel(uchar m)
 {
  // from gp2000:
  //
@@ -300,6 +321,7 @@ void setModel(uchar m)
     if (m == 3)
     {
         outPort(0x84, 0); // 40 column
+        setSpeed(0); // slow
     }
 }
 
@@ -365,7 +387,7 @@ uchar getline2(char* buf, uchar nmax)
     }
     return pos;
 }
-#endif
+
 
 void lastLine()
 {
@@ -377,13 +399,45 @@ void lastLine()
 
 void setWide(uchar v)
 {
-    // model I
-    outPort(0xFF, v ? 0x08 : 0);
-    
-    // other models
-    outPort(0xEF, v ? 0x04 : 0);
+    if (TRSModel == 1)
+    {
+        // model I
+        outPort(0xFF, v << 3); // 8 or 0
+    }
+    else
+    {
+        // get current settings
+        uchar m = inPort(0xff);
+        
+        // set or clear bit 
+        if (v) m |= 4;
+        else m &= ~4;
+        
+        // other models
+        outPort(0xEC, m);
+    }
 }
 
+void initModel()
+{
+    TRSModel = getModel();
+
+    if (TRSModel >= 4)
+    {
+        //hookClockInts();
+    
+        // put into model 3 mode
+        setModel(3);
+
+    }
+    else if (TRSModel == 1)
+    {
+        // HACK to prevent the sound routines from enabling interrupts
+        clobber_rti();
+    }
+}
+
+#endif
 
 
 

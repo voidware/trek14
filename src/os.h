@@ -25,15 +25,14 @@ void outcharat(uchar x, uchar y, uchar c);
 char getkey();
 void setcursor(char x, char y);
 void cls();
-void outPort(uchar port, uchar val);
-uchar getModel();
-void setModel(uchar m);
-void hookClockInts();
 void setWide(uchar v);
+void initModel();
 
 void outs(const char* s);
 void outsWide(const char* s);
 uchar getline2(char* buf, uchar nmax);
 void lastLine();
+
+extern uchar TRSModel;
 
 
