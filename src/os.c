@@ -279,7 +279,7 @@ static void setSpeed(uchar fast)
     }
 }
 
-static void setModel(uchar m)
+static void setModel3()
 {
  // from gp2000:
  //
@@ -318,11 +318,8 @@ static void setModel(uchar m)
  // the Model III to sound the same as the Model I.
 
 
-    if (m == 3)
-    {
-        outPort(0x84, 0); // 40 column
-        setSpeed(0); // slow
-    }
+    outPort(0x84, 0); // 40 column
+    setSpeed(0); // slow
 }
 
 #endif
@@ -427,7 +424,7 @@ void initModel()
         //hookClockInts();
     
         // put into model 3 mode
-        setModel(3);
+        setModel3();
 
     }
     else if (TRSModel == 1)

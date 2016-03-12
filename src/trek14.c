@@ -31,7 +31,7 @@ static void startGame()
 {
     cls();
 
-    //printf("\nTRS-80 Model %d\n\n\n", m);
+    printf("\nTRS-80 Model %d\n\n\n", (int)TRSModel);
     
     outs("Trek 2014!\n");
     outs("Generating Galaxy...\n");

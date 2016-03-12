@@ -3,7 +3,9 @@
 * torps drift with distance if less than 100% operational
 * chance of phaser miss more if less operational
 * cannot phaser through obstacles.
+* two best phasers
 * large planets and stars
+* dock with planets
 * romulans
 * class M planets.
 * collide damage
@@ -13,4 +15,6 @@
 * quasars
 * ships computer
 * K attack bases
+* neutral zone
+
 
