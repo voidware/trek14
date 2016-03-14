@@ -167,16 +167,6 @@ void outchar(char c)
     cursorPos = a;
 }
 
-char getkey()
-{
-    // wait for a key
-    // uses AF, DE
-    __asm
-     call #0x49
-     ld l,a
-    __endasm;
-}
-
 void setcursor(char x, char y)
 {
     cursorPos = ((int)y<<6) + x;
@@ -189,12 +179,14 @@ void cls()
     setWide(0);
 }
 
+#if 0
 void random()
 {
     __asm
     call #0x1d3
     __endasm;
 }
+#endif
 
 static uchar getModel()
 {
@@ -323,6 +315,74 @@ static void setModel3()
 }
 
 #endif
+
+// row 0..7
+#define KBBASE ((uchar*)0x3800)
+
+static uchar readKeyRowCol(uchar* rowcol)
+{
+    uchar r = 1;
+    uchar i;
+    static uchar kbrows[8];
+    
+    for (i = 0; i < 8; ++i)
+    {
+        uchar v = *(KBBASE + r);
+        r <<= 1;
+        
+        if (v != kbrows[i])
+        {
+            kbrows[i] = v;
+
+            if (v) // press not release
+            {
+                *rowcol = i; // row
+            
+                rowcol[1] = 0;
+                while (v > 1)
+                {
+                    v >>= 1;
+                    ++rowcol[1];
+                }
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+static const char keyMatrix[] =
+{
+    '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+    'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+    'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+    'X', 'Y', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z',
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', ':', ';', ',', '-', '.', '/',
+    '\r', '\b', 'Z', KEY_ARROW_UP, KEY_ARROW_DOWN, KEY_ARROW_LEFT, KEY_ARROW_RIGHT, ' ',
+    'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 
+};
+
+char readKey()
+{
+    uchar rc[2];
+
+    // ignore shift & control
+    while (!readKeyRowCol(rc) || rc[0] == 7) ;
+    
+    return keyMatrix[rc[0]*8 + rc[1]];
+}
+
+char getkey()
+{
+    // wait for a key
+    char c;
+    for (;;)
+    {
+        c = readKey();
+        if (c) return c;
+    }
+}
 
 // ---- LIB FUNCTIONS -----------------------------------------------------
 
