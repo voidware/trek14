@@ -53,7 +53,7 @@ trek14.cas: trek14.ihx
 	../tools/mksys/mksys trek14.ihx trek14.cas
 
 
-trek14.ihx : $(OBJS)
+trek14.ihx : $(OBJS) Makefile
 	$(LD) $(LDFLAGS) -i trek14.ihx $(OBJS)
 
 trek14.cmd: trek14.cas

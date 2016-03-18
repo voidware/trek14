@@ -33,6 +33,9 @@ typedef int int16;
 #define VIDRAM ((char*)0x3c00)
 #define VIDSIZE 1024
 
+#define VIDRAM80 ((char*)0xf800)
+#define VIDSIZE80 (80*24)
+
 #define HIGH48K ((char*)0xFFFF)
 #define HIGH32K 0xBFFF
 #define HIGH16K 0x7FFF

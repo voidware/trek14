@@ -27,16 +27,24 @@
 #include "command.h"
 #include "sound.h"
 
+#define SKIPxx
+
 static void startGame()
 {
+    uchar v;
+    
     cls();
 
-    printf("\nTRS-80 Model %d\n\n\n", (int)TRSModel);
+    printf("\nTRS-80 Model %d\n", (int)TRSModel);
 
-    outs("Trek 2014!\n");
+#ifdef SKIP
+    printf("\Stack %x\n", ((int)&v) + 7);
+#endif
+
+    outs("\n\nTrek 2014!\n");
     outs("Generating Galaxy...\n");
 
-#if 1
+#ifndef SKIP
     playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"
               "F6F+9Eb3D2CB-b"
               "A21Ab3G9A3"

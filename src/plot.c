@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "plot.h"
+#include "os.h"
 
 
 // divide by 3, 0 to 47
@@ -32,7 +33,7 @@ static const unsigned char leftCol[] = { 0x01, 0x04, 0x10 };
 static const unsigned char rightCol[] =  { 0x02, 0x08, 0x20 };
 static const unsigned char bothCol[] =  { 0x03, 0x0C, 0x30 };
 
-void plot(char x, char y, uchar c)
+void plot(uchar x, uchar y, uchar c)
 {
     // plot pixel (x,y) colour c
 
@@ -44,10 +45,9 @@ void plot(char x, char y, uchar c)
     q = div3tab[r];
 
     // 64*(y/3) + x/2
-    m = VIDRAM + ((((int)q)<<6) + (x>>1));
-
-    if (m > VIDRAM + VIDSIZE) return;
-
+    m = vidaddr(x>>1, q);
+    if (!m) return;
+	
     // remainder
     r -= q;
     r -= q;
@@ -67,27 +67,25 @@ void plot(char x, char y, uchar c)
         *m = v & ~mask;
 }
 
-
-void plotSpan(char x, char y, uchar n, uchar c)
+void plotSpan(uchar x0, uchar y, uchar n, uchar c)
 {
     // plot (x,y) to (x+n, y) colour c
     
     uchar q, mask;
     char* m;
-    uchar k;
     char v;
+    uchar x = x0;
 
     if (!n) return;
 
     q = div3tab[y];
 
-    // 64*(y/3) + x/2
-    m = VIDRAM + ((((int)q)<<6) + (x>>1));
-
-    if (m > VIDRAM + VIDSIZE) return;
+    // cols*(y/3) + x/2
+    m = vidaddr(x>>1, q);
+    if (!m) return;
 
     // remainder
-    q = y - ((q<<1) + q);
+    q = y - q*3;
     
     if (x&1)
     {
@@ -98,15 +96,16 @@ void plotSpan(char x, char y, uchar n, uchar c)
         else
             *m = v & ~rightCol[q];
         ++m;
+        ++x;
         --n;
     }
 
-    k = n>>1;
-
     mask = bothCol[q];
-    while (k)
+    while (n > 1)
     {
-        --k;
+        if (x >= 160) return;
+        if (x >= 128 && !cols80) return;
+        n -= 2;
         v = *m;
         if (v >= 0) v = 0x80;
         if (c)
@@ -115,12 +114,10 @@ void plotSpan(char x, char y, uchar n, uchar c)
             *m = v & ~mask;
 
         ++m;
-        
-        if (!(((int)m) & 63))
-            return; // ran off line
+        ++x;
     }
 
-    if (n&1)
+    if (n)
     {
         v = *m;
         if (v >= 0) v = 0x80;

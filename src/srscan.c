@@ -206,7 +206,7 @@ char srScan(char k)
     // draw quadrant screen & content.
 
     uchar** epp;
-    int i;
+    uchar i, j;
     char c;
 
  again:
@@ -220,8 +220,11 @@ char srScan(char k)
     // we are redrawing, so clear this
     redrawsr = false;
 
-    setcursor(0,1);
-    for (i = 64*7; i > 0; --i) { outchar('.'); outchar(' '); }
+    for (j = 1; j <= 14; ++j)
+    {
+        setcursor(0,j);        
+        for (i = 0; i < 32; ++i) { outchar('.'); outchar(' '); }
+    }
 
     if (opCheckSR())
     {

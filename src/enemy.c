@@ -36,7 +36,7 @@
 #include "plot.h"
 
 // working buffer for ai 
-static uchar abuf[1024];
+uchar abuf[1024];
 
 static uchar setMap(uchar* map, uchar x, uchar y)
 {

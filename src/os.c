@@ -75,6 +75,7 @@ static uchar getline(char* buf, uchar nmax)
 /* trs80 ----------------------------------------- */
 
 #if 0
+// this was an attempt at roll-your-own callee saves
 typedef void (*Fv)();
 typedef void (*Fvb)(uchar);
 typedef uint (*Fwbb)(uchar, uchar);
@@ -123,37 +124,102 @@ __asm                                           \
 #endif
 
 
-// store our own cursor position (do not use the ROM location)
+// store our own cursor position (do not use the OS location)
 static uint cursorPos;
+
+// are we in 80 col mode?
+uchar cols80;
+static uchar* vidRam;
 
 // what model? (set up by initModel)
 uchar TRSModel;
 
-void outcharat(uchar x, uchar y, uchar c)
+static uint vidoff(char x, char y)
 {
-    // no checking!
-    *(VIDRAM + ((int)y<<6) + (int)x) = c;
+    uint a = x + ((int)y<<6);
+    if (cols80)
+        a += (int)y<<4;
+    return a;
 }
 
-void outchar(char c)
+uchar* vidaddr(char x, char y)
+{
+    uint a = vidoff(x, y);
+    if (a >= VIDSIZE && !cols80 || a >= VIDSIZE80) return 0;
+    return vidRam + a;
+}
+
+void outcharat(uchar x, uchar y, uchar c)
+{
+    *vidaddr(x,y) = c;
+}
+
+void lastLine()
+{
+    // put the cursor on the last line and clear it
+    if (cols80)
+    {
+        setcursor(0, 23);
+        memset(VIDRAM80 + 23*80, ' ', 80);
+    }
+    else
+    {
+        setcursor(0, 15);
+        memset(VIDRAM + 15*64, ' ', 64);
+    }
+}
+
+void nextLine()
 {
     uint a = cursorPos;
-    
-    if (c == '\b')
+    if (cols80)
     {
-        VIDRAM[a] = ' ';
-        if (a) --a;
+        // bump a to the next multiple of 80
+        uint v = 80;
+        if (a >= 800) v += 800;  // skip around half
+        while (v <= a) v += 80;
+        a = v;
+
+        if (a >= VIDSIZE80)
+        {
+            // scroll
+            memmove(VIDRAM80, VIDRAM + 80, 23*80);
+
+            // place at last line and clear line
+            lastLine();
+            return;
+        }
     }
-    else if (c == '\n')
+    else
     {
         a = (a + 64) & ~63;
         if (a >= VIDSIZE)
         {
             // scroll
-            memmove(VIDRAM, VIDRAM + 64, VIDSIZE-64);
+            memmove(VIDRAM, VIDRAM + 64, 15*64);
+
+            // place at last line and clear line
             lastLine();
             return;
         }
+    }
+    cursorPos = a;
+}
+
+void outchar(char c)
+{
+    uint a = cursorPos;
+    uchar* p = vidRam + a;
+    
+    if (c == '\b')
+    {
+        *p = ' ';
+        if (a) a--;
+    }
+    else if (c == '\n')
+    {
+        nextLine();
+        return;
     }
     else if (c == '\r')
     {
@@ -161,20 +227,34 @@ void outchar(char c)
     }
     else
     {
-        VIDRAM[a] = c;
-        a = (a + 1) & (VIDSIZE-1);
+        *p = c;
+        ++a;
+        if (a >= VIDSIZE)
+        {
+            if (!cols80 || a >= VIDSIZE80)
+            {
+                // scroll and place on last line
+                nextLine();
+                return;
+            }
+        }
     }
     cursorPos = a;
 }
 
+
 void setcursor(char x, char y)
 {
-    cursorPos = ((int)y<<6) + x;
+    cursorPos = vidoff(x, y);
 }
 
 void cls()
 {
-    memset(VIDRAM, ' ', VIDSIZE);
+    if (cols80)
+        memset(VIDRAM80, ' ', VIDSIZE80);
+    else
+        memset(VIDRAM, ' ', VIDSIZE);
+    
     cursorPos = 0;
     setWide(0);
 }
@@ -187,34 +267,6 @@ void random()
     __endasm;
 }
 #endif
-
-static uchar getModel()
-{
-    // code thanks to gp2000
-    // return 1, 3 or 4 for Model I, III or 4.
-
-    __asm
-	in	a,(0xff)	; read OUTMOD latches
-	ld	b,a		; save original settings
-	ld	c,#0x60
-	xor	c		; invert CPU Fast, DISWAIT
-	out	(0xec),a	; set latches
-	in	a,(0xff)	; read latches
-	xor	c		; flip to original value
-	xor	b		; compare against original
-	ld	c,#0xec
-	out	(c),b		; return original settings
-	rlca
-	rlca
-	jr	nc,m4		; CPU Fast unchanged, must be Model 4
-	rlca
-	ld	l,#3
-	ret	nc		; DISWAIT same, Model III
-	ld	l,#1		; otherwise, its a Model I
-	ret
-m4:	ld	l,#4
-     __endasm;
-}
 
 static void outPort(uchar port, uchar val)
 {
@@ -238,39 +290,67 @@ static uchar inPort(uchar port)
     __endasm;
 }
 
-static void hookClockInts()
+static uchar ramAt(uchar* p)
 {
     __asm
-        di
-
-        ;; XXX hack disable clock ints for now...
-        xor  a
-        out  (0xe0),a
-        ei
-        ret
-
-      ld      hl,(0x4013)
-      ld      (.clockchain+1),hl
-      ld      hl,#.clockirq
-      ld      (0x4013),hl
-      ei
-      ret
-
-.clockirq:
-.clockchain:
-        jp      0
+        pop bc
+        pop hl
+        push hl      // p
+        push bc
+        inc (hl)     
+        ld  a,(hl)
+        dec (hl)
+        sub (hl)
+        ld  l, a
     __endasm;
+}
 
+static uchar getModel()
+{
+    uchar m = 1;
+
+    /* model 3:
+       ROM from 0000 to 37FF
+    */
+
+    // change to M4 bank 1, which maps RAM over 14K ROM
+    outPort(0x84, 1); 
+
+    if (ramAt(0x2000))
+    {
+        // this is a 4 or 4P.
+        // NB: leave at bank 1 for now...
+        m = 4;
+    }
+    else
+    {
+        // M3 or M1
+        uchar v = inPort(0xff);
+        
+        // toggle DISWAIT
+        outPort(0xec, v ^ 0x20);
+
+        if (inPort(0xff) != v)
+        {
+            // changed, we are M3
+            outPort(0xEC, v);  // restore original
+            m = 3;
+        }
+    }
+
+    return m;
 }
 
 static void setSpeed(uchar fast)
 {
-    if (TRSModel > 1)
+    if (TRSModel >= 4)
     {
+        // M4 runs at 2.02752 or 4.05504 MHz
         outPort(0xec, fast ? 0x40 : 0);
     }
 }
 
+#if 0
 static void setModel3()
 {
  // from gp2000:
@@ -310,14 +390,29 @@ static void setModel3()
  // the Model III to sound the same as the Model I.
 
 
-    outPort(0x84, 0); // 40 column
-    setSpeed(0); // slow
+    // this does doesnt work on LDOS
+    __asm
+        di
+        ld  a,#0x65
+        RST #0x28       //@FLAGS SVC
+        xor  a
+        ld 14(iy),a     // OPREG$ image
+        out (#0x84),a   // select base memory map
+        ld 12(iy),a     // MODOUT image
+        out (#0xec),a   // slow speed
+        ei
+     __endasm;
+
+        outPort(0x84, 0); // 40 column
+        setSpeed(0); // slow
 }
+#endif
 
 #endif
 
 // row 0..7
 #define KBBASE ((uchar*)0x3800)
+#define KBBASE80 ((uchar*)0xf400)
 
 static uchar readKeyRowCol(uchar* rowcol)
 {
@@ -327,7 +422,7 @@ static uchar readKeyRowCol(uchar* rowcol)
     
     for (i = 0; i < 8; ++i)
     {
-        uchar v = *(KBBASE + r);
+        uchar v = cols80 ? *(KBBASE80 + r) : *(KBBASE + r);
         r <<= 1;
         
         if (v != kbrows[i])
@@ -422,15 +517,18 @@ uchar getline2(char* buf, uchar nmax)
         char c;
 
         // emit prompt
-        VIDRAM[cursorPos] = '_';
+        vidRam[cursorPos] = '_';
         
         // wait for key
         c = getkey();
 
         if (c == '\b') // backspace
         {
-            if (pos--)
+            if (pos)
+            {
+                --pos;
                 outchar(c);
+            }
         }
         else 
         {
@@ -446,13 +544,6 @@ uchar getline2(char* buf, uchar nmax)
 }
 
 
-void lastLine()
-{
-    // put the cursor on the last line and clear it
-
-    memset(VIDRAM + VIDSIZE - 64, ' ', 64);
-    cursorPos = VIDSIZE - 64;
-}
 
 void setWide(uchar v)
 {
@@ -463,35 +554,42 @@ void setWide(uchar v)
     }
     else
     {
-        // get current settings
+        // get MODOUT (mirror of port 0xec)
+        // NB: do not read from 0xEC
         uchar m = inPort(0xff);
         
-        // set or clear bit 
+        // set or clear MODSEL bit 
         if (v) m |= 4;
         else m &= ~4;
         
-        // other models
         outPort(0xEC, m);
     }
 }
 
 void initModel()
 {
+    cols80 = 0;
+    vidRam = VIDRAM;
+    
     TRSModel = getModel();
 
     if (TRSModel >= 4)
     {
-        //hookClockInts();
-    
-        // put into model 3 mode
-        setModel3();
+        cols80 = 1;
+        vidRam = VIDRAM80;
+
+        outPort(0x84, 6); // M4 map, 80cols
+        setSpeed(0); // slow (for now..)
 
     }
     else if (TRSModel == 1)
     {
         // HACK to prevent the sound routines from enabling interrupts
-        clobber_rti();
+        //clobber_rti();
     }
+
+    // leave interrupts off in all cases for now...
+    clobber_rti();
 }
 
 #endif

@@ -33,7 +33,9 @@ void outsWide(const char* s);
 uchar getline2(char* buf, uchar nmax);
 void lastLine();
 char readKey();
+extern uchar* vidaddr(char x, char y);
 
 extern uchar TRSModel;
+extern uchar cols80;
 
 
