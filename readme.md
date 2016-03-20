@@ -6,7 +6,9 @@ _TREK14_ is a newly developed "classic startrek" game for the [TRS-80](https://e
 
 The graphics are retro and blocky, just like the orignals. 
 
-![Short Range Scan](http://s3-eu-west-1.amazonaws.com/stvle/5efee7216f98c0c6e38a6daa2f8b38e2.png "Short Range Scan")
+![](http://s3-eu-west-1.amazonaws.com/stvle/1823b86f4dbff853d738947457cfa1d5.png)
+
+![](http://s3-eu-west-1.amazonaws.com/stvle/45efc4eb8f8e9029cdd893499b2b4627.png)
 
 ## Installing/Running
 
@@ -105,6 +107,63 @@ Federation ships have up to twice the energy capacity of enemies. Phases are the
 ### The Manual
 
 For more details, see [doc/manual.txt](http://github.com/voidware/trek14/blob/master/doc/manual.txt).
+
+### Changes/News/Updates
+
+#### 4/4P 80 Column mode support has begun
+
+4/4P no longer run in model III mode. Although, right now, they're still running at 2MHz rather than 4. This will be remedied once I revisit the sound code.
+
+Driving the screen is now totally ROM and DOS free and are 64/80 column aware. Consequently, the 4/4P display comes up in the top left with spare space to the right side and below. There are plans to use this space.
+
+#### Keyboard driving ROM/DOS Free
+
+We now scan the keyboard matrix directly. This is helped by the fact that, for now, we can ignore states such as shift and control, since these are not required for the game.
+
+#### Improved Klingon movement AI
+
+Enemies can now route around obstacles. They will chase you round a planet or star, for example. Klingons can also recharge from stars, from which they have to be adjacent to do so. A, low on power, enemy will route to a star to recharge, then attack again, if given the opportunity.
+
+#### Klingon Dodge
+
+Klingons get a chance to dodge a photon torpedo. A good captain knows this and can accommodate in battle. However, be sure not to hit a star or a planet as this is a breach of the prime directive.
+
+#### Battle screen shake
+
+Wide screen mode is fixed for III/4/4P. Used in announcing alerts and "screen shake" during battle impacts, for added effect.
+
+#### Improved Dialogue
+
+Reports now come from named members of your crew, who now address you in the associated vernacular. New "story" based text generation allows alternative words and phrases to be used in messages. This adds variety and some levity to the dialogue. Expansion in this area is planned. Also perhaps to move the text patterns out of main memory.
+
+#### Score and Review
+
+You now receive an end-game report when you dock with HQ. The report is currently limited, but the plan is to make it relevant to your performance.
+
+#### New Game?
+
+When the game ends, you can now replay without exiting. Exit to DOS may soon not be possible as part of the take-over-the-machine approach. For now, you still can exit to DOS.
+
+#### Explosion!
+
+A fablous explosion with sound is implemented for entitiles. 
+
+#### More on SR Scan
+
+Short range scan now displays shield energy and RED/GREEN condition.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
