@@ -183,7 +183,7 @@ void nextLine()
         if (a >= VIDSIZE80)
         {
             // scroll
-            memmove(VIDRAM80, VIDRAM + 80, 23*80);
+            memmove(VIDRAM80, VIDRAM80 + 80, 23*80);
 
             // place at last line and clear line
             lastLine();
@@ -229,14 +229,11 @@ void outchar(char c)
     {
         *p = c;
         ++a;
-        if (a >= VIDSIZE)
+        if (a >= VIDSIZE && !cols80 || a >= VIDSIZE80)
         {
-            if (!cols80 || a >= VIDSIZE80)
-            {
-                // scroll and place on last line
-                nextLine();
-                return;
-            }
+            // scroll and place on last line
+            nextLine();
+            return;
         }
     }
     cursorPos = a;
@@ -251,9 +248,13 @@ void setcursor(char x, char y)
 void cls()
 {
     if (cols80)
+    {
         memset(VIDRAM80, ' ', VIDSIZE80);
+    }
     else
+    {
         memset(VIDRAM, ' ', VIDSIZE);
+    }
     
     cursorPos = 0;
     setWide(0);
@@ -316,7 +317,7 @@ static uchar getModel()
     // change to M4 bank 1, which maps RAM over 14K ROM
     outPort(0x84, 1); 
 
-    if (ramAt(0x2000))
+    if (ramAt((uchar*)0x2000))
     {
         // this is a 4 or 4P.
         // NB: leave at bank 1 for now...
@@ -561,7 +562,7 @@ void setWide(uchar v)
         // set or clear MODSEL bit 
         if (v) m |= 4;
         else m &= ~4;
-        
+
         outPort(0xEC, m);
     }
 }
@@ -570,15 +571,15 @@ void initModel()
 {
     cols80 = 0;
     vidRam = VIDRAM;
-    
+
     TRSModel = getModel();
 
     if (TRSModel >= 4)
     {
         cols80 = 1;
         vidRam = VIDRAM80;
-
-        outPort(0x84, 6); // M4 map, 80cols
+        
+        outPort(0x84, 0x86); // M4 map, 80cols
         setSpeed(0); // slow (for now..)
 
     }
