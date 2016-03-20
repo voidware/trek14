@@ -504,8 +504,6 @@ void setWide(uchar v)
     }
 }
 
-static uint oldstack;
-
 void initModel()
 {
     cols80 = 0;
@@ -521,19 +519,16 @@ void initModel()
         cols80 = 1;
         vidRam = VIDRAM80;
         
-        //outPort(0x84, 0x86); // M4 map, 80cols
+        outPort(0x84, 0x86); // M4 map, 80cols
         setSpeed(0); // slow (for now..)
-
-        __asm
-            pop hl
-            ld  (#_oldstack),sp
-            ld  sp,#0xf400
-            ld  a,#0x86
-            out (#0x84),a
-            push hl
-        __endasm;
-     
     }
+
+    // locate the stack below the program
+    __asm
+        pop hl
+        ld sp,#0x5000
+        push hl
+    __endasm;
 }
 
 #endif

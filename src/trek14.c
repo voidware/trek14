@@ -38,7 +38,7 @@ static void startGame()
     printf("TRS-80 Model %d\n", (int)TRSModel);
 
 #ifdef SKIP
-    printf("Stack %x\n", ((int)&v) + 7);
+    printf("Stack %x\n", ((int)&v) + 4);
 #endif
 
     outs("\n\nTrek 2014!\n");
@@ -61,10 +61,10 @@ static void startGame()
 
 void main()
 {
+    initModel();
+    
     // initialise our own mini-clib
     libcInit();
-
-    initModel();
     
     do
     {
