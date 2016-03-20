@@ -40,6 +40,10 @@ typedef int int16;
 #define HIGH32K 0xBFFF
 #define HIGH16K 0x7FFF
 
+// row 0..7
+#define KBBASE ((uchar*)0x3800)
+#define KBBASE80 ((uchar*)0xf400)
+
 // TRSDOS and LDOS location of HIGH$
 #define DOS_HIGH ((int*)0x4049)
 

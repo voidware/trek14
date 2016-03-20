@@ -39,14 +39,14 @@ init:
         ;;
         ;; Otherwise see 48k, 32k, 16k has RAM by modifiying it.
 
-        ld      hl,#0x4049      ;LDOS/TRSDOS HIGH$
-        ld      e,(hl)
-        inc     hl
-        ld      d,(hl)
-        ex      de,hl           ;hl = HIGH$
-        ld      a,h
-        or      a,l
-        jr      NZ,00100$       ; high != 0, so use it
+;        ld      hl,#0x4049      ;LDOS/TRSDOS HIGH$
+;        ld      e,(hl)
+;        inc     hl
+;        ld      d,(hl)
+;        ex      de,hl           ;hl = HIGH$
+;        ld      a,h
+;        or      a,l
+;        jr      NZ,00100$       ; high != 0, so use it
 
         ;; check 48 top of ram
         ld      hl,#0xffff       ;48k top
