@@ -30,18 +30,15 @@
 #include "alert.h"
 #include "srscan.h"
 #include "story.h"
+#include "plot.h"
+#include "utils.h"
 
-#define OP_MIN  0x80
+#define OP_MIN  0x7f
 #define OPERATIONAL(_i)  (operations[_i] >= OP_MIN)
 
 // operational level of each facility
 uchar operations[L_COUNT];
 
-void repairAll()
-{
-    // set facilities all operational, but no messages
-    memset(operations, 0xff, sizeof(operations));
-}
 
 static const char* opTable[] = 
 {
@@ -52,6 +49,17 @@ static const char* opTable[] =
     "Warp Drive",
     "Phasers",
     "Long Range Scan",
+};
+
+static const char* opTableShort[] = 
+{
+    "SH",
+    "SR Scan:  ",
+    "Impulse:  ",
+    "Torpedoes:",
+    "Warp:     ",
+    "Phasers:  ",
+    "LR Scan:  ",
 };
 
 static void emitStory(const char* m)
@@ -68,7 +76,7 @@ static void emitStory(const char* m)
     story(m, &st);    
 }
 
-void addop(uchar op, uchar v)
+static void addop(uchar op, uchar v)
 {
     // add `v' units to operation `op'
     uchar u = operations[op];
@@ -97,7 +105,28 @@ uchar opCheck(uchar i)
     return u;
 }
 
-void subop(uchar op, int val)
+static void redrawOperation(uchar op)
+{
+    uint v = ((uint)operations[op] * 100)/255;
+    printfat(65,op,"%s %3d%%", opTableShort[op], v);    
+}
+
+void redrawSidebar()
+{
+    uchar i;
+
+    plotVLine(129,0, 15*3, 1);
+    printfat(65,0, "Operations");
+    for (i = 1; i < L_COUNT; ++i) redrawOperation(i);
+}
+
+void repairAll()
+{
+    // set facilities all operational, but no messages
+    memset(operations, 0xff, sizeof(operations));
+}
+
+static void subop(uchar op, int val)
 {
     // subtract (16 bit) value from operation.
     
@@ -117,29 +146,36 @@ void subop(uchar op, int val)
         // signal we should redraw SR view
         redrawsr = true;
     }
+    else redrawOperation(op);
 }
 
-void repair(uchar r)
+static void repair(uchar r)
 {
     // distribute `r' units of repair amongst defective operations
     // in order of priority.
-    uchar i;
-    for (i = 1; i < L_COUNT; ++i)
+    uchar i, j;
+    
+    // make two passes
+    for (j = 0; j < 2; ++j)
     {
-        uchar v = operations[i];
-        if (v < OP_MIN)
+        for (i = 1; i < L_COUNT; ++i)
         {
-            v = OP_MIN - v;
-            if (r < v) v = r;
-            operations[i] += v;
-            if (OPERATIONAL(i))
+            char v = (j ? 0xff : OP_MIN) - operations[i];
+            if (v > 0)
             {
-                // repaired!
-                char buf[64];
-                sprintf(buf, "^4: ^b%d now [operational|repaired|working], ^0", (int)i);
-                emitStory(buf);
+                if (r < v) v = r;
+                r -= v;
+                operations[i] += v;
+                redrawOperation(i);
+                if (!j && OPERATIONAL(i))
+                {
+                    // repaired!
+                    char buf[64];
+                    sprintf(buf, "^4: ^b%d now [operational|repaired|working], ^0", (int)i);
+                    emitStory(buf);
+                }
             }
-            r -= v;
+            if (!r) return;
         }
     }
 }
@@ -156,7 +192,6 @@ void takeDamage(int dam)
         // shake the ship
         for (j = 0; j < 200; ++j) setWide(i & 1);
     }
-    
     
     // absorption of shields
     dam -= s;
@@ -222,5 +257,8 @@ void opTick()
     repair(10);
     addop(L_SHIELDS, 10);
 }
+
+
+
 
 

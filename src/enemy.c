@@ -35,9 +35,6 @@
 #include "sound.h"
 #include "plot.h"
 
-// working buffer for ai 
-uchar abuf[1024];
-
 static uchar setMap(uchar* map, uchar x, uchar y)
 {
     // `map' is 128 bytes of memory representing one bit for every
@@ -59,6 +56,7 @@ static uchar getMap(uchar* map, uchar x, uchar y)
 
 typedef struct
 {
+    uchar*      abuf;
     uchar*      map;
     uchar       sp;
     uchar       xt;
@@ -69,10 +67,13 @@ typedef struct
     uchar       y1;
     uchar*      visit;
     uchar*      target;
-    
 } routing;
 
-static void prepSectorBuf(routing* rt, uchar* src, uchar type)
+// originally a parameter to routing functions, but cheaper to make
+// single static version.
+static routing rt;
+
+static void prepSectorBuf(uchar* src, uchar type)
 {
     // prepare a bit buffer with the sector barrier map
     // also identify the target
@@ -80,7 +81,7 @@ static void prepSectorBuf(routing* rt, uchar* src, uchar type)
     uchar** epp;
     uchar sw = getWidth(src);
 
-    memset(rt->map, 0, 128);
+    memset(rt.map, 0, 128);
     for (epp = quadrant; *epp; ++epp)
     {
         uchar x, y;
@@ -93,9 +94,9 @@ static void prepSectorBuf(routing* rt, uchar* src, uchar type)
         if (ENT_TYPE(*epp) == type)
         {
             // set target, also not a barrier
-            rt->xt = x;
-            rt->yt = y;
-            rt->target = *epp;
+            rt.xt = x;
+            rt.yt = y;
+            rt.target = *epp;
         }
         else
         {
@@ -112,17 +113,19 @@ static void prepSectorBuf(routing* rt, uchar* src, uchar type)
             while (w)
             {
                 --w;
-                setMap(rt->map, x++, y);
+                setMap(rt.map, x++, y);
             }
         }
     }
 }
 
-static uchar push(routing* rt, uchar x, uchar y, uchar d, uchar src)
+#define ABUF_SIZE  1024
+
+static uchar push(uchar x, uchar y, uchar d, uchar src)
 {
-    uchar* a = abuf + (((int)rt->sp)<<2);
-    if (a > abuf + sizeof(abuf) - 4) return 0;
-    ++rt->sp;
+    uchar* a = rt.abuf + (((int)rt.sp)<<2);
+    if (a > rt.abuf + ABUF_SIZE - 4) return 0;
+    ++rt.sp;
     
     *a++ = x;
     *a++ = y;
@@ -139,7 +142,7 @@ static const char xytable[] =
     -1, 1, 0, 1, 1, 1,
 };
 
-static void router(routing* rt)
+static void router()
 {
     uchar d = 0;
     uchar d2 = 0;
@@ -154,7 +157,7 @@ static void router(routing* rt)
         if (d == d2)
         {
             ks = 0;
-            ke = rt->sp;
+            ke = rt.sp;
             d = 127; // max
             j = 0;
 
@@ -162,8 +165,8 @@ static void router(routing* rt)
             for (k = 0; k < ke; ++k, j+=4)
             {
                 // min node not yet expanded
-                if (abuf[j+2] < d && !getMap(rt->map, abuf[j], abuf[j+1]))
-                    d = abuf[j+2];
+                if (rt.abuf[j+2] < d && !getMap(rt.map, rt.abuf[j], rt.abuf[j+1]))
+                    d = rt.abuf[j+2];
                 
             }
             d2 = d;
@@ -177,21 +180,21 @@ static void router(routing* rt)
         {
             // min is in new range
             ks = ke;
-            ke = rt->sp;
+            ke = rt.sp;
             d = d2;
         }
         
         j = ((int)ks)<<2;        
         for (k = ks; k < ke; ++k, j += 4)
         {
-            if (abuf[j+2] == d)
+            if (rt.abuf[j+2] == d)
             {
-                char xb = abuf[j];
-                char yb = abuf[j+1];
+                char xb = rt.abuf[j];
+                char yb = rt.abuf[j+1];
                 uchar i;
 
                 // mark expanded
-                if (setMap(rt->map, xb, yb)) continue;
+                if (setMap(rt.map, xb, yb)) continue;
                 
                 for (i = 0; i < sizeof(xytable); i += 2)
                 {
@@ -200,20 +203,20 @@ static void router(routing* rt)
                     
                     if (x >= 0 && x < 64 && y >= 0 && y < 16)
                     {
-                        uchar di = distm(x, y, rt->xt, rt->yt);
+                        uchar di = distm(x, y, rt.xt, rt.yt);
                         if (!di)
                         {
                             // unwind 
                             for (;;)
                             {
-                                x = abuf[j];
-                                y = abuf[j+1];
+                                x = rt.abuf[j];
+                                y = rt.abuf[j+1];
                                 //printfat(x, y, "x");
-                                j = ((int)abuf[j+3])<<2;
+                                j = ((int)rt.abuf[j+3])<<2;
                                 if (!j)
                                 {
-                                    rt->dx = x - rt->x1;
-                                    rt->dy = y - rt->y1;    
+                                    rt.dx = x - rt.x1;
+                                    rt.dy = y - rt.y1;    
                                     break;
                                 }
                             }
@@ -222,10 +225,10 @@ static void router(routing* rt)
                         }
 
                         // if not already visited, expand 
-                        if (!setMap(rt->visit, x, y))
+                        if (!setMap(rt.visit, x, y))
                         {
                             if (di < d2) d2 = di; // find next min
-                            if (!push(rt, x, y, di, k))
+                            if (!push(x, y, di, k))
                             {
                                 // failed, out of working buffer
                                 //printfat(15,15, "FAILED!\n");
@@ -247,12 +250,12 @@ static void klingonFire(uchar* kp)
     // fire if have at least half max energy
     if (ke >= ENT_ENERGYK_LIMIT/2)
     {
-        uchar dist = distance(kp, galaxy);
-
+        uchar dist = distance(kp, galaxy)>>1;
+        
         // more likely to fire the closer the distance.
         uchar pow = 1;
         while (pow < dist) pow <<= 1; // 2^k >= dist
-        
+
         if (!(rand16() & (pow-1)))
         {
             // fire all energy, but keep 256
@@ -312,7 +315,6 @@ static uchar klingonMove(uchar* kp)
     // AI for Klingon movement
     
     char ttype = ENT_TYPE_FEDERATION;
-    routing rt;
 
     rt.dx = 0;
     rt.dy = 0;
@@ -333,26 +335,29 @@ static uchar klingonMove(uchar* kp)
     {
         // barrier and expanded node map.
         // This two maps are bitmaps of the sector locations
-        // XX dangerously using too much stack here.
+
+        // note 1.5K of stack here!!
         uchar map[128];
         uchar visit[128];
+        uchar abuf[ABUF_SIZE];
         
+        rt.abuf = abuf;
         rt.map = map;
         rt.sp = 0;
         rt.visit = visit;
 
         // head for target
-        prepSectorBuf(&rt, kp, ttype);
+        prepSectorBuf(kp, ttype);
 
         // visit map starts same as barrier
         memmove(visit, map, 128);
 
         // push initial position and mark visited
-        push(&rt, rt.x1, rt.y1, 100, 0);
+        push(rt.x1, rt.y1, 100, 0);
         setMap(visit, rt.x1, rt.y1);
 
         // route to target
-        router(&rt);
+        router();
     }
     else
     {

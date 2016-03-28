@@ -14,9 +14,6 @@ ASFLAGS = -l
 ## set up your path to where the SDCC Z80 lib is
 LIBS = -l i:\sdcc\lib\z80\z80.lib
 
-#16k machine
-#LDFLAGS = -mjwx -b _CODE=0x4300 -b _DATA=0x7600
-
 # 48k dos machine
 LDFLAGS = -mjwx -b _CODE=0x5200 $(LIBS)
 

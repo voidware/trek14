@@ -252,6 +252,7 @@ void dockCommand()
         // full house
         ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
         repairAll();
+        redrawSidebar();
         messageCode(MSG_CODE_DOCKED);
 
         if (QX == 7 && QY == 7 && QZ == 2)

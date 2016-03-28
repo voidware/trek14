@@ -59,13 +59,8 @@ static void startGame()
     command();
 }
 
-void main()
+static void mainloop()
 {
-    initModel();
-    
-    // initialise our own mini-clib
-    libcInit();
-    
     do
     {
         startGame();
@@ -78,5 +73,14 @@ void main()
             if (c == 'Y') break; 
         }
     } while (!gameover);
+}
 
+void main()
+{
+    initModel();
+    
+    // initialise our own mini-clib
+    libcInit();
+    
+    mainloop();
 }

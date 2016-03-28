@@ -24,56 +24,6 @@
 #include "os.h"
 #include "sound.h" // clobber_rti
 
-// ---- OS FUNCTIONS -----------------------------------------------------
-
-#ifdef _WIN32
-
-#include <stdio.h>
-
-void outchar(char c)
-{
-    putchar(c);
-}
-
-void outcharat(uchar x, uchar y, uchar c)
-{
-    setcursor(x,y);
-    outchar(c);
-}
-
-char getkey()
-{
-    char c;
-    scanf("%c", &c);
-    return c;
-}
-
-void setcursor(uchar x, uchar y)
-{
-}
-
-static void getcursor(uchar* x, uchar* y)
-{
-    *x = 0;
-    *y = 0;
-}
-
-void cls()
-{
-}
-
-static uchar getline(char* buf, uchar nmax)
-{
-    char tbuf[256];
-    int m = scanf("%s", tbuf);
-    strncpy(buf, tbuf, m);
-    return m;
-}
-
-#else
-
-/* trs80 ----------------------------------------- */
-
 #if 0
 // this was an attempt at roll-your-own callee saves
 typedef void (*Fv)();
@@ -120,7 +70,6 @@ __asm                                           \
  __endasm;                                      \
     _w = WP(0);                                 \
 }
-
 #endif
 
 
@@ -129,24 +78,52 @@ static uint cursorPos;
 
 // are we in 80 col mode?
 uchar cols80;
+
+// location of video ram 0x3c00 or 0xf800
 static uchar* vidRam;
 
 // what model? (set up by initModel)
 uchar TRSModel;
 
-static uint vidoff(char x, char y)
+static uchar sidebar[16*16];
+static uchar sidemode;
+
+static uint vidoff(uchar x, uchar y)
 {
-    uint a = x + ((int)y<<6);
-    if (cols80)
-        a += (int)y<<4;
-    return a;
+    uint a;
+    sidemode = 0;
+
+    a = (uint)y<<6;
+    if (cols80) a += (uint)y<<4;
+    else
+    {
+        if (x >= 64)
+        {
+            x -= 64;
+            a = ((uint)y<<4);
+            sidemode = 1;
+        }
+    }
+    return a + x;
 }
 
-uchar* vidaddr(char x, char y)
+static uchar* vidaddrfor(uint a)
 {
-    uint a = vidoff(x, y);
-    if (a >= VIDSIZE && !cols80 || a >= VIDSIZE80) return 0;
-    return vidRam + a;
+    if (sidemode)
+    {
+        return sidebar + a;
+    }
+    else
+    {
+        if (a >= VIDSIZE && !cols80 || a >= VIDSIZE80) return 0;
+        return vidRam + a;
+    }
+}
+
+uchar* vidaddr(uchar x, uchar y)
+{
+    // return the video address of (x,y) or 0 if off end.
+    return vidaddrfor(vidoff(x,y));
 }
 
 void outcharat(uchar x, uchar y, uchar c)
@@ -177,7 +154,7 @@ void nextLine()
         // bump a to the next multiple of 80
         uint v = 80;
         if (a >= 800) v += 800;  // skip around half
-        while (v <= a) v += 80;
+        while (v <= a) v += 80; // until next line
         a = v;
 
         if (a >= VIDSIZE80)
@@ -192,15 +169,24 @@ void nextLine()
     }
     else
     {
-        a = (a + 64) & ~63;
-        if (a >= VIDSIZE)
+        if (sidemode)
         {
-            // scroll
-            memmove(VIDRAM, VIDRAM + 64, 15*64);
-
-            // place at last line and clear line
-            lastLine();
-            return;
+            // next line
+            // NB: no test for overflow or scroll
+            a = (a + 16) & ~15;
+        }
+        else
+        {
+            a = (a + 64) & ~63;  // start of next line
+            if (a >= VIDSIZE)
+            {
+                // scroll
+                memmove(VIDRAM, VIDRAM + 64, 15*64);
+                
+                // place at last line and clear line
+                lastLine();
+                return;
+            }
         }
     }
     cursorPos = a;
@@ -209,7 +195,7 @@ void nextLine()
 void outchar(char c)
 {
     uint a = cursorPos;
-    uchar* p = vidRam + a;
+    uchar* p = vidaddrfor(a);
     
     if (c == '\b')
     {
@@ -239,8 +225,7 @@ void outchar(char c)
     cursorPos = a;
 }
 
-
-void setcursor(char x, char y)
+void setcursor(uchar x, uchar y)
 {
     cursorPos = vidoff(x, y);
 }
@@ -248,26 +233,17 @@ void setcursor(char x, char y)
 void cls()
 {
     if (cols80)
-    {
         memset(VIDRAM80, ' ', VIDSIZE80);
-    }
     else
     {
         memset(VIDRAM, ' ', VIDSIZE);
+        memset(sidebar, ' ', sizeof(sidebar));
     }
-    
-    cursorPos = 0;
+
+    setcursor(0,0);
     setWide(0);
 }
 
-#if 0
-void random()
-{
-    __asm
-    call #0x1d3
-    __endasm;
-}
-#endif
 
 static void outPort(uchar port, uchar val)
 {
@@ -309,14 +285,12 @@ static uchar ramAt(uchar* p)
 static uchar getModel()
 {
     uchar m = 1;
-
-    /* model 3:
-       ROM from 0000 to 37FF
-    */
-
+    
     // change to M4 bank 1, which maps RAM over 14K ROM
+    // if we _are_ M4?
     outPort(0x84, 1); 
 
+    // if we have RAM, then M4
     if (ramAt((uchar*)0x2000))
     {
         // this is a 4 or 4P.
@@ -331,7 +305,7 @@ static uchar getModel()
         // toggle DISWAIT
         outPort(0xec, v ^ 0x20);
 
-        if (inPort(0xff) != v)
+        if (inPort(0xff) != v)  // read back from mirror
         {
             // changed, we are M3
             outPort(0xEC, v);  // restore original
@@ -350,7 +324,6 @@ static void setSpeed(uchar fast)
         outPort(0xec, fast ? 0x40 : 0);
     }
 }
-#endif
 
 static uchar readKeyRowCol(uchar* rowcol)
 {
@@ -417,8 +390,6 @@ char getkey()
     }
 }
 
-// ---- LIB FUNCTIONS -----------------------------------------------------
-
 void outs(const char* s)
 {
     while (*s) outchar(*s++);
@@ -426,9 +397,12 @@ void outs(const char* s)
 
 void outsWide(const char* s)
 {
+    // write text in wide mode
+    
     // arrange even location
     if (cursorPos & 1) outchar(' ');
     
+    // write each char followed by a space
     while (*s)
     {
         outchar(*s++);
@@ -436,13 +410,6 @@ void outsWide(const char* s)
     }
 }
 
-#ifdef _WIN32
-uchar getline2(char* buf, uchar nmax)
-{
-    return getline(buf, nmax);
-}
-
-#else
 uchar getline2(char* buf, uchar nmax)
 {
     // our own version of `getline' 
@@ -475,12 +442,11 @@ uchar getline2(char* buf, uchar nmax)
                 buf[pos++] = c;
                 outchar(c);
             }
-            if (c == '\r') break;
+            if (c == '\r') break;  // enter hit
         }
     }
     return pos;
 }
-
 
 
 void setWide(uchar v)
@@ -504,6 +470,26 @@ void setWide(uchar v)
     }
 }
 
+static uint alloca_ret;
+
+uchar* alloca(uint a)
+{
+    __asm
+        pop  bc         // ret
+        pop  de         // a
+        push de
+        ld   (_alloca_ret),sp  // point to a is result
+        xor a
+        ld   h,a
+        ld   l,a        // hl = 0
+        sbc  hl,de      // hl = -a
+        add  hl,sp      // hl = sp - a
+        ld   sp,hl      
+        push bc
+    __endasm;
+    return alloca_ret;
+}
+
 void initModel()
 {
     cols80 = 0;
@@ -519,19 +505,19 @@ void initModel()
         cols80 = 1;
         vidRam = VIDRAM80;
         
-        outPort(0x84, 0x86); // M4 map, 80cols
+        outPort(0x84, 0x86); // M4 map, 80cols, page 1
         setSpeed(0); // slow (for now..)
     }
 
     // locate the stack below the program
+    // SP is set to load address of code
+    // we want to have enough stack. ~2k ok for now.
     __asm
         pop hl
-        ld sp,#0x5000
+        ld sp,#0x5200
         push hl
     __endasm;
 }
-
-#endif
 
 
 

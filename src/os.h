@@ -23,7 +23,7 @@
 void outchar(char c);
 void outcharat(uchar x, uchar y, uchar c);
 char getkey();
-void setcursor(char x, char y);
+void setcursor(uchar x, uchar y);
 void cls();
 void setWide(uchar v);
 void initModel();
@@ -34,7 +34,8 @@ void outsWide(const char* s);
 uchar getline2(char* buf, uchar nmax);
 void lastLine();
 char readKey();
-extern uchar* vidaddr(char x, char y);
+uchar* vidaddr(uchar x, uchar y);
+uchar* alloca(uint a);
 
 extern uchar TRSModel;
 extern uchar cols80;

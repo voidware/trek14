@@ -214,17 +214,19 @@ char srScan(char k)
     tick();
     showState();
 
-    printfat(0,0, "Short Range Scan, Quad %d%d%d.",
-             (int)QX, (int)QY, (int)QZ);
+    printfat(0,0, "Short Range Scan, Quad %d%d%d.", (int)QX, (int)QY, (int)QZ);
 
     // we are redrawing, so clear this
     redrawsr = false;
 
+    redrawSidebar();
+
     for (j = 1; j <= 14; ++j)
     {
         setcursor(0,j);        
-        for (i = 0; i < 32; ++i) { outchar('.'); outchar(' '); }
+        for (i = 0; i < 32; ++i) outs(". ");
     }
+
 
     if (opCheckSR())
     {
