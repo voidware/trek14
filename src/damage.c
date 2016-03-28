@@ -33,7 +33,7 @@
 #include "plot.h"
 #include "utils.h"
 
-#define OP_MIN  0x7f
+#define OP_MIN  0x80
 #define OPERATIONAL(_i)  (operations[_i] >= OP_MIN)
 
 // operational level of each facility
@@ -107,8 +107,10 @@ uchar opCheck(uchar i)
 
 static void redrawOperation(uchar op)
 {
-    uint v = ((uint)operations[op] * 100)/255;
-    printfat(65,op,"%s %3d%%", opTableShort[op], v);    
+    // map operations from -100% to +100% with OP_MIN at 1%
+    // so, ((op - 127)*100)/128, then round as ((op - 127)*100 + 64)/128
+    int v = ((int)((uint)operations[op]*100) - 12636)>>7;
+    printfat(65,op,"%s%+4d%%", opTableShort[op], v);    
 }
 
 void redrawSidebar()
@@ -155,14 +157,16 @@ static void repair(uchar r)
     // in order of priority.
     uchar i, j;
     
-    // make two passes
+    // make two passes. Scotty fixes anything inoperative first, then
+    // fixes things not 100% operational.
     for (j = 0; j < 2; ++j)
     {
         for (i = 1; i < L_COUNT; ++i)
         {
-            char v = (j ? 0xff : OP_MIN) - operations[i];
-            if (v > 0)
+            uchar v = j ? 0xff : OP_MIN;
+            if (v > operations[i])
             {
+                v -= operations[i];
                 if (r < v) v = r;
                 r -= v;
                 operations[i] += v;
