@@ -85,6 +85,10 @@ static uchar* vidRam;
 // what model? (set up by initModel)
 uchar TRSModel;
 
+// How much memory in K  (initModel)
+uchar TRSMemory;
+uchar* TRSMemoryFail;
+
 static uchar sidebar[16*16];
 static uchar sidemode;
 
@@ -269,6 +273,7 @@ static uchar inPort(uchar port)
 
 static uchar ramAt(uchar* p)
 {
+    // return 1 if we have RAM at address `p', 0 otherwise
     __asm
         pop bc
         pop hl
@@ -280,6 +285,41 @@ static uchar ramAt(uchar* p)
         sub (hl)
         ld  l, a
     __endasm;
+}
+
+static uchar testBlock(uchar a)
+{
+    // return 1, ok, 0 fail
+    uchar* p = (uchar*)(a << 8);
+    uint r;
+    for (;;)
+    {
+        r = ramAt(p);
+        if (!r) 
+        {
+            TRSMemoryFail = p;
+            break;
+        }
+        ++p;
+        if (((uchar)p) == 0) break;
+    } 
+    return r;
+}
+
+#define ADDR(_n) ((uint)&_n)
+#define ADDRH(_n) ((uchar)(ADDR(_n)>>8))
+
+uchar ramTest(uchar a, uchar n)
+{
+    // test `n' blocks of 256 at `a'00
+    uchar r = 1;
+    do
+    {
+        if (a < ADDRH(ramAt) || a > ADDRH(testBlock)) r = testBlock(a);
+        ++a;
+        --n;
+    } while (r && n);
+    return r;
 }
 
 static uchar getModel()
@@ -399,7 +439,7 @@ void outsWide(const char* s)
 {
     // write text in wide mode
     
-    // arrange even location
+   // arrange even location
     if (cursorPos & 1) outchar(' ');
     
     // write each char followed by a space
@@ -490,10 +530,12 @@ uchar* alloca(uint a)
     return alloca_ret;
 }
 
+
 void initModel()
 {
     cols80 = 0;
     vidRam = VIDRAM;
+    TRSMemory = 0;
 
     // leave interrupts off in all cases for now...
     clobber_rti();
@@ -507,7 +549,14 @@ void initModel()
         
         outPort(0x84, 0x86); // M4 map, 80cols, page 1
         setSpeed(0); // slow (for now..)
+        
+        TRSMemory = 16;
     }
+
+    // how much RAM do we have?
+    TRSMemory += 16;
+    if (ramAt((uchar*)0x8000)) TRSMemory += 16;
+    if (ramAt((uchar*)0xC000)) TRSMemory += 16;
 
     // locate the stack below the program
     // SP is set to load address of code

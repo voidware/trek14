@@ -26,8 +26,34 @@
 #include "ent.h"
 #include "command.h"
 #include "sound.h"
+#include "utils.h"
 
 #define SKIPxx
+
+static void peformRAMTest()
+{
+    uchar a = 0;
+    uchar n = TRSMemory;
+    if (n >= 64) n -= 3; // dont test the top 3k screen RAM + KB
+
+    // loop 1K at a time.
+    printfat(0,1,"RAM TEST ");
+    do
+    {
+        uchar b = a<<2;
+        ++a;
+        if (TRSMemory < 64) b += 0x40; 
+        
+        printfat(9,1, "%dK ", (int)a);
+        if (!ramTest(b, 4)) break;
+        --n;
+    } while (n);
+
+    if (!n)
+        printf("OK\n");
+    else
+        printf("FAILED at %x\n", (uint)TRSMemoryFail);
+}
 
 static void startGame()
 {
@@ -35,7 +61,9 @@ static void startGame()
     
     cls();
 
-    printf("TRS-80 Model %d\n", (int)TRSModel);
+    printf("TRS-80 Model %d (%dk RAM)\n", (int)TRSModel, (int)TRSMemory);
+
+    peformRAMTest();
 
 #ifdef SKIP
     printf("Stack %x\n", ((int)&v) + 4);

@@ -36,8 +36,11 @@ void lastLine();
 char readKey();
 uchar* vidaddr(uchar x, uchar y);
 uchar* alloca(uint a);
+uchar ramTest(uchar a, uchar n);
 
 extern uchar TRSModel;
+extern uchar TRSMemory;
+extern uchar* TRSMemoryFail;
 extern uchar cols80;
 
 
