@@ -24,55 +24,6 @@
 #include "os.h"
 #include "sound.h" // clobber_rti
 
-#if 0
-// this was an attempt at roll-your-own callee saves
-typedef void (*Fv)();
-typedef void (*Fvb)(uchar);
-typedef uint (*Fwbb)(uchar, uchar);
-
-uchar args[16];
-
-#define BP(_n) (args + sizeof(Fv*))[_n]
-#define WP(_n) ((uint*)(args + sizeof(Fv*)))[_n]
-
-static void callee_vb()
-{
-    (*((Fvb*)args))(BP(0));
-}
-
-static void callee_wbb()
-{
-    WP(0) = (*((Fwbb*)args))(BP(2),BP(3));
-}
-
-#define CALL_f(__f)  *((Fv**)args) = (Fv*)(__f)
-
-#define CALL_vb(_f, _a)                         \
-{                                               \
-    CALL_f(_f);                                 \
-    BP(0) = (uchar)(_a);                        \
-__asm                                           \
-    exx                                         \
-    call _callee_vb                             \
-    exx                                         \
- __endasm;                                      \
-}
-
-#define CALL_wbb(_f, _w, _a, _b)                \
-{                                               \
-    CALL_f(_f);                                 \
-    BP(2) = (uchar)(_a);                        \
-    BP(3) = (uchar)(_b);                        \
-__asm                                           \
-    exx                                         \
-    call _callee_wbb                            \
-    exx                                         \
- __endasm;                                      \
-    _w = WP(0);                                 \
-}
-#endif
-
-
 // store our own cursor position (do not use the OS location)
 static uint cursorPos;
 
@@ -89,11 +40,15 @@ uchar TRSModel;
 uchar TRSMemory;
 uchar* TRSMemoryFail;
 
+// sidebar "screen" memory for 80 cols on 64
 static uchar sidebar[16*16];
 static uchar sidemode;
 
 static uint vidoff(uchar x, uchar y)
 {
+    // calculate the video offset from the screen base for char pos (x,y)
+    // for 64 col mode, x >= 64 will offset into `sidebar' ram and set
+    // `sidemode'
     uint a;
     sidemode = 0;
 
@@ -113,12 +68,11 @@ static uint vidoff(uchar x, uchar y)
 
 static uchar* vidaddrfor(uint a)
 {
-    if (sidemode)
-    {
-        return sidebar + a;
-    }
+    // find the video ram address for offset `a'
+    if (sidemode) return sidebar + a; // in the sidebar, model <= 3
     else
     {
+        // actual video ram
         if (a >= VIDSIZE && !cols80 || a >= VIDSIZE80) return 0;
         return vidRam + a;
     }
@@ -132,6 +86,7 @@ uchar* vidaddr(uchar x, uchar y)
 
 void outcharat(uchar x, uchar y, uchar c)
 {
+    // set video character directly without affecting cursor position
     *vidaddr(x,y) = c;
 }
 
@@ -176,7 +131,7 @@ void nextLine()
         if (sidemode)
         {
             // next line
-            // NB: no test for overflow or scroll
+            // NB: no test for overflow test or scrolling on sidebar
             a = (a + 16) & ~15;
         }
         else
@@ -277,18 +232,23 @@ static uchar ramAt(uchar* p)
     __asm
         pop bc
         pop hl
-        push hl      // p
+        push hl         // p -> hl
         push bc
-        inc (hl)     
-        ld  a,(hl)
-        dec (hl)
-        sub (hl)
-        ld  l, a
+        ld  a,(hl)      // get original
+        ld  b,a         // save
+        xor #0xff       // flip bits
+        ld  (hl),a      // change all bits in RAM
+        xor (hl)        // mask
+        ld  (hl),b      // restore original
+        ld   l,#1       // return result if ok
+        ret  z          // return if ok
+        dec  l          // return 0 if bad
     __endasm;
 }
 
 static uchar testBlock(uchar a)
 {
+    // test 256 bytes of RAM at address `a'00
     // return 1, ok, 0 fail
     uchar* p = (uchar*)(a << 8);
     uint r;
@@ -297,6 +257,7 @@ static uchar testBlock(uchar a)
         r = ramAt(p);
         if (!r) 
         {
+            // test failed, remember failure address
             TRSMemoryFail = p;
             break;
         }
@@ -326,8 +287,8 @@ static uchar getModel()
 {
     uchar m = 1;
     
-    // change to M4 bank 1, which maps RAM over 14K ROM
-    // if we _are_ M4?
+    // attempt to change to M4 bank 1, which maps RAM over 14K ROM
+    // will work if we _are_ M4.
     outPort(0x84, 1); 
 
     // if we have RAM, then M4
@@ -510,8 +471,8 @@ void setWide(uchar v)
     }
 }
 
+#if 0
 static uint alloca_ret;
-
 uchar* alloca(uint a)
 {
     __asm
@@ -529,7 +490,7 @@ uchar* alloca(uint a)
     __endasm;
     return alloca_ret;
 }
-
+#endif
 
 void initModel()
 {
