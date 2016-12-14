@@ -13,7 +13,7 @@ _clobber_rti::
          ret
 
 __bit_close::
-          xor  a
+          xor  a                ; will clear wide mode on model I also
           out  (sndbit_port),a
 
 __rti::
@@ -33,11 +33,12 @@ _bit_sound::
         ;; preserve the wide-char bits for model I
 __beeper::
           di
-          in   a,(#0xff)      ; current wide status (model I)
+          in   a,(#0xff)      ; current wide status (model I) inverted
+          cpl                 ; flip 
           and  #0x40
-          srl  a
-          srl  a
-          srl  a                ; wide bit into bit 3 (other models ignored) 
+          rrca
+          rrca
+          rrca                ; wide bit into bit 3 (other models ignored) 
           push af
           ld   a,l
           srl  l
@@ -84,7 +85,6 @@ __beeper::
           jp   (iy)
 .be_end:
           pop  af
-          and  #0x8c            ; clear mask bits
           out  (sndbit_port),a
           jp   __rti
 
