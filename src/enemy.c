@@ -523,7 +523,7 @@ uchar hitEnergy(uchar* ep, unsigned int d)
             if (!gameover) playVictory();
                 
             // indicate screen redraw
-            redrawsr = true;
+            redrawsr = TRUE;
         }
     }
     return u;

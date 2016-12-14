@@ -217,7 +217,7 @@ char srScan(char k)
     printfat(0,0, "Short Range Scan, Quad %d%d%d.", (int)QX, (int)QY, (int)QZ);
 
     // we are redrawing, so clear this
-    redrawsr = false;
+    redrawsr = FALSE;
 
     redrawSidebar();
 

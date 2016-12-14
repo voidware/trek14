@@ -42,8 +42,8 @@ uchar QX, QY, QZ;
 uchar alertLevel;
 
 // need to redraw screen 
-bool redrawsr;
-bool gameover;
+uchar redrawsr;
+uchar gameover;
 
 // entities in current quadrant
 uchar quadCounts[ENT_TYPE_COUNT];
@@ -255,7 +255,6 @@ void updateQuadrant()
     // update list of things in this quadrant
     getQuad(QX, QY, QZ, quadCounts, quadrant);
 }
-
 
 uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z)
 {
@@ -561,9 +560,9 @@ void genGalaxy()
     }
 
 #if 0
+    // fill up with planets. useful for testing
     while (galaxyEnd < galaxy + sizeof(galaxy))
     {
-        // fill up with planets
         genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 5, 1);        
         galaxyEnd += ENT_SIZE;
     }
@@ -577,9 +576,6 @@ void genGalaxy()
     // +1 for starfleet HQ, not to count
     score = -1;
 
-    // no red alert yet
-    alertLevel = 0;
-    
     // warp to QX, QY, QZ
     warp(); 
 }

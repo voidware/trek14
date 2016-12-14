@@ -24,7 +24,9 @@
 	.globl	_main
         .globl	l__INITIALIZER
         .globl	s__INITIALIZER 
-        .globl	s__INITIALIZED 
+        .globl	s__INITIALIZED
+        .globl	l__DATA
+        .globl	s__DATA
 
 init:
 
@@ -32,7 +34,7 @@ init:
 
         ;; save the original stack area 
         ld     (_exit+1),sp     
-
+ 
         ;; Initialise global variables
         call    gsinit
 	call	_main
@@ -58,6 +60,19 @@ _exit::
 	.area   _GSINIT
 gsinit::
 
+      	ld	hl, #s__DATA
+	ld	bc, #l__DATA
+        
+.initbss:
+      	ld	a, b
+	or	c
+	jr	Z, .initz
+        ld      (hl),#0
+        inc     hl
+        dec     bc
+        jp      .initbss
+        
+.initz: 
 	ld	bc, #l__INITIALIZER
 	ld	a, b
 	or	a, c

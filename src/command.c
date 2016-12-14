@@ -66,6 +66,8 @@ const char* crewTable[] =
     "Sulu", // 9 helmsman
 };
 
+// syntax allows message variations in [] and references to another 
+// message table with ^
 static const char* msgTable[] = 
 {
     "^6: [Insufficient|Not Enough] Energy, ^2",
@@ -89,6 +91,7 @@ static const char* msgTable[] =
 
 static void emitStory(const char* m, Story* st)
 {
+    // select message tables and emit message "story"
     st->sub[0] = crewTable;
     st->subSize[0] = DIM(crewTable);
     st->sub[1] = msgTable;
@@ -163,7 +166,7 @@ void endgame(uchar msg)
 
     if (score < 0) score = 0;
     printf("\n\n   Your score is %d\n", score);
-    gameover = true;
+    gameover = TRUE;
 }
 
 char warpCommand()
@@ -202,7 +205,7 @@ void phaserCommand()
                 // ensure keep some back.
                 if (e <= (int)(ENT_ENERGY(galaxy) - 200))
                 {
-                    // doesnt work properly
+                    // phaser lock sound; doesnt work properly
                     //playNotes("CE++F--B++D-F#-B+"); // nameP, C, L, B, G, K,  D
                     if (!phasers(galaxy, e, ENT_TYPE_KLINGON))
                         messageCode(MSG_CODE_PHASERS_NO_LOCK);
@@ -259,9 +262,7 @@ void dockCommand()
             endgame(MSG_CODE_ENDGAME_RESIGN);
     }
     else
-    {
         messageCode(MSG_CODE_NO_DOCK);
-    }
 }
 
 void tick()
@@ -338,7 +339,9 @@ static uchar conn()
         default:
             c = 0;
         }
-        if (gameover) return gameover;
+
+        if (gameover) return TRUE;
+
     } while (c);
-    return c;
+    return 0;
 }

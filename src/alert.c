@@ -60,7 +60,7 @@ void alert2(const char* msg1, const char* msg2, uchar len)
     cls();
 
     // need to redraw
-    redrawsr = true;
+    redrawsr = TRUE;
 }
 
 void alert(const char* msg, uchar len)

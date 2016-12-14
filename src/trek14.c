@@ -28,6 +28,7 @@
 #include "sound.h"
 #include "utils.h"
 
+// comment in to skip the sound intro when developing
 #define SKIPxx
 
 static void peformRAMTest()
@@ -57,22 +58,22 @@ static void peformRAMTest()
 
 static void startGame()
 {
-    uchar v;
-    
     cls();
 
     printf("TRS-80 Model %d (%dk RAM)\n", (int)TRSModel, (int)TRSMemory);
 
+    // When you run this on a real TRS-80, you'll thank this RAM test!
     peformRAMTest();
 
 #ifdef SKIP
     printf("Stack %x\n", ((int)&v) + 4);
 #endif
 
-    outs("\n\nTrek 2014!\n");
+    outs("\n\nTREK 2014!\n");
     outs("Generating Galaxy...\n");
 
 #ifndef SKIP
+    // play the theme tune
     playNotes("14tF6Eb+9D3C2Bb-AAb21Gb3"
               "F6F+9Eb3D2CB-b"
               "A21Ab3G9A3"
@@ -97,7 +98,7 @@ static void mainloop()
         {
             char c = getSingleCommand("Play Again (Y/N)? ");
             if (c == 'N') break; // leave gameover true
-            gameover = 0;
+            gameover = FALSE;
             if (c == 'Y') break; 
         }
     } while (!gameover);

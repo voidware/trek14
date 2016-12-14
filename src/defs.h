@@ -23,6 +23,9 @@
 #include <stdbool.h>
 #include <string.h> 
 
+#define TRUE 1
+#define FALSE 0
+
 typedef unsigned char uchar;
 typedef unsigned int uint;
 
