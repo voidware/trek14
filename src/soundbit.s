@@ -34,7 +34,7 @@ _bit_sound::
 __beeper::
           di
           in   a,(#0xff)      ; current wide status (model I) inverted
-          cpl                 ; flip 
+          cpl                 ; flip. Thanks to gp2000 
           and  #0x40
           rrca
           rrca
