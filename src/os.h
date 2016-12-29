@@ -33,10 +33,11 @@ void outs(const char* s);
 void outsWide(const char* s);
 uchar getline2(char* buf, uchar nmax);
 void lastLine();
-char readKey();
 uchar* vidaddr(uchar x, uchar y);
-uchar* alloca(uint a);
 uchar ramTest(uchar a, uchar n);
+
+typedef void (*IdleHandler)(uchar);
+void setIdleHandler(IdleHandler h, uchar d);
 
 extern uchar TRSModel;
 extern uchar TRSMemory;

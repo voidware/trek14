@@ -259,18 +259,25 @@ void torps(uchar* ep, int dir)
 
     if (hit)
     {
-        if (ENT_TYPE(hit) == ENT_TYPE_KLINGON)
+        if (mainType(hit) == ENT_TYPE_KLINGON)
         {
             uchar sx, sy;
-            char dx, dy;
-            
-            ENT_SXY(ep, sx, sy);
-            
-            // dodge?
-            moveAway(hit, sx, sy, &dx, &dy);
-            
-            // can expire here
-            moveEnt(hit, dx, dy);
+            signed char dx, dy;
+            uchar dist;
+
+            dist = distance(hit, galaxy);            
+
+            // if far enough away, enemy could try to dodge
+            if (dist > 15)
+            {
+                ENT_SXY(ep, sx, sy);
+
+                // dodge?
+                moveAway(hit, sx, sy, &dx, &dy);
+                
+                // can expire here
+                moveEnt(hit, dx, dy);
+            }
         }
     }
 

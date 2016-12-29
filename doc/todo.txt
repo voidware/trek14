@@ -1,3 +1,5 @@
+## Features
+
 * consider one-on-one battle screens
 * klingons hide behind planets (shadow tactics)
 * torps drift with distance if less than 100% operational
@@ -16,5 +18,10 @@
 * ships computer
 * K attack bases
 * neutral zone
+
+## BUGS or MISSING
+* explosion sound wrong picture for M3/M4
+* support high speed for M4 (involves fixing sound pitch again)
+* K routing algorithm a bit slow for M1 esp when multiple enemies in quadrant.
 
 

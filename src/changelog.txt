@@ -1,3 +1,11 @@
+xmas 2016
+* K dodge only if sufficiently far away
+* K animation
+* bigger K ship
+* warp out does not leave a trail
+* BUG fix for TRS32
+
+
 * bugfix in K slow recharge
 * K recharge from stars
 * enemy nagivation AI

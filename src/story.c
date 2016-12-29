@@ -27,22 +27,6 @@
 #include "os.h"
 #include "ent.h"
 
-static uchar randn(uchar n)
-{
-    // random [0,n-1]
-    
-    uchar c = 1;
-    uchar v;
-
-    while (c < n) c <<= 1;
-    --c;
-    do
-    {
-        v = rand16() & c;
-    } while (v >= n);
-    return v;
-}
-
 static const char* skipTerm(const char* s)
 {
     uchar level = 0;

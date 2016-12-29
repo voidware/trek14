@@ -33,7 +33,7 @@ uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
 unsigned int stardate;
 int score;
-const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'R', 0 };
+const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'K', 'D', 'R', 0 };
 
 // current location
 uchar QX, QY, QZ;
@@ -64,21 +64,104 @@ static const uchar star[] = { 0x02, 0x22, 0, 0x05,
                               0x04, 0, 0x05,
                               0x02, 0x22, 0x00,
                               0x00 };
-
 static const uchar planet[] = { 0x15, 0, 0x06,
                                 0x07, 0, 0x06,
                                 0x05, 0,
                                 0x00  };
 
-static const uchar klingon[] = { 0x02, 0x72, 0, 0x0b,
-                                 0x0b, 0, 0x07,
-                                 0x03, 0,
-                                 0x00 };
+// basic klingon
+static const uchar klingon[] = { 
+    0x02, 0x72, 0, 0x0b,
+    0x0b, 0, 0x07,
+    0x03, 0,
+    0x00
+};
 
-static const uchar romulan[] = { 0x02, 0x27, 0x20, 0x0b,
-                                 0x01, 0xb0, 0x07,
-                                 0x01, 0x30, 0x00,
-                                 0x00 };
+static const uchar klingonAlt[] = {
+    0x01, 0x91, 0, 0x0b,
+    0x0b, 0, 0x07,
+    0x03, 0,
+    0x00
+};
+
+// bigger klingon
+static const uchar klingon2[] = {   // 15 pixel version
+    0x03, 0x11, 0x51, 0x13, 0,
+    0x0f,
+    0x0f, 0,
+    0x0a,
+    0x05, 0,
+    00
+};
+
+static const uchar klingon2Alt[] = { 
+    0x03, 0x93,0,
+    0x0f,
+    0x0f, 0,
+    0x0a,
+    0x05, 0,
+    00
+};
+
+
+#if 0
+// bigger still
+static const uchar klingonbs[] = {   // 17 pixel version
+    0x03, 0x11, 0x71, 0x13, 0,
+    0x11,
+    0x0f, 0x02, 0,
+    0x0c,
+    0x07, 0,
+    00
+};
+#endif
+
+
+
+#if 0
+static const uchar klingonbs[] = {   
+    0x03, 0x11, 0x91, 0x13, 0,  // like a face
+    0x13,
+    0x0f, 0x04, 0,
+    0x13,
+    0x05, 0x11, 0x11, 0x11, 0x11, 0x15, 0,
+    0x10,
+    0x0d, 0,
+    00
+};
+#endif
+
+
+static const uchar klingon_destroyer[] = {   
+    0x03, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x13, 0,
+    0x13,
+    0x05, 0x95, 0,
+    //0x0f, 0x04, 0,
+    0x13,
+    0x0f, 0x04, 0,
+    //0x05, 0x11, 0x11, 0x11, 0x11, 0x15, 0,
+    0x0d,
+    0x07, 0,
+    00
+};
+
+static const uchar romulan[] = {  // birdshape
+                                0x03, 0x31, 0x33, 0,
+                                0x0c,
+                                0x0b, 0,
+                                0x08,
+                                0x02, 0x12, 0,
+                                00
+};
+
+#if 0
+static const uchar romulan2[] = { // heavy birdshape
+    0x01, 0x11, 0x11, 0x51, 0x11, 0x11, 0, 0x0f,
+                                0x0f, 0, 0x0a,
+                                0x05, 0,
+                                00
+};
+#endif
 
 
 // pixel to char width
@@ -88,13 +171,15 @@ const EntObj objTable[] =
 {
     // high negative scores will ensure the game ends if you
     // destroy them
-    { CW(12), 1, -1000, base },
-    { CW(16), 1, -1000, fedshipRLE }, 
-    { CW(6), 1, -1000, star },
-    { CW(7), 1, -1000, planet },
-    { CW(11), 1, SCORE_KLINGON, klingon },
-    { CW(0), 1, SCORE_KLINGON, romulan },
-    { 1, 1, 0, romulan }, // additional entry used for torpedo
+    { CW(12), 1, -1000, 0, base },
+    { CW(16), 1, -1000, 8000, fedshipRLE }, 
+    { CW(6), 1, -1000, 256, star },  // recharge energy
+    { CW(7), 1, -1000, 0, planet },
+    { CW(11), 1, SCORE_KLINGON, KLINGON_ENERGY, klingon, klingonAlt },
+    { CW(15), 1, SCORE_KLINGON, KLINGON2_ENERGY, klingon2, klingon2Alt },
+    { CW(19), 2, SCORE_KLINGON, KLINGOND_ENERGY, klingon_destroyer },
+    { CW(0), 1, SCORE_KLINGON, 2000, romulan },
+    { 1, 1, 0, 0, romulan }, // additional entry used for torpedo
 };
 
 unsigned int rand16()
@@ -108,6 +193,31 @@ unsigned int rand16()
     a -= (v >> 8);
     seed = ((v & 0xff00) | a) - 1;
     return seed;
+}
+
+uint randn(uint n)
+{
+    // random [0,n-1]
+    
+    uint c = 1;
+    uint v;
+
+    while (c < n) c <<= 1;
+    --c;
+    do
+    {
+        v = rand16() & c;
+    } while (v >= n);
+    return v;
+}
+
+uchar mainType(uchar* ep)
+{
+    // get type, but map all klingons onto same type
+    uchar t = ENT_TYPE(ep);
+    if (t > ENT_TYPE_KLINGON && t <= ENT_TYPE_KLINGON_DESTROYER)
+        t = ENT_TYPE_KLINGON;
+    return t;
 }
 
 void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
@@ -135,7 +245,8 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
                 *eplist++ = ep;
                 *eplist = 0;
             }
-            ++quadCounts[ENT_TYPE(ep)];
+
+            ++quadCounts[mainType(ep)];
         }
         ep += ENT_SIZE;
     }
@@ -382,13 +493,14 @@ void genSector(uchar* ep)
     } while (setSector(ep, x, y, 0));
 }
 
-static void genEntLocation(uchar* ep, uchar type, uchar tmax, uchar tmin)
+static uchar genEntLocation(uchar* ep, uchar type, uchar n)
 {
-    // pick a random location, ensuring type' does not
-    // exceed `tmax'
+    // pick a random location, with none of the given type
+    // create [1,n].
     // avoiding quadrant QX, QY, QZ
 
     uchar x, y, z;
+    uchar i;
     
     do
     {
@@ -404,9 +516,11 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax, uchar tmin)
 
         getQuad(x, y, z, quadCounts, quadrant);
         
-    } while ((uchar)(quadCounts[type] + tmin) > tmax);
+    } while (quadCounts[type]);
 
-    while (tmin--)
+    n = randn(n) + 1;
+
+    for (i = 0; i < n; ++i)
     {
         ENT_SET_TYPE(ep, type);
         ENT_SET_QX(ep, x);
@@ -414,7 +528,8 @@ static void genEntLocation(uchar* ep, uchar type, uchar tmax, uchar tmin)
         ENT_SET_QY(ep, y);
         genSector(ep);
         ep += ENT_SIZE;
-    } 
+    }
+    return n;
 }
 
 void clearMarks()
@@ -483,17 +598,23 @@ void removeEnt(uchar *ep)
     }
 }
 
+static int randomEnergy(uchar t)
+{
+    uint e = objTable[t]._emax>>1; // half max
+    return randn(e) + e;
+}
+
 void genGalaxy()
 {
     uchar i;
-        
+    
     // (adjust for bogus warp to start)
     stardate = STARDATE_START - STARDATE_WARP; 
 
     galaxyEnd = galaxy;
 
     // we are the first entity in the table
-    genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1, 1);
+    genEntLocation(galaxyEnd, ENT_TYPE_FEDERATION, 1);
 
     // full energy & photons
     ENT_SET_DAT(galaxyEnd, ENT_REFUEL_DATA);
@@ -507,56 +628,62 @@ void genGalaxy()
     QZ = 2;
 
     // populate bases
-    for (i = 0; i < TOTAL_BASES-1; ++i)
+    for (i = 0; i < TOTAL_BASES; ++i)
     {
-        genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1, 1);
+        genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1);
         galaxyEnd += ENT_SIZE; 
     }
 
-    // generate starfleet HQ
-    genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1, 1);
-    
+    // last one is starfleet HQ
     // put HQ in our start quadrant (ok to move since nothing else there)
-    setQuadrant(galaxyEnd, QX, QY, QZ);
-    galaxyEnd += ENT_SIZE; 
-
+    setQuadrant(galaxyEnd - ENT_SIZE, QX, QY, QZ);
+    
     // populate klingons
-    i = TOTAL_KLINGONS;
-    while (i > 0)
+    for (i = 0; i < TOTAL_KLINGONS;)
     {
-        // between 1 & 4 klingons
-        uchar n = (rand16() & 3) + 1;
-        if (n > i) n = i;
-        
-        genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 4, n);
-        
-        while (n)
-        {
-            --n;
-            --i;
+        uchar k2 = 0;
+        uchar n;
 
-            // enemy has at least half its allowed energy
-            ENT_SET_DAT(galaxyEnd, (rand16() & (ENT_ENERGYK_LIMIT/4-1)) + ENT_ENERGYK_LIMIT/2);
+        n = genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 4);
+        i += n;
+
+        while (n--)
+        {
+            uint e = randomEnergy(k2 ? ENT_TYPE_KLINGON : ENT_TYPE_KLINGON2);
+            if (e > KLINGON_ENERGY)
+            {
+                // some are bigger
+                ENT_SET_TYPE(galaxyEnd, ENT_TYPE_KLINGON2);
+                ++k2;
+            }
+            ENT_SET_DAT(galaxyEnd, e);
             galaxyEnd += ENT_SIZE;
         }
     }
 
     // populate stars
-    for (i = 0; i < TOTAL_STARS; ++i)
+    for (i = 0; i < TOTAL_STARS;)
     {
-        genEntLocation(galaxyEnd, ENT_TYPE_STAR, 2, 1);
+        uchar n = genEntLocation(galaxyEnd, ENT_TYPE_STAR, 2);
+        i += n;
 
-        // give stars a random energy between 128 and 256
-        // this energy can be drawn by enemies to recharge
-        ENT_SET_DAT(galaxyEnd, (rand16() & 127) + 128);
-        galaxyEnd += ENT_SIZE;
+        while (n--)
+        {
+            // give stars a random energy between 128 and 256
+            // this energy can be drawn by enemies to recharge
+            ENT_SET_DAT(galaxyEnd, randomEnergy(ENT_TYPE_STAR));
+            galaxyEnd += ENT_SIZE;
+        }
     }
 
     // populate planets
-    for (i = 0; i < TOTAL_PLANETS; ++i)
+    for (i = 0; i < TOTAL_PLANETS;)
     {
-        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 3, 1);
-        galaxyEnd += ENT_SIZE;
+        uchar n = genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 3);
+        i += n;
+
+        while (n--)
+            galaxyEnd += ENT_SIZE;
     }
 
 #if 0
@@ -576,10 +703,11 @@ void genGalaxy()
     // +1 for starfleet HQ, not to count
     score = -1;
 
+    // reset (eg new game)
+    alertLevel = 0;
+
     // warp to QX, QY, QZ
     warp(); 
 }
-
-
 
 

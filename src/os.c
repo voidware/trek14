@@ -370,13 +370,38 @@ static const char keyMatrix[] =
     'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 'Z', 
 };
 
-char readKey()
+
+static uchar keyIdleState;
+static IdleHandler idleHandler;
+static uchar idleDelay;
+static uchar idleCount;
+
+void setIdleHandler(IdleHandler h, uchar d)
+{
+    idleHandler = h;
+    idleDelay = d;
+}
+
+static void _keyIdle()
+{
+    if (idleHandler)
+    {
+        if (!idleCount) idleCount = idleDelay + 1;
+        
+        if (!--idleCount)
+        {
+            keyIdleState = ~keyIdleState;
+            (*idleHandler)(keyIdleState);
+        }
+    }
+}
+
+static char readKey()
 {
     uchar rc[2];
 
     // ignore shift & control
-    while (!readKeyRowCol(rc) || rc[0] == 7) ;
-    
+    while (!readKeyRowCol(rc) || rc[0] == 7) _keyIdle();
     return keyMatrix[rc[0]*8 + rc[1]];
 }
 
@@ -387,7 +412,19 @@ char getkey()
     for (;;)
     {
         c = readKey();
-        if (c) return c;
+        if (c)
+        {
+            if (keyIdleState) 
+            {
+                idleCount = 1;
+                _keyIdle(); // force revert to state 0
+            }
+            return c;
+        }
+        else
+        {
+            _keyIdle();
+        }
     }
 }
 

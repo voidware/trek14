@@ -34,10 +34,7 @@ const char* readline(FILE* fp)
     static char buf[256];
     int c;
     char* p = buf;
-    while ((c = getc(fp)) != EOF && c != '\n')
-    {
-        *p++ = c;
-    }
+    while ((c = getc(fp)) != EOF && c != '\n') *p++ = c;
     *p = 0;
 
     if (p == buf && c == EOF) return 0; // over
@@ -51,46 +48,46 @@ int cas_write_header(FILE *out, char *name)
     int i, namelength;
     char htname[7];
     
-    strcpy( htname, "      ");
+    strcpy(htname, "      ");
 
     namelength = strlen(name);
-    if ( namelength > 6 ) namelength = 6;
-    else if ( namelength < 1 ) return 0;
+    if (namelength > 6) namelength = 6;
+    else if (namelength < 1) return 0;
     
-    strncpy( htname, name, namelength);
+    strncpy(htname, name, namelength);
         
-    for (i=0; i<256; i++)
-    	fputc( 0x00, out);
+    // emit leader
+    for (i=0; i<256; i++) fputc(0x00, out);
 
-    fputc( 0xA5, out );
-    fputc( 0x55, out );
+    // emit header sequence
+    fputc(0xA5, out);
+    fputc(0x55, out);
         	
-    for (i=0; i<6; i++)
-        fputc( htname[i], out );
+    // emit 6 character program name
+    for (i=0; i<6; i++) fputc(htname[i], out);
         
     return -1;
 }
 
-void cas_write_block_header(FILE *out, int blocksize, 
-    unsigned short addr)
+void cas_write_block_header(FILE *out, int blocksize, unsigned short addr)
 {
     unsigned char a;
 
-    fputc( 0x3c, out );	// escape char  
+    fputc(0x3c, out);	// escape char  
     a = blocksize;
-    fputc( blocksize, out ); // block length(256)
+    fputc(blocksize, out); // block length(256)
     a = addr&0xFF;
-    fputc( a, out); // load address lo
+    fputc(a, out); // load address lo
     a = addr>>8;
-    fputc( a, out); // load address hi      		
+    fputc(a, out); // load address hi      		
 }
 
 void cas_write_eof(FILE *out, unsigned short start_addr)
 {
     //fprintf( stderr, "Start address
-	fputc( 0x78, out);
-	fputc( start_addr & 0xFF, out);
-	fputc( start_addr >> 8, out);
+    fputc( 0x78, out);
+    fputc( start_addr & 0xFF, out);
+    fputc( start_addr >> 8, out);
 }
 
 void emit(FILE* fpout, unsigned char* buf, int n, int addr)

@@ -53,7 +53,7 @@
 
  NB: the LSb of the sector-x is stored in byte 3
 
- Bytes 4 & 5 (format for federation ships)
+ Bytes 4 & 5
  +---+---+---+---|---+---+---+---+  +---+---+---+---|---+---+---+---+
  | t | t |   | E | E | E | E | E |  | E | E | E | E | E | E | E | E |
  +---+---+---+---|---+---+---+---+  +---+---+---+---|---+---+---+---+
@@ -120,9 +120,9 @@
 // at 13 bits, refuel to 8000 rather than 8192.
 #define ENT_REFUEL_DATA ((3<<ENT_ENERGY_BITS) + 8000)
 
-// klingons have half energy max
-#define ENT_ENERGYK_BITS  (ENT_ENERGY_BITS-1)
-#define ENT_ENERGYK_LIMIT (1<<ENT_ENERGYK_BITS)
+#define KLINGON_ENERGY     4000
+#define KLINGON2_ENERGY    5000
+#define KLINGOND_ENERGY    8000
 
 
 #define ENT_SIZE  5
@@ -134,9 +134,11 @@
 #define ENT_TYPE_STAR 2
 #define ENT_TYPE_PLANET  3
 #define ENT_TYPE_KLINGON 4
-#define ENT_TYPE_ROMULAN 5
-#define ENT_TYPE_TORPEDO 6
-#define ENT_TYPE_COUNT 6
+#define ENT_TYPE_KLINGON2 5
+#define ENT_TYPE_KLINGON_DESTROYER 6
+#define ENT_TYPE_ROMULAN 7
+#define ENT_TYPE_TORPEDO 8
+#define ENT_TYPE_COUNT 9
 
 // total of entities should not exceed ENT_COUNT_MAX
 #define TOTAL_BASES     10
@@ -153,7 +155,15 @@ typedef struct
     uchar               _h;
     
     int                 _score;
-    const uchar*        _data;
+
+    // max energy
+    int                 _emax;
+    
+    // main RLE sprite
+    const uchar*        _sprite;
+
+    // alternate, for animation if defined.
+    const uchar*        _spriteAlt;
 } EntObj;
 
 
@@ -195,6 +205,8 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quad, uchar** eplist);
 void genGalaxy();
 void genSector(uchar* ep);
 unsigned int rand16();
+uint randn(uint n);
+uchar mainType(uchar* ep);
 char collision(uchar* ep1, uchar* ep2);
 char collisionBorder(uchar* ep);
 uchar setSector(uchar* ep, uchar x, uchar y, uchar cancross);

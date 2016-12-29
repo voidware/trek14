@@ -24,9 +24,9 @@
 extern const unsigned char div3tab[];
 
 void plot(uchar x, uchar y, uchar c);
-void plotSpan(uchar x0, uchar y, uchar n, uchar c);
+uchar plotSpan(uchar x0, uchar y, uchar n, uchar c);
 void drawRLE(char x, char y, const uchar* dp, uchar c);
-void moveRLE(char x, char y, const uchar* dp, uchar left);
+void moveRLE(char x, char y, const uchar* dp, signed char dx);
 
 void plotHLine(uchar x1, uchar y, uchar x2, uchar c);
 void plotVLine(uchar x, uchar y1, uchar y2, uchar c);

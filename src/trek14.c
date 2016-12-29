@@ -62,11 +62,16 @@ static void startGame()
 
     printf("TRS-80 Model %d (%dk RAM)\n", (int)TRSModel, (int)TRSMemory);
 
+#ifdef SKIP
+    {
+        int v;
+        //printf("Stack %x\n", ((int)&v) + 4);
+    }
+#else
+
     // When you run this on a real TRS-80, you'll thank this RAM test!
     peformRAMTest();
 
-#ifdef SKIP
-    printf("Stack %x\n", ((int)&v) + 4);
 #endif
 
     outs("\n\nTREK 2014!\n");

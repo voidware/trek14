@@ -39,25 +39,23 @@ void plot(uchar x, uchar y, uchar c)
 
     uchar q, r, mask;
     char* m;
-    char v;
+    signed char v;
     
     r = y;
     q = div3tab[r];
 
     // 64*(y/3) + x/2
     m = vidaddr(x>>1, q);
-    if (!m) return;
+    if (!m) return;  // not within screen 
 	
     // remainder
     r -= q;
     r -= q;
     r -= q;
 
-    if (x&1)
-        mask = rightCol[r];
-    else
-        mask = leftCol[r];
-
+    mask = leftCol[r];
+    if (x&1) mask += mask; // rightCol
+	
     v = *m;
     if (v >= 0) v = 0x80;
 
@@ -67,65 +65,67 @@ void plot(uchar x, uchar y, uchar c)
         *m = v & ~mask;
 }
 
-void plotSpan(uchar x0, uchar y, uchar n, uchar c)
+uchar plotSpan(uchar x, uchar y, uchar n0, uchar c)
 {
     // plot (x,y) to (x+n, y) colour c
     
     uchar q, mask;
     char* m;
-    char v;
-    uchar x = x0;
-
-    if (!n) return;
-
-    q = div3tab[y];
-
-    // cols*(y/3) + x/2
-    m = vidaddr(x>>1, q);
-    if (!m) return;
-
-    // remainder
-    q = y - q*3;
-    
-    if (x&1)
-    {
-        v = *m;
-        if (v >= 0) v = 0x80;
-        if (c)
-            *m = v | rightCol[q];
-        else
-            *m = v & ~rightCol[q];
-        ++m;
-        ++x;
-        --n;
-    }
-
-    mask = bothCol[q];
-    while (n > 1)
-    {
-        if (x >= 160) return;
-        if (x >= 128 && !cols80) return;
-        n -= 2;
-        v = *m;
-        if (v >= 0) v = 0x80;
-        if (c)
-            *m = v | mask;
-        else
-            *m = v & ~mask;
-
-        ++m;
-        ++x;
-    }
+    signed char v;
+    uchar n = n0;
 
     if (n)
     {
-        v = *m;
-        if (v >= 0) v = 0x80;
-        if (c)
-            *m = v | leftCol[q];
-        else
-            *m = v & ~leftCol[q];
+        q = div3tab[y];
+
+        // cols*(y/3) + x/2
+        m = vidaddr(x>>1, q);
+        if (!m) return 0;
+
+        // remainder
+        q = y - q*3;
+    
+        if (x&1)
+        {
+            v = *m;
+            if (v >= 0) v = 0x80;
+            if (c)
+                *m = v | rightCol[q];
+            else
+                *m = v & ~rightCol[q];
+            ++m;
+            ++x;
+            --n;
+        }
+
+        mask = bothCol[q];
+        while (n > 1)
+        {
+            if (x >= 160) return;
+            if (x >= 128 && !cols80) return;
+            n -= 2;
+            v = *m;
+            if (v >= 0) v = 0x80;
+            if (c)
+                *m = v | mask;
+            else
+                *m = v & ~mask;
+
+            ++m;
+            ++x;
+        }
+
+        if (n)
+        {
+            v = *m;
+            if (v >= 0) v = 0x80;
+            if (c)
+                *m = v | leftCol[q];
+            else
+                *m = v & ~leftCol[q];
+        }
     }
+    return n0;
 }
 
 void plotHLine(uchar x1, uchar y, uchar x2, uchar c)
@@ -250,15 +250,18 @@ uchar pixelsRLE(const uchar* dp, char* pix)
     return c;
 }
 
+#if 0
 void drawRLE(char x, char y, const uchar* dp, uchar c)
 {
     // plot run-line encoded (RLE) sprite, colour c
-    
     // sprite format is made up of a sequence of skip/draw nibbles:
     // <skip-draw> ... <0> <flyback>
     // <skip-draw> ... <0> <flyback>
     // ...
     // 0x00
+
+    // note that this does not reset the `skip` regions of the
+    // sprite.
 
     uchar pair;
     for (;;)
@@ -266,8 +269,7 @@ void drawRLE(char x, char y, const uchar* dp, uchar c)
         while (pair = *dp++)
         {
             x += pair >> 4; // skip
-            plotSpan(x, y, pair & 0xf, c); // plot
-            x += pair & 0xf;
+            x += plotSpan(x, y, pair & 0xf, c); // plot
         }
         
         // flyback
@@ -276,33 +278,46 @@ void drawRLE(char x, char y, const uchar* dp, uchar c)
         ++y;
     }
 }
+#endif
 
-void moveRLE(char x, char y, const uchar* dp, uchar left)
+void moveRLE(char x, char y, const uchar* dp, signed char dx)
 {
-    // moves RLE sprite from (x,y) to (x-1, y) if `left'
-    // or from (x,y) to (x+1, y)
+    // move left or right according to dx. dx = +/-1 or 0
+    // moves RLE sprite from (x,y) to (x-1, y) if `dx=-1`
+    // or from (x,y) to (x+1, y) if dx=1.
+
+    // plot run-line encoded (RLE) sprite, colour c
+    // sprite format is made up of a sequence of skip/draw nibbles:
+    // <skip-draw> ... <0> <flyback>
+    // <skip-draw> ... <0> <flyback>
+    // ...
+    // 0x00
 
     uchar pair;
 
-    x -= left;
     for (;;)
     {
+        // if moving right, set first pixel of row
+        if (dx > 0) plot(x, y, 0);
+
+        // adjust start of line span
+        x += dx;
+
+        // plot each line span of sprite
         while (pair = *dp++)
         {
-            x += pair >> 4; // skip
-            if (pair & 0xf)
-            {
-                plot(x,y,left);
-                x += pair & 0xf;
-                plot(x,y,!left);;
-            }
+            x += plotSpan(x, y, pair >> 4, 0); // reset skip
+            x += plotSpan(x, y, pair & 0xf, 1); // set region
         }
+
+        // if moving left, reset last pixel of row
+        if (dx < 0)
+            plot(x, y, 0);
         
-        // flyback
+        // flyback with adjustment
         if (!*dp) break;
-        x -= *dp++;
+        x -= (*dp++ + dx);
         ++y;
     }
-
 }
 

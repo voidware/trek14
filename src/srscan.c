@@ -42,14 +42,21 @@ void fillbg(char x, char y)
     outcharat(x, y, (x & 1) ? ' ' : '.');
 }
 
-void drawEnt(uchar* ep)
+static void drawEntAlt(uchar* ep, uchar alt)
 {
     uchar sx, sy;
     const EntObj* eo = objTable + ENT_TYPE(ep);
     ENT_SXY(ep, sx, sy);
-
+    
     // convert sector position to pixel
-    drawRLE((sx - (eo->_w>>1))<<1, sy*3, eo->_data, 1);
+    moveRLE((sx - (eo->_w>>1))<<1, sy*3, 
+            (alt ? eo->_spriteAlt : eo->_sprite),
+            0);
+}
+
+void drawEnt(uchar* ep)
+{
+    drawEntAlt(ep, 0);
 }
 
 void undrawEnt(uchar* ep)
@@ -66,7 +73,7 @@ void undrawEnt(uchar* ep)
         fillbg(sx++, sy);
 }
 
-char moveEnt(uchar* ep, char dx, char dy)
+char moveEnt(uchar* ep, signed char dx, signed char dy)
 {
     // move entity `ep' by `dx' `dy' & redraw
     // return >0, collision
@@ -100,8 +107,7 @@ char moveEnt(uchar* ep, char dx, char dy)
         if (dy)
         {
             drawEnt(ep);
-            while (w2--)
-                fillbg(sx++, sy);
+            while (w2--) fillbg(sx++, sy);
         }
         else if (dx)
         {
@@ -109,8 +115,8 @@ char moveEnt(uchar* ep, char dx, char dy)
             y = sy*3;
 
             // move two pixels, either right of left
-            moveRLE(x, y, obj->_data, (dx < 0));            
-            moveRLE(x+dx, y, obj->_data, (dx < 0));            
+            moveRLE(x, y, obj->_sprite, dx);
+            moveRLE(x+dx, y, obj->_sprite, dx);
             if (dx < 0)
                 fillbg(sx + w2 - 1, sy);                
             else
@@ -154,7 +160,7 @@ void showState()
              ENT_TORPS(galaxy),
              GET_SHIELD_ENERGY,
              d, (stardate - d*10),
-             (alertLevel ? "RED " : "Green"));
+             (alertLevel ? "RED  " : "Green"));
 }
 
 static void animateOut()
@@ -184,8 +190,7 @@ static void animateOut()
         if (n > 0)
         {
             --n;
-            ++x;
-            drawRLE(x, y, obj->_data, 1);
+            moveRLE(x++, y, obj->_sprite, 1);
         }
 
         // make the sound increase in pitch until it reaches a final point
@@ -197,6 +202,20 @@ static void animateOut()
             if (!n) break;
             f = 100;
         }
+    }
+}
+
+static void animationHandler(uchar state)
+{
+    uchar** epp;    
+    epp = quadrant;
+    while (*epp)
+    {
+        if (objTable[ENT_TYPE(*epp)]._spriteAlt)
+        {
+            drawEntAlt(*epp, state);
+        }
+        ++epp;
     }
 }
 
@@ -227,14 +246,13 @@ char srScan(char k)
         for (i = 0; i < 32; ++i) outs(". ");
     }
 
-
     if (opCheckSR())
     {
         // draw items in this quadrant. Assume here, `quadrant' is correctly
         // setup
         epp = quadrant;
-        while (*epp)
-            drawEnt(*epp++);
+        while (*epp) drawEnt(*epp++);
+        setIdleHandler(animationHandler, 255);
     }
     
     // enter interactive loop on SR view
@@ -290,7 +308,7 @@ char srScan(char k)
         }
         else break;
 
-        if (gameover) return c;
+        if (gameover) break;
 
         if ((dx || dy) && opCheck(L_IMPULSE))
         {
@@ -314,6 +332,8 @@ char srScan(char k)
         // update the state
         tick();
     }
+
+    setIdleHandler(0, 0);
 
     return c;
 }

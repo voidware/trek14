@@ -248,7 +248,7 @@ static void klingonFire(uchar* kp)
     unsigned int ke = ENT_DAT(kp);
 
     // fire if have at least half max energy
-    if (ke >= ENT_ENERGYK_LIMIT/2)
+    if (ke >= objTable[ENT_TYPE(kp)]._emax>>1)
     {
         uchar dist = distance(kp, galaxy)>>1;
         
@@ -264,15 +264,14 @@ static void klingonFire(uchar* kp)
     }
 }
 
-static int klingonRecharge(uchar* kp, uint de)
+static int enemyRecharge(uchar* kp, uint de)
 {
-    // add energy to klingon
-    
-    uint e = ENT_DAT(kp) + de;
+    // add energy
 
-    // up to the limit
-    if (e >= ENT_ENERGYK_LIMIT)
-        e = ENT_ENERGYK_LIMIT-1;
+    uint e = ENT_DAT(kp) + de;
+    uint emax = objTable[ENT_TYPE(kp)]._emax;
+    
+    if (e > emax) e = emax;
     
     ENT_SET_DAT(kp, e);
 
@@ -320,7 +319,7 @@ static uchar klingonMove(uchar* kp)
     rt.dy = 0;
     
     // if weak, keep away and recharge
-    if (klingonRecharge(kp, 32) < ENT_ENERGYK_LIMIT/2)
+    if (enemyRecharge(kp, 32) < KLINGON_ENERGY/2)
     {
         ttype = -1; // no target
         
@@ -383,7 +382,7 @@ static uchar klingonMove(uchar* kp)
                 int f = 500;
 
                 // klingons recharge from stars, collect energy
-                klingonRecharge(kp, ENT_DAT(rt.target));
+                enemyRecharge(kp, ENT_DAT(rt.target));
                 
                 do 
                 {
@@ -399,13 +398,14 @@ static uchar klingonMove(uchar* kp)
     
     return 1;
 }
+
     
 void enemyMove()
 {
     uchar** epp;
     for (epp = quadrant; *epp; ++epp)
     {
-        if (ENT_TYPE(*epp) == ENT_TYPE_KLINGON)
+        if (mainType(*epp) == ENT_TYPE_KLINGON)
         {
             // if destroyed, back up one as list is regenerated
             if (!klingonMove(*epp)) --epp;
@@ -434,8 +434,7 @@ void explode(uchar* ep)
     const EntObj* eo = objTable + ENT_TYPE(ep);
 
     // XX must be enough space to convert entity to array of pixel pairs
-    // eg enemy ship = 18 pairs.
-    char pix[24*2];
+    char pix[100*2];
 
     // get sector position
     ENT_SXY(ep, sx, sy);
@@ -449,7 +448,7 @@ void explode(uchar* ep)
     sy = sy*3 + h2;
 
     // convert to array of pixels offset from (sx, sy)
-    n = pixelsRLE(eo->_data, pix);
+    n = pixelsRLE(eo->_sprite, pix);
 
     // adjust for centre 
     p = pix;
