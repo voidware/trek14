@@ -48,7 +48,8 @@ void command()
                "  (L)ong Range Scan\n"
                "  (W)arp\n"
                "  (P)hasers\n"
-               "  (T)orpedoes\n");
+               "  (T)orpedoes\n"
+               "  (C)omputer\n");
     } while (!conn());
 }
 
@@ -172,22 +173,20 @@ void endgame(uchar msg)
 char warpCommand()
 {
     int x, y, z;
-    char v = opCheck(L_WARP);
-
-    if (v)
+    if (opCheck(L_WARP))
     {
         cMessage("^9, [Location|Destination|Course]: ");
         scanf("%d,%d,%d", &x, &y, &z);
-        v = canwarp(x,y,z);
-        if (v)
+        if (canwarp(x,y,z))
         {
             // our new position after warp
             QX = x;
             QY = y;
             QZ = z;
+            return TRUE;
         }
     }
-    return v;
+    return FALSE;
 }
 
 void phaserCommand()
@@ -203,7 +202,7 @@ void phaserCommand()
             if (e > 0)
             {
                 // ensure keep some back.
-                if (e <= (int)(ENT_ENERGY(galaxy) - 200))
+                if (e <= (int)(ENT_ENERGY(galaxy) - 500))
                 {
                     // phaser lock sound; doesnt work properly
                     //playNotes("CE++F--B++D-F#-B+"); // nameP, C, L, B, G, K,  D
@@ -225,11 +224,9 @@ void torpCommand()
 {
     // fire torpedo
     
-    uchar u = opCheck(L_TORPS);
-    
-    if (u)
+    if (opCheck(L_TORPS))
     {
-        u = ENT_TORPS(galaxy);
+        uchar u = ENT_TORPS(galaxy);
         if (u > 0)
         {
             int dir;
@@ -258,7 +255,7 @@ void dockCommand()
         redrawSidebar();
         messageCode(MSG_CODE_DOCKED);
 
-        if (QX == 7 && QY == 7 && QZ == 2)
+        if ((uchar)(QX + QY + QZ) == 16) // 772
             endgame(MSG_CODE_ENDGAME_RESIGN);
     }
     else
@@ -267,8 +264,6 @@ void dockCommand()
 
 void tick()
 {
-    static int recalled;
-
     if (alertLevel)
     {
         // running cost 10 units per tick extra if in red alert
@@ -302,6 +297,75 @@ void tick()
     }
 }
 
+static void computerScan(uchar type)
+{
+    uchar* ep;
+    uchar c = 0;
+    uchar nearest = 0xff;
+    uchar nx, ny, nz;
+
+    cls();
+    printf("Ship's Computer Memory Bank Scan for %c\n", entTypeChar[type]);
+
+    for (ep = galaxy; ep != galaxyEnd; ep += ENT_SIZE)
+    {
+        if (mainType(ep) == type && ENT_MARKED(ep))
+        {
+            uchar x, y, z, d;
+            if ((c++ & 0x3) == 0) printf("\n");
+
+            x = ENT_QX(ep);
+            y = ENT_QY(ep);
+            z = ENT_QZ(ep);
+
+            d = distmTo(x, y, z);
+
+            if (d < nearest)
+            {
+                nearest = d;
+                nx = x; 
+                ny = y;
+                nz = z;
+            }
+            
+            printf("%d,%d,%d ", (int)x, (int)y, (int)z);
+        }
+    } 
+
+    if (!c) printf("\nNone Known\n");
+    else printf("\n\nNearest %d,%d,%d\n", (int)nx, (int)ny, (int)nz);
+    
+    getkey();
+}
+
+void computerCommand()
+{
+    char c;
+
+    do
+    {
+        cls();
+    
+        printf("Search Ship's memory banks for:\n\n"
+           "  (K) Klingon locations\n"
+           "  (B) Bases\n"
+           "  (R) Return\n"
+           );
+
+        c = getSingleCommand("Operation: ");
+    
+        switch (c)
+        {
+        case 'K':
+            computerScan(ENT_TYPE_KLINGON);
+            break;
+        case 'B':
+            computerScan(ENT_TYPE_BASE);
+            break;
+        }
+    } while (c != 'R');
+}
+
 
 // mr spock, you have the conn :-)
 static uchar conn()
@@ -326,7 +390,7 @@ static uchar conn()
             if (warpCommand())
             {
                 // complete warp command on SR view
-                k = srScan('W' | 0x80); 
+                k = srScan('W' | 0x80);  // XX flag command chosen
             }
             break;
         case 'S':
@@ -336,6 +400,9 @@ static uchar conn()
         case 'T':
             k = srScan(c);
             break;
+        case 'C':
+            computerCommand();
+            // fall through
         default:
             c = 0;
         }

@@ -28,6 +28,7 @@ void cls();
 void setWide(uchar v);
 void initModel();
 void uninitModel();
+void pause();
 
 void outs(const char* s);
 void outsWide(const char* s);

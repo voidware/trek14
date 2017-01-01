@@ -44,6 +44,7 @@ uchar alertLevel;
 // need to redraw screen 
 uchar redrawsr;
 uchar gameover;
+uchar recalled;
 
 // entities in current quadrant
 uchar quadCounts[ENT_TYPE_COUNT];
@@ -266,7 +267,7 @@ uchar distance(uchar* ep1, uchar* ep2)
     return x2 + y2 - (((x2>y2) ? y2 : x2) >> 1);
 }
 
-char distm(char x1, char y1, char x2, char y2)
+uchar distm(char x1, char y1, char x2, char y2)
 {
     // Manhattan distance
     char dx = x1 - x2;
@@ -274,6 +275,11 @@ char distm(char x1, char y1, char x2, char y2)
     if (dx < 0) dx = -dx;
     if (dy < 0) dy = -dy;
     return dx + dy;
+}
+
+uchar distmTo(uchar x, uchar y, uchar z)
+{
+    return ABSC(QX - x) + ABSC(QY - y) + ABSC(QZ - z);
 }
 
 uchar getWidth(uchar* ep)
@@ -644,6 +650,7 @@ void genGalaxy()
         uchar k2 = 0;
         uchar n;
 
+        // up to 4 klingons per quadrant.
         n = genEntLocation(galaxyEnd, ENT_TYPE_KLINGON, 4);
         i += n;
 
@@ -705,6 +712,7 @@ void genGalaxy()
 
     // reset (eg new game)
     alertLevel = 0;
+    recalled = 0;
 
     // warp to QX, QY, QZ
     warp(); 

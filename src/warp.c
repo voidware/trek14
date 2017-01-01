@@ -33,21 +33,23 @@ char canwarp(uchar x, uchar y, uchar z)
     // can we warp to (x,y,z) ?
     // if we can, subtract energy needed.
 
-    char v = (x < 8 && y < 8 && z <= 2);
-    
-    if (v)
+    if (x < 8 && y < 8 && z <= 2)
     {
         // warp costs the "manhattan distance"
-        uchar d = ABSC(QX - x) + ABSC(QY - y) + ABSC(QZ - z);
-        
-        // we are the first entry in the galaxy
-        if (!enoughEnergy(galaxy, ((int)d)*100))
+        uchar d = distmTo(x, y, z);
+
+        if (d)
         {
-            messageCode(MSG_CODE_INSUFENERGY);
-            v = 0;
+            // we are the first entry in the galaxy
+            if (!enoughEnergy(galaxy, ((int)d)*100))
+            {
+                messageCode(MSG_CODE_INSUFENERGY);
+                return 0;
+            }
         }
+        else return 0;
     }
-    return v;
+    return 1;
 }
 
 void warp()

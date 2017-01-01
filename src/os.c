@@ -396,13 +396,23 @@ static void _keyIdle()
     }
 }
 
-static char readKey()
+static char scanKey()
 {
+    // return key if pressed or 0
     uchar rc[2];
-
+    
     // ignore shift & control
-    while (!readKeyRowCol(rc) || rc[0] == 7) _keyIdle();
-    return keyMatrix[rc[0]*8 + rc[1]];
+    return (readKeyRowCol(rc) && rc[0] != 7) ? keyMatrix[rc[0]*8 + rc[1]] : 0;
+}
+
+void pause()
+{
+    // delay, unless key pressed
+    int c = 1000;  // XX scale delay by machine speed
+    while (--c)
+    {
+        if (scanKey()) return;
+    }
 }
 
 char getkey()
@@ -411,7 +421,7 @@ char getkey()
     char c;
     for (;;)
     {
-        c = readKey();
+        c = scanKey();
         if (c)
         {
             if (keyIdleState) 

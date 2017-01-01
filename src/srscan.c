@@ -208,14 +208,46 @@ static void animateOut()
 static void animationHandler(uchar state)
 {
     uchar** epp;    
-    epp = quadrant;
-    while (*epp)
+    for (epp = quadrant; *epp; ++epp)
     {
         if (objTable[ENT_TYPE(*epp)]._spriteAlt)
-        {
             drawEntAlt(*epp, state);
+    }
+}
+
+static void drawEnts()
+{
+    uchar** epp;    
+    for (epp = quadrant; *epp; ++epp) drawEnt(*epp);
+}
+
+static void identifyScan()
+{
+    if (opCheckSR())
+    {
+        // identify entities on SR screen
+        uchar** epp;    
+        uchar cc = 0;
+        for (epp = quadrant; *epp; ++epp)
+        {
+            uchar* ep = *epp;
+            if (mainType(ep) == ENT_TYPE_KLINGON)
+            {
+                uchar sx, sy;
+                const EntObj* eo = objTable + ENT_TYPE(ep);
+                ENT_SXY(*epp, sx, sy);
+                sx -= (eo->_w>>1) - 1;
+                printfat(sx, sy, "%d", ENT_ENERGY(ep));
+                ++cc;
+            }
         }
-        ++epp;
+
+        if (cc)
+        {
+            // wait, then redraw
+            pause();
+            drawEnts();
+        }
     }
 }
 
@@ -224,7 +256,6 @@ char srScan(char k)
     // short range scan.
     // draw quadrant screen & content.
 
-    uchar** epp;
     uchar i, j;
     char c;
 
@@ -240,6 +271,7 @@ char srScan(char k)
 
     redrawSidebar();
 
+    // draw star field
     for (j = 1; j <= 14; ++j)
     {
         setcursor(0,j);        
@@ -250,16 +282,19 @@ char srScan(char k)
     {
         // draw items in this quadrant. Assume here, `quadrant' is correctly
         // setup
-        epp = quadrant;
-        while (*epp) drawEnt(*epp++);
-        setIdleHandler(animationHandler, 255);
+        drawEnts();
     }
     
     // enter interactive loop on SR view
     for (;;)
     {
-        char dx, dy;
+        signed char dx, dy;
 
+        if (opCheckSR())
+            setIdleHandler(animationHandler, 255);
+        else
+            setIdleHandler(0, 0);
+        
         // operate command passed in, if any
         if (k) { c = k; k = 0; }
         else
@@ -293,11 +328,13 @@ char srScan(char k)
         }
         else if (c == 'T')
         {
-            // NB: enemy move called here early to allow
-            // enemy to (maybe) dodge torpedo
             torpCommand();
         }
-        else if ((c & 0x7f) == 'W')
+        else if (c == 'S')
+        {
+            identifyScan();
+        }
+        else if ((c & 0x7f) == 'W') // XX bit signals command done
         {
             if (c != 'W' || warpCommand())
             {
@@ -333,6 +370,7 @@ char srScan(char k)
         tick();
     }
 
+    // stop animating when not on this screen.
     setIdleHandler(0, 0);
 
     return c;

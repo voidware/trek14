@@ -39,7 +39,6 @@
 // operational level of each facility
 uchar operations[L_COUNT];
 
-
 static const char* opTable[] = 
 {
     "Shields",
@@ -81,7 +80,7 @@ static void addop(uchar op, uchar v)
     // add `v' units to operation `op'
     uchar u = operations[op];
     uchar t = u + v;
-    if (t < u) t = 0xff;
+    if (t < u) t = 0xff;  // detect overflow & clamp
     operations[op] = t;
 }
 

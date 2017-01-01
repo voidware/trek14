@@ -166,7 +166,7 @@ uchar phasers(uchar* ep, unsigned int e, uchar type)
 
     for (qp = quadrant; *qp; ++qp)
     {
-        if (ENT_TYPE(*qp) == type)
+        if (mainType(*qp) == type)
         {
             uchar x, y;
             uchar ex, ey;
