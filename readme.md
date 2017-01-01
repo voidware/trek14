@@ -106,7 +106,7 @@ Federation ships have up to twice the energy capacity of enemies. Phases are the
 
 ### The Manual
 
-For more details, see [doc/manual.txt](http://github.com/voidware/trek14/blob/master/doc/manual.txt).
+For more details, see [doc/manual.txt](http://github.com/voidware/trek14/blob/master/doc/manual.md).
 
 ### Changes/News/Updates
 
