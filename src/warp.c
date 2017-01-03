@@ -41,15 +41,15 @@ char canwarp(uchar x, uchar y, uchar z)
         if (d)
         {
             // we are the first entry in the galaxy
-            if (!enoughEnergy(galaxy, ((int)d)*100))
+            if (enoughEnergy(galaxy, ((int)d)*100)) return 1;
+            else
             {
                 messageCode(MSG_CODE_INSUFENERGY);
-                return 0;
+                pause();
             }
         }
-        else return 0;
     }
-    return 1;
+    return 0;
 }
 
 void warp()

@@ -176,8 +176,7 @@ char warpCommand()
     if (opCheck(L_WARP))
     {
         cMessage("^9, [Location|Destination|Course]: ");
-        scanf("%d,%d,%d", &x, &y, &z);
-        if (canwarp(x,y,z))
+        if (scanf("%d,%d,%d", &x, &y, &z) == 3 && canwarp(x, y, z))
         {
             // our new position after warp
             QX = x;

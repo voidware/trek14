@@ -712,7 +712,8 @@ static smint _doFormatIn(StreamInFn sf, void* ctx,
             if (isdigit(*p)) 
             {
                 width = 0;
-                do {
+                do
+                {
                     width = width*10 + (*p - '0');
                     ++p;
                 } while (isdigit(*p));
@@ -735,20 +736,23 @@ static smint _doFormatIn(StreamInFn sf, void* ctx,
                     --width;
                 }
                 *s = 0;
+                ++n;
             }
             else if (*p == 'c') 
             {
                 /* single character */
                 char* s = va_arg(args, char*);
                 *s = c;
+                c = (*sf)(ctx); 
+                ++n;
             }
-            else if (*p == 'd') 
+            else if (*p == 'd' || *p == 'u')
             {
                 /* Decimal integer */
                 int* vp = va_arg(args, int*);
 
                 usmint neg = 0;
-                int val = 0;
+                unsigned int val = 0;
                 if (c == '-') 
                 {
                     neg = 1;
@@ -761,27 +765,10 @@ static smint _doFormatIn(StreamInFn sf, void* ctx,
                 }
                 
                 *vp = neg ? -val : val;
+                ++n;
             }
-            else if (*p == 'u') 
-            {
-                /* unsigned Decimal integer */
-                unsigned int* vp = va_arg(args, unsigned int*);
-                unsigned int val = 0;
-
-                while (isdigit(c)) 
-                {
-                    val = (val * 10) + (c - '0');
-                    c = (*sf)(ctx);
-                }
-                *vp = val;
-            }
-            else 
-            {
-                if (c != *p) break;
-                c = (*sf)(ctx);            
-            }
+            else break; // unknown % op
             ++p;
-            ++n;
         }
         else if (isspace(*p)) 
         {
@@ -789,15 +776,13 @@ static smint _doFormatIn(StreamInFn sf, void* ctx,
             do ++p; while (isspace(*p));
 
             /* eat all spaces in input */
-            while (isspace(c)) 
-                c = (*sf)(ctx);
+            while (isspace(c)) c = (*sf)(ctx);
         }
         else 
         {
             if (c != *p) break;
             c = (*sf)(ctx);            
             ++p;
-            ++n;
         }
     }
     return n;
