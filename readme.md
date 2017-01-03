@@ -2,13 +2,11 @@
 
 ## Introduction
 
-_TREK14_ is a newly developed "classic startrek" game for the [TRS-80](https://en.wikipedia.org/wiki/TRS-80), inspired by some of the originals, but with some new ideas.
+_TREK14_ is a newly developed "classic startrek" game for the [TRS-80](https://en.wikipedia.org/wiki/TRS-80), inspired by some of the originals, but witwh some new ideas.
 
 The graphics are retro and blocky, just like the orignals. 
 
-![](http://s3-eu-west-1.amazonaws.com/stvle/1823b86f4dbff853d738947457cfa1d5.png)
-
-![](http://s3-eu-west-1.amazonaws.com/stvle/45efc4eb8f8e9029cdd893499b2b4627.png)
+![](doc/trek14.gif)
 
 ## Installing/Running
 
