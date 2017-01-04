@@ -1,10 +1,10 @@
-# Trek14: StarTrek for the TRS-80
+# Trek14: Star Trek for the TRS-80
 
 ## Introduction
 
-_TREK14_ is a newly developed "classic startrek" game for the [TRS-80](https://en.wikipedia.org/wiki/TRS-80), inspired by some of the originals, but witwh some new ideas.
+_TREK14_ is a newly developed "classic startrek" game for the [TRS-80](https://en.wikipedia.org/wiki/TRS-80), inspired by some of the originals, but with some new ideas.
 
-The graphics are retro and blocky, just like the orignals. 
+The graphics are retro and blocky, just like the originals. 
 
 ![](doc/trek14.gif)
 
@@ -23,7 +23,7 @@ The program will begin. The galaxy is generated and then you enter the main game
 
 ### Model III
 
-The file `TREK14.CMD` is a binary to put put onto a floppy disk and run. Alternatively use the `TREK14.DSK` image of a floppy disk containing `TREK14/CMD`
+The file `TREK14.CMD` is a binary to put onto a floppy disk and run. Alternatively use the `TREK14.DSK` image of a floppy disk containing `TREK14/CMD`
 
 ### Model IV/4P
 
@@ -86,21 +86,21 @@ One reason this format was not chosen by classic BASIC variants, is that scannin
 
 ### Klingons
 
-The galaxy has 20 klingon warships, randomly positioned with initially a max of 3 per quandrant. 
+The galaxy has 20 Klingon warships, randomly positioned with initially a max of 3 per quadrant. 
 
 ### Romulans
 
-As well as klingons, romulans are planned. Naturally these will make use of cloaking devices and are politically neutral, except when attacked. In some circumstances, the romulans will also attack the Klingons.
+As well as Klingons, romulans are planned. Naturally these will make use of cloaking devices and are politically neutral, except when attacked. In some circumstances, the romulans will also attack the Klingons.
 
 ### Bases & Federation Ships
 
-There are 5 star bases across the galaxy, where you can refuel and restock depleted photon torpedoes (only a max of 3 can be carried). Additionally Starfleet HQ is located in the galaxy far corner. Dock with HQ when you wish to finish your game and receive your rating.
+There are 5 star bases across the galaxy, where you can refuel and restock depleted photon torpedoes (only a max of 3 can be carried). Additionally Star fleet HQ is located in the galaxy far corner. Dock with HQ when you wish to finish your game and receive your rating.
 
 Other Federation ships may be encountered in the galaxy. Sometimes these come under enemy attack and call for your assistance. Sometimes, they may even help you fight the Klingons.
 
 ### Phasers & Torpedoes
 
-Federation ships have up to twice the energy capacity of enemies. Phases are the enemy's only weapon (although they might ram you!). Phaser damage decays linearly with distance. A quadrant is about the max distance a phaser can be effective, whereas photon torpedoes may penetrate adjacent quadrants - watch out you don't blow up something by accident! You may be court martialed.
+Federation ships have up to twice the energy capacity of enemies. Phases are the enemy's only weapon (although they might ram you!). Phaser damage decays linearly with distance. A quadrant is about the max distance a phaser can be effective, whereas photon torpedoes may penetrate adjacent quadrants - watch out you don't blow up something by accident! You may face court martial.
 
 ### The Manual
 
@@ -144,7 +144,7 @@ When the game ends, you can now replay without exiting. Exit to DOS may soon not
 
 #### Explosion!
 
-A fablous explosion with sound is implemented for entitiles. 
+A fabulous explosion with sound is implemented for entitles. 
 
 #### More on SR Scan
 
