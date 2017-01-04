@@ -112,7 +112,9 @@ For more details, see [doc/manual.md](http://github.com/voidware/trek14/blob/mas
 
 4/4P no longer run in model III mode. Although, right now, they're still running at 2MHz rather than 4. This will be remedied once I revisit the sound code.
 
-Driving the screen is now totally ROM and DOS free and are 64/80 column aware. Consequently, the 4/4P display comes up in the top left with spare space to the right side and below. There are plans to use this space.
+Driving the screen is now totally ROM and DOS free and are 64/80 column aware. Consequently, the 4/4P display comes up in the top left with spare space to the right side and below. 
+
+The right sidebar on 80 columns now shows operations levels of the ship.
 
 #### Keyboard driving ROM/DOS Free
 
@@ -146,29 +148,13 @@ When the game ends, you can now replay without exiting. Exit to DOS may soon not
 
 A fabulous explosion with sound is implemented for entitles. 
 
-#### More on SR Scan
+#### SR Scan Improvements
 
-Short range scan now displays shield energy and RED/GREEN condition.
+Short range scan now displays shield energy and RED/GREEN condition. Can press "S" inside SR scan to scan enemy energy levels - but this costs a move.
 
+#### Enemies and Animation
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Enemies now animate menacingly. Added a new, bigger and beefier Klingon ship. Plan to add the Klingon Destroyer Ships at some point too - these will be badass.
 
 
 
