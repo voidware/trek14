@@ -1,43 +1,42 @@
 /**
- * Copyright (c) 2013 Voidware Ltd.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *    _    __        _      __                           
+ *   | |  / /____   (_)____/ /_      __ ____ _ _____ ___ 
+ *   | | / // __ \ / // __  /| | /| / // __ `// ___// _ \
+ *   | |/ // /_/ // // /_/ / | |/ |/ // /_/ // /   /  __/
+ *   |___/ \____//_/ \__,_/  |__/|__/ \__,_//_/    \___/ 
+ *                                                       
+ *  Copyright (©) Voidware 2018.
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to
+ *  deal in the Software without restriction, including without limitation the
+ *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ *  sell copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
  * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ *  THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ *  IN THE SOFTWARE.
+ * 
+ *  contact@voidware.com
  */
 
 // helper utility functions
 
+#include <stdio.h>
+#include <ctype.h>
+#include <stdarg.h>
+
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
-
-void printfat(uchar x, uchar y, const char* fmt, ...)
-{
-    // printf at (x,y) character position
-    // NB: text is automatically flushed (without need for "\n")
-    
-    va_list args;
-    setcursor(x, y);    
-    va_start(args, fmt);
-    vprintf(fmt, args);
-    va_end(args);
-    flush();
-}
 
 #if 0
 unsigned char isqrt16(unsigned short a)
@@ -197,5 +196,43 @@ void tanfxDeg(short v, short* s, short* c)
         *s = -*s;
         *c = -*c;
     }
+}
+
+char getSingleCommand(const char* msg)
+{
+    char c;
+    lastLine();
+    outs(msg);
+    c = getkey();
+    c = toupper(c);
+    return c;
+}
+
+void peformRAMTest()
+{
+    uchar a;
+    uchar n = TRSMemory;
+    if (n >= 64) n -= 3; // dont test the top 3k screen RAM + KB
+
+    // loop 1K at a time.
+    setcursor(0, 1);
+    outs("RAM TEST ");
+    a = 0;
+    do
+    {
+        uchar b = a<<2;
+        ++a;
+        if (TRSMemory < 64) b += 0x40; 
+
+        setcursor(9, 1);
+        printf_simple("%dK ", a);
+        if (!ramTest(b, 4)) break; // test 1K
+        --n;
+    } while (n);
+
+    if (!n)
+        outs("OK\n");
+    else
+        printf_simple("FAILED at %x\n", (uint)TRSMemoryFail);
 }
 

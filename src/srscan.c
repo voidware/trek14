@@ -22,9 +22,9 @@
 
 // quadrant view
 
+#include <ctype.h>
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
 #include "utils.h"
 #include "ent.h"
 #include "plot.h"
@@ -269,7 +269,7 @@ char srScan(char k)
     // we are redrawing, so clear this
     redrawsr = FALSE;
 
-    redrawSidebar();
+    //redrawSidebar();
 
     // draw star field
     for (j = 1; j <= 14; ++j)
@@ -299,8 +299,7 @@ char srScan(char k)
         if (k) { c = k; k = 0; }
         else
         {
-            c = getkey();
-            if (islower(c)) c = _toupper(c);
+            c = getSingleCommand("Command: ");
         }
         
         dx = 0;
@@ -309,7 +308,7 @@ char srScan(char k)
             dx = -1;
         else if (c == KEY_ARROW_RIGHT)
             dx = 1;
-        else if (c == KEY_ARROW_UP)
+        else if (c == KEY_ARROW_UP || c == KEY_ARROW_UP_M4)
             dy = -1;
         else if (c == KEY_ARROW_DOWN)
             dy = 1;

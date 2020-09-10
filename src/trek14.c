@@ -1,77 +1,70 @@
 /**
- * Copyright (c) 2013 Voidware Ltd.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *    _    __        _      __                           
+ *   | |  / /____   (_)____/ /_      __ ____ _ _____ ___ 
+ *   | | / // __ \ / // __  /| | /| / // __ `// ___// _ \
+ *   | |/ // /_/ // // /_/ / | |/ |/ // /_/ // /   /  __/
+ *   |___/ \____//_/ \__,_/  |__/|__/ \__,_//_/    \___/ 
+ *                                                       
+ *  Copyright (©) Voidware 2018.
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to
+ *  deal in the Software without restriction, including without limitation the
+ *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ *  sell copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
  * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ *  THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ *  IN THE SOFTWARE.
+ * 
+ *  contact@voidware.com
  */
 
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
 #include "ent.h"
 #include "command.h"
 #include "sound.h"
 #include "utils.h"
 
-// comment in to skip the sound intro when developing
+
+// by-pass RAM test
 #define SKIPxx
 
-static void peformRAMTest()
+
+#ifdef SKIP
+static void printStack()
 {
-    uchar a = 0;
-    uchar n = TRSMemory;
-    if (n >= 64) n -= 3; // dont test the top 3k screen RAM + KB
+    int v;
+    printf_simple("Stack %x\n", ((uint)&v) + 4);
 
-    // loop 1K at a time.
-    printfat(0,1,"RAM TEST ");
-    do
-    {
-        uchar b = a<<2;
-        ++a;
-        if (TRSMemory < 64) b += 0x40; 
-        
-        printfat(9,1, "%dK ", (int)a);
-        if (!ramTest(b, 4)) break;
-        --n;
-    } while (n);
-
-    if (!n)
-        printf("OK\n");
-    else
-        printf("FAILED at %x\n", (uint)TRSMemoryFail);
 }
+#endif
 
 static void startGame()
 {
     cls();
 
-    printf("TRS-80 Model %d (%dk RAM)\n", (int)TRSModel, (int)TRSMemory);
+    printf_simple("TRS-80 Model %d (%dk RAM)\n", (int)TRSModel, (int)TRSMemory);
 
-#ifdef SKIP
-    {
-        int v;
-        //printf("Stack %x\n", ((int)&v) + 4);
-    }
-#else
+#ifdef HIRES    
+    if (grayfx) printf_simple("Grayfx Board Detected\n");
+#endif
 
+#ifndef SKIP
     // When you run this on a real TRS-80, you'll thank this RAM test!
     peformRAMTest();
-
+#else
+    // printStack();
 #endif
 
     outs("\n\nTREK 2014!\n");
@@ -109,12 +102,17 @@ static void mainloop()
     } while (!gameover);
 }
 
-void main()
+int main()
 {
     initModel();
-    
-    // initialise our own mini-clib
-    libcInit();
+
+    // for bbasic programs we could mostly get away without relocating
+    // the stack to the top of memory.
+    setStack();
     
     mainloop();
+    
+    revertStack();
+    
+    return 0;   // need this to ensure call to revert (else jp)
 }

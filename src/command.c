@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
 #include "utils.h"
 #include "ent.h"
 #include "lrscan.h"
@@ -44,7 +43,7 @@ void command()
         playNotes("+1G"); // nameE
 
         cls();
-        printf("\n  (S)hort Range Scan\n"
+        printf_simple("\n  (S)hort Range Scan\n"
                "  (L)ong Range Scan\n"
                "  (W)arp\n"
                "  (P)hasers\n"
@@ -110,7 +109,7 @@ static void emitStoryCmd(const char* m)
 static void emitStoryCmdM(uchar mc)
 {
     char buf[16];
-    sprintf(buf, "^b%d", (int)mc);
+    sprintf_simple(buf, "^b%d", (int)mc);
     emitStoryCmd(buf);
 }
 
@@ -135,17 +134,6 @@ void cMessage(const char* s)
     emitStoryCmd(s);
 }
 
-char getSingleCommand(const char* msg)
-{
-    char buf[4];
-    char c;
-    cMessage(msg);
-    getline2(buf, sizeof(buf));
-    c = buf[0];
-    if (islower(c)) c = _toupper(c);
-    return c;
-}
-
 void endgame(uchar msg)
 {
     char buf[16];
@@ -156,7 +144,7 @@ void endgame(uchar msg)
 
     cls();
 
-    sprintf(buf, "\n\n^b%d", (int)msg);
+    sprintf_simple(buf, "\n\n^b%d", (int)msg);
     emitStory(buf, &st);
 
     if (msg == MSG_CODE_ENDGAME_RESIGN)
@@ -166,7 +154,7 @@ void endgame(uchar msg)
     }
 
     if (score < 0) score = 0;
-    printf("\n\n   Your score is %d\n", score);
+    printf_simple("\n\n   Your score is %d\n", score);
     gameover = TRUE;
 }
 
@@ -176,7 +164,7 @@ char warpCommand()
     if (opCheck(L_WARP))
     {
         cMessage("^9, [Location|Destination|Course]: ");
-        if (scanf("%d,%d,%d", &x, &y, &z) == 3 && canwarp(x, y, z))
+        if (scanf_simple("%d,%d,%d", &x, &y, &z) == 3 && canwarp(x, y, z))
         {
             // our new position after warp
             QX = x;
@@ -196,7 +184,7 @@ void phaserCommand()
         {
             int e;
             cMessage("^5, Energy: ");
-            scanf("%d", &e);
+            scanf_simple("%d", &e);
 
             if (e > 0)
             {
@@ -230,7 +218,7 @@ void torpCommand()
         {
             int dir;
             message("^5, [Direction|Angle|Vector]: ");
-            scanf("%d", &dir);
+            scanf_simple("%d", &dir);
 
             // if out of range, abort command
             if (dir >= 0 && dir <= 360)
@@ -251,7 +239,7 @@ void dockCommand()
         // full house
         ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
         repairAll();
-        redrawSidebar();
+        //redrawSidebar();
         messageCode(MSG_CODE_DOCKED);
 
         if ((uchar)(QX + QY + QZ) == 16) // 772
@@ -304,14 +292,14 @@ static void computerScan(uchar type)
     uchar nx, ny, nz;
 
     cls();
-    printf("Ship's Computer Memory Bank Scan for %c\n", entTypeChar[type]);
+    printf_simple("Ship's Computer Memory Bank Scan for %c\n", entTypeChar[type]);
 
     for (ep = galaxy; ep != galaxyEnd; ep += ENT_SIZE)
     {
         if (mainType(ep) == type && ENT_MARKED(ep))
         {
             uchar x, y, z, d;
-            if ((c++ & 0x3) == 0) printf("\n");
+            if ((c++ & 0x3) == 0) printf_simple("\n");
 
             x = ENT_QX(ep);
             y = ENT_QY(ep);
@@ -327,12 +315,12 @@ static void computerScan(uchar type)
                 nz = z;
             }
             
-            printf("%d,%d,%d ", (int)x, (int)y, (int)z);
+            printf_simple("%d,%d,%d ", (int)x, (int)y, (int)z);
         }
     } 
 
-    if (!c) printf("\nNone Known\n");
-    else printf("\n\nNearest %d,%d,%d\n", (int)nx, (int)ny, (int)nz);
+    if (!c) printf_simple("\nNone Known\n");
+    else printf_simple("\n\nNearest %d,%d,%d\n", (int)nx, (int)ny, (int)nz);
     
     getkey();
 }
@@ -345,7 +333,7 @@ void computerCommand()
     {
         cls();
     
-        printf("Search Ship's memory banks for:\n\n"
+        printf_simple("Search Ship's memory banks for:\n\n"
            "  (K) Klingon locations\n"
            "  (B) Bases\n"
            "  (R) Return\n"
@@ -364,7 +352,6 @@ void computerCommand()
         }
     } while (c != 'R');
 }
-
 
 // mr spock, you have the conn :-)
 static uchar conn()

@@ -21,8 +21,8 @@
  */
 
 #include "defs.h"
+#include "os.h"
 #include "ent.h"
-#include "libc.h"
 #include "utils.h"
 #include "warp.h"
 #include "damage.h"
@@ -182,35 +182,6 @@ const EntObj objTable[] =
     { CW(0), 1, SCORE_KLINGON, 2000, romulan },
     { 1, 1, 0, 0, romulan }, // additional entry used for torpedo
 };
-
-unsigned int rand16()
-{
-    static unsigned short seed = 0;
-    unsigned short v;
-    uchar a;
-
-    v = (seed + 1)*75;
-    a = v;
-    a -= (v >> 8);
-    seed = ((v & 0xff00) | a) - 1;
-    return seed;
-}
-
-uint randn(uint n)
-{
-    // random [0,n-1]
-    
-    uint c = 1;
-    uint v;
-
-    while (c < n) c <<= 1;
-    --c;
-    do
-    {
-        v = rand16() & c;
-    } while (v >= n);
-    return v;
-}
 
 uchar mainType(uchar* ep)
 {

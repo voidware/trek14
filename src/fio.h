@@ -6,7 +6,7 @@
  *   | |/ // /_/ // // /_/ / | |/ |/ // /_/ // /   /  __/
  *   |___/ \____//_/ \__,_/  |__/|__/ \__,_//_/    \___/ 
  *                                                       
- *  Copyright (©) Voidware 2018.
+ *  Copyright (Â©) Voidware 2019.
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to
@@ -29,9 +29,26 @@
  *  contact@voidware.com
  */
 
-void printfat(uchar x, uchar y, const char* fmt, ...);
-unsigned char isqrt16(unsigned short a);
-unsigned int expfixed(unsigned int v);
-void tanfxDeg(short v, short* s, short* c);
-char getSingleCommand(const char* msg);
-void peformRAMTest();
+#ifndef __fio_h__
+#define __fio_h__
+
+#include "defs.h"
+
+typedef char FCB[50];
+
+uchar fopen_exist(FCB f);
+uchar fopen(FCB f);
+
+int fgetc(FCB f);
+// return < 0 if error, otherwise char
+
+uchar fputc(char c, FCB f);
+// return 0 if OK, otherwise error code
+
+uchar fwrite(const void* buf, FCB f);
+// write one record at `buf` return 0 if ok, else error code
+
+void fclose(FCB f);
+
+#endif // __fio_h__
+

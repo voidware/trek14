@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
 #include "utils.h"
 #include "ent.h"
 #include "plot.h"
@@ -44,7 +43,7 @@ uchar lrScan()
     if (!opCheck(L_SCANL)) return 0;
 
     cls();
-    printf("Long Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
+    printf_simple("Long Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
 
     y = 7; // 2*cy+1
     x = 0;

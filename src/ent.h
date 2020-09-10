@@ -205,8 +205,6 @@ extern const uchar fedshipRLE[];
 void getQuad(uchar x, uchar y, uchar z, uchar* quad, uchar** eplist);
 void genGalaxy();
 void genSector(uchar* ep);
-unsigned int rand16();
-uint randn(uint n);
 uchar mainType(uchar* ep);
 char collision(uchar* ep1, uchar* ep2);
 char collisionBorder(uchar* ep);

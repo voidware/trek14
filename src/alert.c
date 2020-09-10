@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
 #include "plot.h"
 #include "sound.h"
 #include "ent.h"

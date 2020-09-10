@@ -22,7 +22,6 @@
 
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
 #include "ent.h"
 #include "command.h"
 #include "damage.h"
@@ -97,13 +96,14 @@ uchar opCheck(uchar i)
     if (!u)
     {
         char buf[64];
-        sprintf(buf, "^4: ^b%d [are out|inoperative|[still |]dunny' work], ^0!", (int)i);
+        sprintf_simple(buf, "^4: ^b%d [are out|inoperative|[still |]dunny' work], ^0!", (int)i);
         emitStory(buf);
         alertsound();  // also pause
     }
     return u;
 }
 
+/*
 static void redrawOperation(uchar op)
 {
     // map operations from -100% to +100% with OP_MIN at 1%
@@ -120,6 +120,7 @@ void redrawSidebar()
     printfat(65,0, "Operations");
     for (i = 1; i < L_COUNT; ++i) redrawOperation(i);
 }
+*/
 
 void repairAll()
 {
@@ -147,7 +148,7 @@ static void subop(uchar op, int val)
         // signal we should redraw SR view
         redrawsr = TRUE;
     }
-    else redrawOperation(op);
+    //else redrawOperation(op);
 }
 
 static void repair(uchar r)
@@ -169,12 +170,12 @@ static void repair(uchar r)
                 if (r < v) v = r;
                 r -= v;
                 operations[i] += v;
-                redrawOperation(i);
+                //redrawOperation(i);
                 if (!j && OPERATIONAL(i))
                 {
                     // repaired!
                     char buf[64];
-                    sprintf(buf, "^4: ^b%d now [operational|repaired|working], ^0", (int)i);
+                    sprintf_simple(buf, "^4: ^b%d now [operational|repaired|working], ^0", (int)i);
                     emitStory(buf);
                 }
             }

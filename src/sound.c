@@ -20,9 +20,9 @@
  * IN THE SOFTWARE.
  */
 
+#include <ctype.h>
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
 #include "sound.h"
 
 #define BASE_TSTATES_M1 221750L
@@ -76,14 +76,6 @@ static const Note notes[] =
 };
 
 // play melodies. eg:
-
-#if 0
-static int divs(int a, uint b)
-{
-    // bogus routine to divide using only unsigned int
-    return a >= 0 ? (int)(((uint)a)/b) : -(int)(((uint)(-a))/b);
-}
-#endif
 
 void playVictory()
 {

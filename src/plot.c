@@ -1,23 +1,32 @@
 /**
- * Copyright (c) 2013 Voidware Ltd.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *    _    __        _      __                           
+ *   | |  / /____   (_)____/ /_      __ ____ _ _____ ___ 
+ *   | | / // __ \ / // __  /| | /| / // __ `// ___// _ \
+ *   | |/ // /_/ // // /_/ / | |/ |/ // /_/ // /   /  __/
+ *   |___/ \____//_/ \__,_/  |__/|__/ \__,_//_/    \___/ 
+ *                                                       
+ *  Copyright (©) Voidware 2018.
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to
+ *  deal in the Software without restriction, including without limitation the
+ *  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ *  sell copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
  * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ *  THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ *  IN THE SOFTWARE.
+ * 
+ *  contact@voidware.com
  */
 
 #include "defs.h"
@@ -37,34 +46,30 @@ void plot(uchar x, uchar y, uchar c)
 {
     // plot pixel (x,y) colour c
 
-    uchar q, r, mask;
-    char* m;
-    signed char v;
+    uchar q, mask;
+    uchar* m;
     
-    r = y;
-    q = div3tab[r];
+    q = div3tab[y];
 
     // 64*(y/3) + x/2
     m = vidaddr(x>>1, q);
     if (!m) return;  // not within screen 
-	
-    // remainder
-    r -= q;
-    r -= q;
-    r -= q;
 
-    mask = leftCol[r];
-    if (x&1) mask += mask; // rightCol
-	
-    v = *m;
-    if (v >= 0) v = 0x80;
+    // remainder	
+    //r = y - q - q - q;
+    mask = leftCol[y - q*3];
+
+    if (x&1) mask <<= 1; // rightcol
+
+    q = *m;
+    if (q < 128) q = 0x80;
 
     if (c)
-        *m = v | mask;
+        *m = q | mask;
     else
-        *m = v & ~mask;
+        *m = q & ~mask;
 }
-
+	
 uchar plotSpan(uchar x, uchar y, uchar n0, uchar c)
 {
     // plot (x,y) to (x+n, y) colour c
@@ -101,8 +106,8 @@ uchar plotSpan(uchar x, uchar y, uchar n0, uchar c)
         mask = bothCol[q];
         while (n > 1)
         {
-            if (x >= 160) return;
-            if (x >= 128 && !cols80) return;
+            //if (x >= 160) return;
+            //if (x >= 128 && !cols80) return;
             n -= 2;
             v = *m;
             if (v >= 0) v = 0x80;
@@ -143,76 +148,6 @@ void plotVLine(uchar x, uchar y1, uchar y2, uchar c)
     } while (++y1 <= y2);
 
 }
-
-#if 0
-void plotLine(char x1, char y1, char x2, char y2, plotfn* fn)
-{
-    // draw line (x1, y1) to (x2, y2) inclusive
-    uchar ax, ay;
-    char sx, sy;
-    char x, y;
-
-    sx = 1;
-    ax = x2-x1; 
-    if ((char)ax < 0)
-    {
-        ax = -ax;
-        sx = -1;
-    }
-    else if (!ax)
-        sx = 0;
-    
-    ax <<= 1;
-
-    sy = 1;    
-    ay = y2-y1;
-    if ((char)ay < 0)
-    {
-        ay = -ay;
-        sy = -1;
-    }
-    else if (!ay)
-        sy = 0;
-    
-    ay <<= 1;
-
-    x = x1;
-    y = y1;
-    
-    if (ax>ay) 	
-    {	
-	char d = ay-(ax>>1);
-	for (;;) 
-        {
-            (*fn)(x, y);
-	    if (x==x2) return;
-	    if (d>=0) 
-            {
-		y += sy;
-		d -= ax;
-	    }
-	    x += sx;
-	    d += ay;
-	}
-    }
-    else        
-    {
-	char d = ax-(ay>>1);
-	for (;;) 
-        {
-            (*fn)(x, y);
-	    if (y==y2) return;
-	    if (d>=0) 
-            {
-		x += sx;
-		d -= ay;
-	    }
-	    y += sy;
-	    d += ax;
-	}
-    }
-}
-#endif
 
 uchar pixelsRLE(const uchar* dp, char* pix)
 {

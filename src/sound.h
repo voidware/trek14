@@ -34,6 +34,4 @@ extern void zapsound();
 extern void alertsound();
 extern void squoink();
 
-extern void clobber_rti();
-
 #endif // __sound_h__

@@ -2,17 +2,28 @@
 # Build Trek14!
 # 
 
+SDCCDIR = d:/sdcc
 CC = sdcc
 AS = sdasz80
 LD = sdldz80
-DEBUG = 
-OPT2 = --max-allocs-per-node 100000 
-OPT = --opt-code-size
-CFLAGS = -mz80 --std-sdcc99 $(OPT) $(DEBUG)
+DEBUG =
+GCC = gcc
+
+# callee-saves appears not available on Z80
+OPTBASE = --opt-code-size #--all-callee-saves
+
+OPT = $(OPTBASE) --max-allocs-per-node 20000
+OPT2 = $(OPTBASE) --max-allocs-per-node 100000  --opt-code-speed
+
 ASFLAGS = -l
+DEFS = -DSMALL -DNDEBUG
+
+CFLAGS = -mz80 --std-sdcc11 --fsigned-char $(OPT) $(DEBUG) $(DEFS)
+
 
 ## set up your path to where the SDCC Z80 lib is
-LIBS = -l i:\sdcc\lib\z80\z80.lib
+LIBS = -l $(SDCCDIR)/lib/z80/z80.lib
+
 
 # 48k dos machine
 LDFLAGS = -mjwx -b _CODE=0x5200 $(LIBS)
@@ -33,10 +44,9 @@ OBJS = \
 	os.rel \
 	utils.rel \
 	sound.rel \
-	libc.rel \
-	libcbase.rel \
 	soundbit.rel \
 	story.rel \
+	fios.rel
 
 %.rel: %.c
 	$(CC) $(CFLAGS) -c $< 
@@ -45,6 +55,10 @@ OBJS = \
 	$(AS) $(ASFLAGS) -o $@ $< 
 
 all: trek14.dsk
+
+# increase optimisation on plot functions
+plot.rel: plot.c
+	$(CC) $(CFLAGS) $(OPT2) -c $<
 
 trek14.cas: trek14.ihx
 	../tools/mksys/mksys trek14.ihx trek14.cas
@@ -78,8 +92,11 @@ clean:
 	rm -f *.sym
 
 cleanall: clean
+	rm -f *.exe
 	rm -f *.cmd
 	rm -f *.cas
+	rm -f *.dsk
+	rm -f *.t8c
 
 
 tags:

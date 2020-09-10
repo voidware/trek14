@@ -23,7 +23,6 @@
 
 #include "defs.h"
 #include "os.h"
-#include "libc.h"
 #include "utils.h"
 #include "ent.h"
 #include "plot.h"

@@ -6,12 +6,6 @@ sndbit_mask     .equ  3
 sndbit_port     .equ  255
 
 
-;;;  XX HACK to clobber the EI instruction at the __rti function
-_clobber_rti::
-         ld iy,#__rti
-         ld (iy),#0             ; nop
-         ret
-
 __bit_close::
           xor  a                ; will clear wide mode on model I also
           out  (sndbit_port),a
