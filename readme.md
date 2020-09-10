@@ -139,10 +139,6 @@ Reports now come from named members of your crew, who now address you in the ass
 
 You now receive an end-game report when you dock with HQ. The report is currently limited, but the plan is to make it relevant to your performance. _TODO!_
 
-#### New Game?
-
-When the game ends, you can now replay without exiting. Exit to DOS may soon not be possible as part of the take-over-the-machine approach. For now, you still can exit to DOS.
-
 #### Explosion!
 
 A fabulous explosion with sound is implemented for entitles. 
