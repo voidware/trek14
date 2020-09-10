@@ -24,12 +24,18 @@ The program will begin. The galaxy is generated and then you enter the main game
 ### Model I DOS
 `go1.bat`
 
+At the command prompt type, `TREK14`
+
 
 ### Model III
 `go3.bat`
 
+At the command prompt type, `TREK14`
+
 ### Model IV
 `go4.bat`
+
+At the command prompt type, `TREK14`
 
 ## Compiling Trek14
 
