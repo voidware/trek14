@@ -103,24 +103,28 @@ uchar opCheck(uchar i)
     return u;
 }
 
-/*
 static void redrawOperation(uchar op)
 {
-    // map operations from -100% to +100% with OP_MIN at 1%
-    // so, ((op - 127)*100)/128, then round as ((op - 127)*100 + 64)/128
-    int v = ((int)((uint)operations[op]*100) - 12636)>>7;
-    printfat(65,op,"%s%+4d%%", opTableShort[op], v);    
+    if (useSVC)
+    {
+        // map operations from -100% to +100% with OP_MIN at 1%
+        // so, ((op - 127)*100)/128, then round as ((op - 127)*100 + 64)/128
+        int v = ((int)((uint)operations[op]*100) - 12636)>>7;
+        printfat(65,op,"%s%-4d%%", opTableShort[op], v);    
+    }
 }
 
 void redrawSidebar()
 {
     uchar i;
 
-    plotVLine(129,0, 15*3, 1);
-    printfat(65,0, "Operations");
-    for (i = 1; i < L_COUNT; ++i) redrawOperation(i);
+    if (useSVC)
+    {
+        plotVLine(129,0, 15*3, 1);
+        printfat(65,0, "Operations");
+        for (i = 1; i < L_COUNT; ++i) redrawOperation(i);
+    }
 }
-*/
 
 void repairAll()
 {
@@ -148,7 +152,7 @@ static void subop(uchar op, int val)
         // signal we should redraw SR view
         redrawsr = TRUE;
     }
-    //else redrawOperation(op);
+    else redrawOperation(op);
 }
 
 static void repair(uchar r)
@@ -170,7 +174,7 @@ static void repair(uchar r)
                 if (r < v) v = r;
                 r -= v;
                 operations[i] += v;
-                //redrawOperation(i);
+                redrawOperation(i);
                 if (!j && OPERATIONAL(i))
                 {
                     // repaired!

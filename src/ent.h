@@ -124,6 +124,13 @@
 #define KLINGON2_ENERGY    5000
 #define KLINGOND_ENERGY    8000
 
+// planets do not actually have energy.
+// this value is used as a "habitability" factor.
+// high "energy" planets are more inhabitable.
+#define PLANET_ENERGY  128
+#define PLANET_ENERGY_M 256
+
+#define STAR_ENERGY 256
 
 #define ENT_SIZE  5
 #define ENT_COUNT_MAX   300
@@ -133,17 +140,19 @@
 #define ENT_TYPE_FEDERATION 1
 #define ENT_TYPE_STAR 2
 #define ENT_TYPE_PLANET  3
-#define ENT_TYPE_KLINGON 4
-#define ENT_TYPE_KLINGON2 5
-#define ENT_TYPE_KLINGON_DESTROYER 6
-#define ENT_TYPE_ROMULAN 7
-#define ENT_TYPE_TORPEDO 8
-#define ENT_TYPE_COUNT 9
+#define ENT_TYPE_PLANET_M  4
+#define ENT_TYPE_KLINGON 5
+#define ENT_TYPE_KLINGON2 6
+#define ENT_TYPE_KLINGON_DESTROYER 7
+#define ENT_TYPE_ROMULAN 8
+#define ENT_TYPE_TORPEDO 9
+#define ENT_TYPE_COUNT 10
 
 // total of entities should not exceed ENT_COUNT_MAX
 #define TOTAL_BASES     10
 #define TOTAL_KLINGONS  50
-#define TOTAL_PLANETS   100
+#define TOTAL_PLANETS   95
+#define TOTAL_PLANETS_M 5
 #define TOTAL_STARS     100
 
 typedef struct 
@@ -216,6 +225,6 @@ uchar getWidth(uchar* ep);
 uchar enoughEnergy(uchar* ep, unsigned int d);
 uchar takeEnergy(uchar* ep, unsigned int d);
 void removeEnt(uchar *ep);
-uchar adjacentTo(uchar* ep, uchar type);
+uchar* adjacentTo(uchar* ep, uchar type);
 uchar distm(char x1, char y1, char x2, char y2);
 uchar distmTo(uchar x, uchar y, uchar z);

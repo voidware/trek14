@@ -44,6 +44,7 @@ unsigned int cursorPos;
 
 // are we in 80 col mode?
 uchar cols80;
+uchar rowCount;
 
 // location of video ram 0x3c00 or 0xf800
 uchar* vidRam;
@@ -148,15 +149,20 @@ void clearLine()
     memset(vidaddrfor(a), ' ', b - a);
 }
 
-void lastLine()
+void lastLinex(uchar x)
 {
-    // put the cursor on the last line and clear
-    if (cols80) setcursor(0, 23);
-    else setcursor(0, 15);
+    // put the cursor on the last line, pos x and clear to end
+    setcursor(x, rowCount-1);
     clearLine();
 }
 
-void nextLine()
+void lastLine()
+{
+    // put the cursor on the last line, do not clear
+    setcursor(0, rowCount-1);
+}
+
+static void nextLine()
 {
     uchar sc;
 
@@ -185,7 +191,7 @@ void nextLine()
     if (sc)
     {
         // place at last line and clear line
-        lastLine();
+        lastLinex(0);
     }
 }
 
@@ -901,6 +907,7 @@ void initModel()
     uchar* rp = (uchar*)0x4000;
     
     cols80 = 0;
+    rowCount = 16;
     vidRam = VIDRAM;
     TRSMemory = 0;
 
@@ -916,6 +923,7 @@ void initModel()
         char* h = getHigh();
         
         cols80 = 1;
+        rowCount = 24;
         useSVC = 1;
         vidRam = VIDRAM80;
 

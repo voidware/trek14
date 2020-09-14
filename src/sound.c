@@ -27,6 +27,7 @@
 
 #define BASE_TSTATES_M1 221750L
 #define BASE_TSTATES_M3 257230L
+#define BASE_TSTATES_M4 400000L
 
 // frequencies for notes.
 // "A" above middle C is 440Hz.
@@ -50,6 +51,7 @@
 #define RND(_x)     ((int)((_x) + 0.5))
 #define TSTATE1(_n)  RND(BASE_TSTATES_M1/_n)
 #define TSTATE3(_n)  RND(BASE_TSTATES_M3/_n)
+#define TSTATE4(_n)  RND(BASE_TSTATES_M4/_n)
 
 typedef struct
 {
@@ -57,6 +59,7 @@ typedef struct
     unsigned int        _freq;
     unsigned int        _tstatesM1;
     unsigned int        _tstatesM3;
+    unsigned int        _tstatesM4;
 } Note;
 
 static const Note notes[] =

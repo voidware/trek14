@@ -269,7 +269,7 @@ char srScan(char k)
     // we are redrawing, so clear this
     redrawsr = FALSE;
 
-    //redrawSidebar();
+    redrawSidebar();
 
     // draw star field
     for (j = 1; j <= 14; ++j)

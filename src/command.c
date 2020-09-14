@@ -87,6 +87,8 @@ static const char* msgTable[] =
     "^6: ^2, you are relieved of command pending court martial.",
     "^6: You [violated the prime directive.|blew it up!] Your command is suspended.",
     "^6: Enemy shields absorbed impact, ^2",
+    "^6: Lifeless G Planet, ^2",
+    "^6: Class M Planet, ^2. Fascinating!",
 };
 
 static void emitStory(const char* m, Story* st)
@@ -113,24 +115,26 @@ static void emitStoryCmdM(uchar mc)
     emitStoryCmd(buf);
 }
 
+#define MSG_X  10
+
 void message(const char* m)
 {
     // emit a given message on the message line
-    lastLine();
+    lastLinex(MSG_X);
     emitStoryCmd(m);
 }
 
 void messageCode(uchar mc)
 {
     // emit a message with a code on the message line.
-    lastLine();
+    lastLinex(MSG_X);
     emitStoryCmdM(mc);
 }
 
 void cMessage(const char* s)
 {
     // set cursor for command input. always the base of the screen
-    lastLine();
+    lastLinex(MSG_X);
     emitStoryCmd(s);
 }
 
@@ -239,14 +243,21 @@ void dockCommand()
         // full house
         ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
         repairAll();
-        //redrawSidebar();
+        redrawSidebar();
         messageCode(MSG_CODE_DOCKED);
 
         if ((uchar)(QX + QY + QZ) == 16) // 772
             endgame(MSG_CODE_ENDGAME_RESIGN);
     }
-    else
-        messageCode(MSG_CODE_NO_DOCK);
+    else if (adjacentTo(galaxy, ENT_TYPE_PLANET))
+    {
+        messageCode(MSG_CODE_PLANET_G);
+    }
+    else if (adjacentTo(galaxy, ENT_TYPE_PLANET_M))
+    {
+        messageCode(MSG_CODE_PLANET_M);
+        // XXX score?
+    }
 }
 
 void tick()
@@ -299,7 +310,7 @@ static void computerScan(uchar type)
         if (mainType(ep) == type && ENT_MARKED(ep))
         {
             uchar x, y, z, d;
-            if ((c++ & 0x3) == 0) printf_simple("\n");
+            if ((c++ & 0x3) == 0) outs("\n");
 
             x = ENT_QX(ep);
             y = ENT_QY(ep);
@@ -315,7 +326,7 @@ static void computerScan(uchar type)
                 nz = z;
             }
             
-            printf_simple("%d,%d,%d ", (int)x, (int)y, (int)z);
+            printf_simple("%c%d,%d,%d ", entTypeChar[ENT_TYPE(ep)], (int)x, (int)y, (int)z);
         }
     } 
 
@@ -336,6 +347,7 @@ void computerCommand()
         printf_simple("Search Ship's memory banks for:\n\n"
            "  (K) Klingon locations\n"
            "  (B) Bases\n"
+           "  (P) Planets\n"
            "  (R) Return\n"
            );
 
@@ -348,6 +360,9 @@ void computerCommand()
             break;
         case 'B':
             computerScan(ENT_TYPE_BASE);
+            break;
+        case 'P':
+            computerScan(ENT_TYPE_PLANET);
             break;
         }
     } while (c != 'R');

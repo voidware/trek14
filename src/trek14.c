@@ -38,7 +38,7 @@
 
 
 // by-pass RAM test
-#define SKIPxx
+#define SKIP
 
 
 #ifdef SKIP
@@ -49,6 +49,11 @@ static void printStack()
 
 }
 #endif
+
+static void pressEnter()
+{
+    getSingleCommand("ENTER to begin");
+}
 
 static void startGame()
 {
@@ -67,8 +72,12 @@ static void startGame()
     // printStack();
 #endif
 
-    outs("\n\nTREK 2014!\n");
-    outs("Generating Galaxy...\n");
+    outs("\nTREK 2014!\n\n"
+"Your mission is to boldy:\n"
+"* Explore the galaxy\n"
+"* Destroy the 50 Klingons\n"
+"* Locate the 5 class M planets\n"
+         );
 
 #ifndef SKIP
     // play the theme tune
@@ -80,9 +89,11 @@ static void startGame()
               );
 #endif
 
-    genGalaxy();
-    outs("done\n");
+    pressEnter();
+    cls();
+    outs("Generating Galaxy...\n");
 
+    genGalaxy();
     command();
 }
 

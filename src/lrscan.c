@@ -89,13 +89,8 @@ uchar lrScan()
                             bp[1] = '0' + *cp;
                             if (*bp == 'K')
                                 playNotes("18t+EC"); // nameF, nameH
+                            bp += 2;
                         }
-                        else
-                        {
-                            *bp = ' ';
-                            bp[1] = ' ';
-                        }
-                        bp += 2;
                         ++cp;
                     }
                     bp = buf;

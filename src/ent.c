@@ -33,7 +33,7 @@ uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
 unsigned int stardate;
 int score;
-const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'K', 'K', 'D', 'R', 0 };
+const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'M', 'K', 'K', 'D', 'R', 0 };
 
 // current location
 uchar QX, QY, QZ;
@@ -66,6 +66,11 @@ static const uchar star[] = { 0x02, 0x22, 0, 0x05,
                               0x02, 0x22, 0x00,
                               0x00 };
 static const uchar planet[] = { 0x15, 0, 0x06,
+                                0x07, 0, 0x06,
+                                0x05, 0,
+                                0x00  };
+
+static const uchar planetm[] = { 0x12, 0x12, 0, 0x06,
                                 0x07, 0, 0x06,
                                 0x05, 0,
                                 0x00  };
@@ -174,8 +179,9 @@ const EntObj objTable[] =
     // destroy them
     { CW(12), 1, -1000, 0, base },
     { CW(16), 1, -1000, 8000, fedshipRLE }, 
-    { CW(6), 1, -1000, 256, star },  // recharge energy
-    { CW(7), 1, -1000, 0, planet },
+    { CW(6), 1, -1000, STAR_ENERGY, star },  // recharge energy
+    { CW(7), 1, -1000, PLANET_ENERGY, planet }, // planet G
+    { CW(7), 1, -1000, PLANET_ENERGY_M, planetm }, // PLANET_M
     { CW(11), 1, SCORE_KLINGON, KLINGON_ENERGY, klingon, klingonAlt },
     { CW(15), 1, SCORE_KLINGON, KLINGON2_ENERGY, klingon2, klingon2Alt },
     { CW(19), 2, SCORE_KLINGON, KLINGOND_ENERGY, klingon_destroyer },
@@ -189,6 +195,7 @@ uchar mainType(uchar* ep)
     uchar t = ENT_TYPE(ep);
     if (t > ENT_TYPE_KLINGON && t <= ENT_TYPE_KLINGON_DESTROYER)
         t = ENT_TYPE_KLINGON;
+    if (t == ENT_TYPE_PLANET_M) t = ENT_TYPE_PLANET;
     return t;
 }
 
@@ -280,7 +287,7 @@ char collisionBorder(uchar* ep)
     return 0;
 }
 
-uchar adjacentTo(uchar* ep, uchar type)
+uchar* adjacentTo(uchar* ep, uchar type)
 {
     uchar** epp;
     for (epp = quadrant; *epp; ++epp)
@@ -288,8 +295,8 @@ uchar adjacentTo(uchar* ep, uchar type)
         if (ENT_TYPE(*epp) == type)
         {
             // hit or adjacent
-            if (collision(ep, *epp))
-                return 1;
+            if (collision(ep, *epp)) return *epp;
+
         }
     }
     return 0;
@@ -581,6 +588,22 @@ static int randomEnergy(uchar t)
     return randn(e) + e;
 }
 
+static void genObject(uchar num, uchar type, uchar tmax)
+{
+    uchar i = 0;
+    while (i < num)
+    {
+        uchar n = genEntLocation(galaxyEnd, type, tmax);
+        i += n;
+
+        while (n--)
+        {
+            ENT_SET_DAT(galaxyEnd, randomEnergy(type));
+            galaxyEnd += ENT_SIZE;
+        }
+    }
+}
+
 void genGalaxy()
 {
     uchar i;
@@ -598,7 +621,7 @@ void genGalaxy()
 
     galaxyEnd += ENT_SIZE; 
 
-    // our current location. setting this with prevent anything else from 
+    // our current location. setting this will prevent anything else from 
     // being put in this quadrant
     QX = 7;
     QY = 7;
@@ -640,29 +663,14 @@ void genGalaxy()
     }
 
     // populate stars
-    for (i = 0; i < TOTAL_STARS;)
-    {
-        uchar n = genEntLocation(galaxyEnd, ENT_TYPE_STAR, 2);
-        i += n;
-
-        while (n--)
-        {
-            // give stars a random energy between 128 and 256
-            // this energy can be drawn by enemies to recharge
-            ENT_SET_DAT(galaxyEnd, randomEnergy(ENT_TYPE_STAR));
-            galaxyEnd += ENT_SIZE;
-        }
-    }
+    // give stars a random energy between 128 and 256
+    // this energy can be drawn by enemies to recharge
+    genObject(TOTAL_STARS, ENT_TYPE_STAR, 2);
 
     // populate planets
-    for (i = 0; i < TOTAL_PLANETS;)
-    {
-        uchar n = genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 3);
-        i += n;
+    genObject(TOTAL_PLANETS, ENT_TYPE_PLANET, 3);
+    genObject(TOTAL_PLANETS_M, ENT_TYPE_PLANET_M, 1);
 
-        while (n--)
-            galaxyEnd += ENT_SIZE;
-    }
 
 #if 0
     // fill up with planets. useful for testing

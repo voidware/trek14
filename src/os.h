@@ -56,7 +56,7 @@ void printfat(char x, char y, const char* f, ...);
 uchar scanf_simple(const char* f, ...);
 uchar getline(char* buf, uchar nmax);
 void lastLine();
-void nextLine();
+void lastLinex(uchar x);
 uchar* vidaddr(char x, char y);
 uchar* vidaddrfor(uint a);
 uchar ramTest(uchar a, uchar n);
@@ -80,12 +80,14 @@ extern uchar TRSModel;
 extern uchar TRSMemory;
 extern uchar* TRSMemoryFail;
 extern uchar cols80;
+extern uchar rowCount;
 extern unsigned int scrollPos;
 extern unsigned int cursorPos;
 extern uchar* vidRam;
 extern char* CmdLine;
 extern uchar hiresBoard;
 extern uchar grayfx;
+extern uchar useSVC;
 
 /* file IO */
 int readFile(const char* name, char* buf, int bz);

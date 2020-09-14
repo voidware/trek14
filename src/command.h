@@ -52,5 +52,7 @@ extern const char* crewTable[];
 #define MSG_CODE_COURT_MARTIAL 14
 #define MSG_CODE_INCOMPETENCE 15
 #define MSG_CODE_SURVIVED_HIT 16
+#define MSG_CODE_PLANET_G 17
+#define MSG_CODE_PLANET_M 18
 
 
