@@ -280,7 +280,7 @@ void torps(uchar* ep, int dir)
         }
     }
 
-    // bogus sound
+    // torpedo sound
     squoink();
 
     hit = trackPoint(ep, x, y, s, c, setPixel, fillBgPixel);

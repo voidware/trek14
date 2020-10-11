@@ -70,11 +70,11 @@ const char* crewTable[] =
 // message table with ^
 static const char* msgTable[] = 
 {
-    "^6: [Insufficient|Not Enough] Energy, ^2",
+    "^4: [Insufficient|Not Enough] Energy, ^0",
     "^5: No enemies here, ^1!",
     "Destroyed!",
     "^5: [No torpedoes[ left|]|Out of torpedoes], ^1",
-    "^6: Docked, ^2",
+    "^9: Docked, ^2",
     "Returned to Starfleet HQ",
     "Out of Energy. You die drifting through space",
     "Ship and crew killed in battle",
@@ -89,6 +89,7 @@ static const char* msgTable[] =
     "^6: Enemy shields absorbed impact, ^2",
     "^6: Lifeless G Planet, ^2",
     "^6: Class M Planet, ^2. Fascinating!",
+    "^9: We've already been here, ^2!",
 };
 
 static void emitStory(const char* m, Story* st)
@@ -114,8 +115,6 @@ static void emitStoryCmdM(uchar mc)
     sprintf_simple(buf, "^b%d", (int)mc);
     emitStoryCmd(buf);
 }
-
-#define MSG_X  10
 
 void message(const char* m)
 {
@@ -168,7 +167,18 @@ char warpCommand()
     if (opCheck(L_WARP))
     {
         cMessage("^9, [Location|Destination|Course]: ");
-        if (scanf_simple("%d,%d,%d", &x, &y, &z) == 3 && canwarp(x, y, z))
+
+        // can type 7,7,2 or 772
+        uchar c = scanf_simple("%d,%d,%d", &x, &y, &z);
+        if (c == 1)
+        {
+            z = x % 10;
+            y = (x / 10) % 10;
+            x /= 100;
+        }
+        else if (c != 3) return FALSE;
+
+        if (canwarp(x, y, z))
         {
             // our new position after warp
             QX = x;
@@ -236,6 +246,24 @@ void torpCommand()
     }
 }
 
+static uchar* orbitAlready(uchar t)
+{
+    uchar* ep = adjacentTo(galaxy, t);
+    if (ep)
+    {
+        if (ENT_DOCKED(ep))
+        {
+            messageCode(MSG_CODE_ORBIT_ALREADY_M);
+            ep = 0;
+        }
+        else
+        {
+            ENT_SET_DOCKED(ep);
+        }
+    }
+    return ep;
+}
+
 void dockCommand()
 {
     if (adjacentTo(galaxy, ENT_TYPE_BASE))
@@ -245,18 +273,27 @@ void dockCommand()
         repairAll();
         redrawSidebar();
         messageCode(MSG_CODE_DOCKED);
+        
+        // refuel sound
+        warpcall();
 
         if ((uchar)(QX + QY + QZ) == 16) // 772
             endgame(MSG_CODE_ENDGAME_RESIGN);
     }
-    else if (adjacentTo(galaxy, ENT_TYPE_PLANET))
+    else
     {
-        messageCode(MSG_CODE_PLANET_G);
-    }
-    else if (adjacentTo(galaxy, ENT_TYPE_PLANET_M))
-    {
-        messageCode(MSG_CODE_PLANET_M);
-        // XXX score?
+        if (orbitAlready(ENT_TYPE_PLANET))
+            messageCode(MSG_CODE_PLANET_G);
+        else
+        {
+            if (orbitAlready(ENT_TYPE_PLANET_M))
+            {
+                messageCode(MSG_CODE_PLANET_M);
+                warpcall();
+                score += SCORE_PLANET_M;
+                redrawsr = TRUE;
+            }
+        }
     }
 }
 

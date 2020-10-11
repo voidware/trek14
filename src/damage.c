@@ -70,7 +70,7 @@ static void emitStory(const char* m)
     st.subSize[1] = DIM(opTable);
 
     // emit on the message line
-    lastLine();
+    lastLinex(MSG_X);
     story(m, &st);    
 }
 
@@ -105,7 +105,7 @@ uchar opCheck(uchar i)
 
 static void redrawOperation(uchar op)
 {
-    if (useSVC)
+    if (cols80)
     {
         // map operations from -100% to +100% with OP_MIN at 1%
         // so, ((op - 127)*100)/128, then round as ((op - 127)*100 + 64)/128
@@ -118,11 +118,12 @@ void redrawSidebar()
 {
     uchar i;
 
-    if (useSVC)
+    if (cols80)
     {
         plotVLine(129,0, 15*3, 1);
         printfat(65,0, "Operations");
         for (i = 1; i < L_COUNT; ++i) redrawOperation(i);
+        printfat(65,i, "Score:%-4d/%4d", score, scoremax);
     }
 }
 

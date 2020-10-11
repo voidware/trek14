@@ -28,10 +28,11 @@
 
  Byte1:
  +---+---+---+---|---+---+---+---+
- | M |   | Z | Z | T | Y | P | E |
+ | M | D | Z | Z | T | Y | P | E |
  +---+---+---+---|---+---+---+---+
 
  M = mark bit (explored)
+ D = docked bit (orbit)
  Z = quadrant Z coordinate (0-3)
  TYPE = entity type
 
@@ -65,6 +66,9 @@
 
 #define ENT_TYPE(_p)  (*(_p) & 0xf)
 #define ENT_MARKED(_p) (*((char*)(_p)) < 0)
+
+#define ENT_DOCKED(_p) (*(_p) & 0x40)
+#define ENT_SET_DOCKED(_p)  *(_p) |= 0x40
 
 // NB: used to initialise whole byte
 #define ENT_SET_TYPE(_p, _v) *(_p) = (_v)
@@ -180,6 +184,7 @@ typedef struct
 
 // every entity when seen gives a small score
 #define SCORE_EXPLORE   1
+#define SCORE_PLANET_M  99 // NB: +1 for seeing it at all =100
 
 #define MASK_RIGHT  1
 #define MASK_LEFT   2
@@ -201,13 +206,14 @@ extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
 extern unsigned int stardate;
 extern int score;
+extern int scoremax;
 extern uchar alertLevel;
 extern uchar redrawsr;
 extern uchar gameover;
 extern uchar recalled;
 extern const char entTypeChar[];
 extern const EntObj objTable[];
-extern const uchar fedshipRLE[];
+extern const uchar fedship[];
 
 // -- functions
 

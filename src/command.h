@@ -35,6 +35,8 @@ void message(const char*);
 
 extern const char* crewTable[];
 
+#define MSG_X  10
+
 #define MSG_CODE_INSUFENERGY  0
 #define MSG_CODE_NO_TARGET 1
 #define MSG_CODE_DESTROYED 2
@@ -54,5 +56,6 @@ extern const char* crewTable[];
 #define MSG_CODE_SURVIVED_HIT 16
 #define MSG_CODE_PLANET_G 17
 #define MSG_CODE_PLANET_M 18
+#define MSG_CODE_ORBIT_ALREADY_M 19
 
 

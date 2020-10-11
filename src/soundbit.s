@@ -325,6 +325,7 @@ _zap3::
           pop   bc
           djnz  .zap3_1
           jp    __bit_close
+.endif
           
 ; a kind of wibble
 _warpcall::
@@ -358,4 +359,4 @@ _warpcall::
           add   hl,de  
           ld    (.warps+1),hl  
           ret   
-.endif
+

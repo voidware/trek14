@@ -32,7 +32,6 @@
 extern const unsigned char div3tab[];
 
 void plot(uchar x, uchar y, uchar c);
-uchar plotSpan(uchar x0, uchar y, uchar n, uchar c);
 void drawRLE(char x, char y, const uchar* dp, uchar c);
 void moveRLE(char x, char y, const uchar* dp, signed char dx);
 

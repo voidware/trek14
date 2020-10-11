@@ -28,10 +28,13 @@ extern void playNotes(const char* m);
 extern void explode_sound(int d);
 extern void playVictory();
 
-extern void warpsound(int length);
 extern void blastsound(int length);
 extern void zapsound();
 extern void alertsound();
 extern void squoink();
+extern void warpcall();
+
+//extern void clackson();
+//extern void zap3();
 
 #endif // __sound_h__

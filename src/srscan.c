@@ -68,9 +68,9 @@ void undrawEnt(uchar* ep)
 
     // adjust to left pos
     sx -= w>>1;
-            
-    while (w--)
-        fillbg(sx++, sy);
+
+    // ASSUME ent is not more than 1 char high.
+    while (w--) fillbg(sx++, sy);
 }
 
 char moveEnt(uchar* ep, signed char dx, signed char dy)
@@ -106,7 +106,7 @@ char moveEnt(uchar* ep, signed char dx, signed char dy)
             
         if (dy)
         {
-            drawEnt(ep);
+            drawEnt(ep); // at new position
             while (w2--) fillbg(sx++, sy);
         }
         else if (dx)

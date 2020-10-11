@@ -33,6 +33,7 @@ uchar galaxy[ENT_COUNT_MAX*ENT_SIZE];
 uchar* galaxyEnd;
 unsigned int stardate;
 int score;
+int scoremax;
 const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'M', 'K', 'K', 'D', 'R', 0 };
 
 // current location
@@ -56,10 +57,10 @@ static const uchar base[] = { 0x33, 0x00, 0x01,
                               0x0c, 0x00,
                               0x00 };
 
-const uchar fedshipRLE[] = { 0x06, 0, 0x02,
-                             0x01, 0x47, 0, 0x0d,
-                             0x0b, 0x00,
-                             0x00 };
+const uchar fedship[] = { 0x06, 0, 0x02,
+                          0x01, 0x47, 0, 0x0d,
+                          0x0b, 0,
+                          0x00 };
 
 static const uchar star[] = { 0x02, 0x22, 0, 0x05,
                               0x04, 0, 0x05,
@@ -178,13 +179,13 @@ const EntObj objTable[] =
     // high negative scores will ensure the game ends if you
     // destroy them
     { CW(12), 1, -1000, 0, base },
-    { CW(16), 1, -1000, 8000, fedshipRLE }, 
+    { CW(16), 1, -1000, 8000, fedship }, 
     { CW(6), 1, -1000, STAR_ENERGY, star },  // recharge energy
     { CW(7), 1, -1000, PLANET_ENERGY, planet }, // planet G
     { CW(7), 1, -1000, PLANET_ENERGY_M, planetm }, // PLANET_M
     { CW(11), 1, SCORE_KLINGON, KLINGON_ENERGY, klingon, klingonAlt },
-    { CW(15), 1, SCORE_KLINGON, KLINGON2_ENERGY, klingon2, klingon2Alt },
-    { CW(19), 2, SCORE_KLINGON, KLINGOND_ENERGY, klingon_destroyer },
+    { CW(15), 1, SCORE_KLINGON*2, KLINGON2_ENERGY, klingon2, klingon2Alt },
+    { CW(19), 2, SCORE_KLINGON*4, KLINGOND_ENERGY, klingon_destroyer },
     { CW(0), 1, SCORE_KLINGON, 2000, romulan },
     { 1, 1, 0, 0, romulan }, // additional entry used for torpedo
 };
@@ -637,6 +638,8 @@ void genGalaxy()
     // last one is starfleet HQ
     // put HQ in our start quadrant (ok to move since nothing else there)
     setQuadrant(galaxyEnd - ENT_SIZE, QX, QY, QZ);
+
+    scoremax = TOTAL_BASES + TOTAL_STARS + TOTAL_PLANETS + TOTAL_PLANETS_M*SCORE_PLANET_M;
     
     // populate klingons
     for (i = 0; i < TOTAL_KLINGONS;)
@@ -650,12 +653,14 @@ void genGalaxy()
 
         while (n--)
         {
+            scoremax += SCORE_KLINGON;
             uint e = randomEnergy(k2 ? ENT_TYPE_KLINGON : ENT_TYPE_KLINGON2);
             if (e > KLINGON_ENERGY)
             {
                 // some are bigger
                 ENT_SET_TYPE(galaxyEnd, ENT_TYPE_KLINGON2);
                 ++k2;
+                scoremax += SCORE_KLINGON;  // score twice
             }
             ENT_SET_DAT(galaxyEnd, e);
             galaxyEnd += ENT_SIZE;

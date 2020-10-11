@@ -70,7 +70,7 @@ void plot(uchar x, uchar y, uchar c)
         *m = q & ~mask;
 }
 	
-uchar plotSpan(uchar x, uchar y, uchar n0, uchar c)
+static uchar plotSpan(uchar x, uchar y, uchar n0, uchar c)
 {
     // plot (x,y) to (x+n, y) colour c
     
@@ -246,8 +246,7 @@ void moveRLE(char x, char y, const uchar* dp, signed char dx)
         }
 
         // if moving left, reset last pixel of row
-        if (dx < 0)
-            plot(x, y, 0);
+        if (dx < 0) plot(x, y, 0);
         
         // flyback with adjustment
         if (!*dp) break;

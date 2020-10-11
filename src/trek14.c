@@ -38,7 +38,7 @@
 
 
 // by-pass RAM test
-#define SKIP
+#define SKIPxx
 
 
 #ifdef SKIP
@@ -120,10 +120,9 @@ int main()
     // for bbasic programs we could mostly get away without relocating
     // the stack to the top of memory.
     setStack();
-    
     mainloop();
-    
     revertStack();
+    setM4Map4(); // revert to normal mode (if M4)
     
     return 0;   // need this to ensure call to revert (else jp)
 }

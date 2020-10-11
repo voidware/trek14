@@ -493,9 +493,7 @@ uchar hitEnergy(uchar* ep, unsigned int d)
         if (you)
             takeDamage(d);
         else
-        {
             messageCode(MSG_CODE_SURVIVED_HIT);
-        }
     }
     else
     {
