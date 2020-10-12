@@ -138,7 +138,7 @@
 
 #define ENT_SIZE  5
 #define ENT_COUNT_MAX   300
-#define ENT_QUAD_MAX    10
+#define ENT_QUAD_MAX    12  //1 spare for "guests"?
 
 #define ENT_TYPE_BASE   0
 #define ENT_TYPE_FEDERATION 1

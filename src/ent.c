@@ -682,12 +682,11 @@ void genGalaxy()
     genObject(TOTAL_PLANETS, ENT_TYPE_PLANET, 3);
     genObject(TOTAL_PLANETS_M, ENT_TYPE_PLANET_M, 1);
 
-
 #if 0
     // fill up with planets. useful for testing
     while (galaxyEnd < galaxy + sizeof(galaxy))
     {
-        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 5, 1);        
+        genEntLocation(galaxyEnd, ENT_TYPE_PLANET, 5);
         galaxyEnd += ENT_SIZE;
     }
 #endif

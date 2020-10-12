@@ -178,7 +178,7 @@ static void animateOut()
     ENT_SXY(galaxy, x, y);
     x -= w2>>1; // left position
 
-    n = 63 - x - w2; // -1 for first movement
+    n = 64 - x - w2;  // chars to move
     
     // convert to pixels
     x <<= 1;

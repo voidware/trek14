@@ -62,9 +62,10 @@ uchar* TRSMemoryFail;
 
 // command line used 
 char* CmdLine;
+char* CmdArg;
 
 // random number seed
-static uint seed;
+uint seed;
 
 static uchar* OldStack;
 static uchar* NewStack;
@@ -980,14 +981,18 @@ void initModel()
 
     // fix the command line buf
     rp = CmdLine;
-    
-    // just keep the name of the binary
-    while (isalnum(*rp))
+
+    // skip program name
+    uchar c = 0;
+    while (*rp != '\r')
     {
-        *rp = toupper(*rp);
+        if (*rp == ' ') ++c;
+        else if (c && !CmdArg) CmdArg = rp;
         ++rp;
     }
+    
     *rp = 0;
+    if (!CmdArg) CmdArg = rp;
 }
 
 void setStack() __naked

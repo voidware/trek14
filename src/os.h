@@ -88,9 +88,11 @@ extern unsigned int scrollPos;
 extern unsigned int cursorPos;
 extern uchar* vidRam;
 extern char* CmdLine;
+extern char* CmdArg;
 extern uchar hiresBoard;
 extern uchar grayfx;
 extern uchar useSVC;
+extern uint seed;
 
 /* file IO */
 int readFile(const char* name, char* buf, int bz);

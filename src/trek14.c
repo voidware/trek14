@@ -29,6 +29,7 @@
  *  contact@voidware.com
  */
 
+#include <stdlib.h>
 #include "defs.h"
 #include "os.h"
 #include "ent.h"
@@ -92,7 +93,11 @@ static void startGame()
 
     pressEnter();
     cls();
-    outs("Generating Galaxy...\n");
+
+    // restore previous galaxy from command line
+    if (*CmdArg) seed = atoi(CmdArg);
+    
+    printf_simple("Generating Galaxy %d...\n", seed);
 
     genGalaxy();
     command();
