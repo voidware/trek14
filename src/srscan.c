@@ -275,7 +275,7 @@ char srScan(char k)
     for (j = 1; j <= 14; ++j)
     {
         setcursor(0,j);        
-        for (i = 0; i < 32; ++i) outs(". ");
+        outsn(". ", 32);
     }
 
     if (opCheckSR())
@@ -304,35 +304,20 @@ char srScan(char k)
         
         dx = 0;
         dy = 0;
-        if (c == KEY_ARROW_LEFT)
-            dx = -1;
-        else if (c == KEY_ARROW_RIGHT)
-            dx = 1;
-        else if (c == KEY_ARROW_UP || c == KEY_ARROW_UP_M4)
-            dy = -1;
-        else if (c == KEY_ARROW_DOWN)
-            dy = 1;
+        
+        if (c == KEY_ARROW_LEFT) dx = -1;
+        else if (c == KEY_ARROW_RIGHT) dx = 1;
+        else if (c == KEY_ARROW_UP || c == KEY_ARROW_UP_M4) dy = -1;
+        else if (c == KEY_ARROW_DOWN) dy = 1;
 
         else if (c == ' ')
         {
             // dummy move!
         }
-        else if (c == 'P')
-        {
-            phaserCommand();
-        }
-        else if (c == 'D')
-        {
-            dockCommand();
-        }
-        else if (c == 'T')
-        {
-            torpCommand();
-        }
-        else if (c == 'S')
-        {
-            identifyScan();
-        }
+        else if (c == 'P') phaserCommand();
+        else if (c == 'D') dockCommand();
+        else if (c == 'T') torpCommand();
+        else if (c == 'S') identifyScan();
         else if ((c & 0x7f) == 'W') // XX bit signals command done
         {
             if (c != 'W' || warpCommand())

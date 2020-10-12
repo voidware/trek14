@@ -623,6 +623,15 @@ void outs(const char* s)
     while (*s) outchar(*s++);
 }
 
+void outsn(const char* s, uchar n)
+{
+    while (n)
+    {
+        --n;
+        outs(s);
+    }
+}
+
 void outint(int v)
 {
     char buf[17];

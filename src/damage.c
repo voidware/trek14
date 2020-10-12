@@ -120,7 +120,7 @@ void redrawSidebar()
 
     if (cols80)
     {
-        plotVLine(129,0, 15*3, 1);
+        plotVLine(129,0, 47, 1);
         printfat(65,0, "Operations");
         for (i = 1; i < L_COUNT; ++i) redrawOperation(i);
         printfat(65,i, "Score:%-4d/%4d", score, scoremax);

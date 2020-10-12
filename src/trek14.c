@@ -72,8 +72,8 @@ static void startGame()
     // printStack();
 #endif
 
-    outs("\nTREK 2014!\n\n"
-"Your mission is to boldy:\n"
+    outs("\nTREK 2014! v1.0\n\n"
+"Your mission is to BOLDY:\n\n"
 "* Explore the galaxy\n"
 "* Destroy the 50 Klingons\n"
 "* Locate the 5 class M planets\n"

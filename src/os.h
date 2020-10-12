@@ -49,6 +49,7 @@ void revertStack();
 void enableInterrups();
 
 void outs(const char* s);
+void outsn(const char* s, uchar n);
 void outsWide(const char* s);
 void printf_simple(const char* f, ...);
 int sprintf_simple(char* buf, const char* f, ...);
