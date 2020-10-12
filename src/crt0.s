@@ -72,7 +72,6 @@ init:
 
 _exit::
         ld sp, #0                   ; restores stack to original
-        ei
         ret
 
         .area   _GSINIT

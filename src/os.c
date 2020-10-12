@@ -491,8 +491,7 @@ static void _keyIdle()
         
         if (!--idleCount)
         {
-            keyIdleState = ~keyIdleState;
-            (*idleHandler)(keyIdleState);
+            (*idleHandler)(keyIdleState++);
         }
     }
 }
@@ -501,6 +500,9 @@ char getkey()
 {
     // wait for a key
     char c;
+
+    keyIdleState = 0;
+    
     for (;;)
     {
         c = scanKey();
@@ -508,8 +510,10 @@ char getkey()
         {
             if (keyIdleState) 
             {
+                // force revert to state 0
+                keyIdleState = 0; // back to state 0
                 idleCount = 1;
-                _keyIdle(); // force revert to state 0
+                _keyIdle(); 
             }
             return c;
         }

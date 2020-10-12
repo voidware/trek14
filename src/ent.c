@@ -62,10 +62,16 @@ const uchar fedship[] = { 0x06, 0, 0x02,
                           0x0b, 0,
                           0x00 };
 
-static const uchar star[] = { 0x02, 0x22, 0, 0x05,
-                              0x04, 0, 0x05,
-                              0x02, 0x22, 0x00,
+static const uchar star[] = { 0x02, 0x22, 0, 6,
+                              0x14, 0x10, 0, 6,
+                              0x02, 0x22, 0,
                               0x00 };
+
+static const uchar staralt[] = { 0x02, 0x22, 0, 6,
+                                 0x22, 0x20, 0, 6,
+                                 0x02, 0x22, 0,
+                                 0x00 };
+
 static const uchar planet[] = { 0x15, 0, 0x06,
                                 0x07, 0, 0x06,
                                 0x05, 0,
@@ -180,7 +186,7 @@ const EntObj objTable[] =
     // destroy them
     { CW(12), 1, -1000, 0, base },
     { CW(16), 1, -1000, 8000, fedship }, 
-    { CW(6), 1, -1000, STAR_ENERGY, star },  // recharge energy
+    { CW(6), 1, -1000, STAR_ENERGY, star, staralt, 2 },  // recharge energy
     { CW(7), 1, -1000, PLANET_ENERGY, planet }, // planet G
     { CW(7), 1, -1000, PLANET_ENERGY_M, planetm }, // PLANET_M
     { CW(11), 1, SCORE_KLINGON, KLINGON_ENERGY, klingon, klingonAlt },

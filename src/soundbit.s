@@ -1,5 +1,7 @@
 ;; whatever
 
+        .globl	_useSVC
+
         .area   _CODE
 
 sndbit_mask     .equ  3
@@ -14,7 +16,28 @@ __rti::
           ei
           ret
 
+_bit_soundi::
         ;;  bit_sound(duration, frequency)
+        ;;  disables interupts
+        di
+        pop   hl
+        exx
+        call _bit_sound
+        exx
+        push  hl
+        jp   __rti
+
+__beeper4::
+        ld    a,(_useSVC)
+        or    a
+        jr    z,.b4a
+        sla   l
+        rl    h         ; hl*2 for M4 (approx)
+.b4a:        
+        jp    __beeper
+
+        ;;  bit_sound(duration, frequency)
+        ;; NB: ASSUME interrupts disabled
 _bit_sound::
           pop bc
           pop de                ; duration
@@ -25,8 +48,8 @@ _bit_sound::
 
         ;; HL=freq, DE=duration
         ;; preserve the wide-char bits for model I
+        ;; NB: ASSUME interrupts disabled
 __beeper::
-          di
           in   a,(#0xff)      ; current wide status (model I) inverted
           cpl                 ; flip. Thanks to gp2000 
           and  #0x40
@@ -80,7 +103,7 @@ __beeper::
 .be_end:
           pop  af
           out  (sndbit_port),a
-          jp   __rti
+          ret
 
         ;;;  explode_sound(int d)
 _explode_sound::
@@ -176,6 +199,7 @@ _alertsound::
 ;Strange squeak hl=300,de=2
 ;Game up hl=300,de=10 inc de
 ;-like a PACMAN sound
+          di
           xor   a
           ld    b,#1  
 .fx6_1:
@@ -186,10 +210,10 @@ _alertsound::
 .fx6_2:
           push  hl
           push  de
-          call  __beeper  
+          call  __beeper4
           pop   de
           pop   hl
-          inc  de           ;if added in makes different sound..
+          inc   de           ;if added in makes different sound..
           ld    bc,#10
           and   a
           sbc   hl,bc
@@ -197,7 +221,7 @@ _alertsound::
           pop   af
           pop   bc
           djnz  .fx6_1
-          ret
+          jp    __rti      
 
         ; like a sort of alarm power up or something??
 _squoink::
@@ -241,6 +265,7 @@ _squoink::
 
 ; wibble up sound
 _fx5::
+          di
           ld    b,#1            ;number of times
 .fx5_1:   push  bc  
           ld    hl,#1200        ;freq
@@ -255,12 +280,12 @@ _fx5::
           sbc   hl,bc           ;freq -= 100
           jr    nc,.fx5_2  
           pop   bc  
-          djnz  .fx5_1  
-          ret   
-
+          djnz  .fx5_1
+          jp    __rti
 
 ; zap/alarm??
 _zap1::
+          di
           ld    a,#1
           ld    b,#0  
 .zap1_1:  push  bc  
@@ -277,6 +302,7 @@ _zap1::
 
 ; sort of clakson sound. not very good
 _clackson::
+          di
           ld      a,#1
 .clackson_LENGHT:
           ld      b,#90
@@ -301,6 +327,7 @@ _clackson::
 
 ; kind of high pitched ring sound
 _zap3::
+          di
           ld    a,#1
 .zap3_1:  push  bc
           xor   #sndbit_mask
@@ -329,6 +356,7 @@ _zap3::
           
 ; a kind of wibble
 _warpcall::
+          di
           ld    hl,#1600  
           ld    (.warps+1),hl  
           ld    hl,#-800  
@@ -341,7 +369,7 @@ _warpcall::
           call .warps
           pop  bc
           djnz .warpcall1
-          ret   
+          jp    __rti
           
 .warps:   ld    hl,#1600  
           ld    de,#6  

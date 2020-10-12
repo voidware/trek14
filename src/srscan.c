@@ -195,7 +195,7 @@ static void animateOut()
 
         // make the sound increase in pitch until it reaches a final point
         // if we've finished moving, then we're done
-        bit_sound(4, f);
+        bit_soundi(4, f);
         f -= df;
         if (f < 100)
         {
@@ -210,8 +210,14 @@ static void animationHandler(uchar state)
     uchar** epp;    
     for (epp = quadrant; *epp; ++epp)
     {
-        if (objTable[ENT_TYPE(*epp)]._spriteAlt)
-            drawEntAlt(*epp, state);
+        const EntObj* eo = objTable + ENT_TYPE(*epp);
+
+        if (eo->_spriteAlt)
+        {
+            uchar d = eo->_altRateDiv;
+            if (useSVC) ++d; // XX M4 delay adjust
+            drawEntAlt(*epp, (state>>d) & 1);
+        }
     }
 }
 
@@ -255,8 +261,8 @@ char srScan(char k)
 {
     // short range scan.
     // draw quadrant screen & content.
-
-    uchar i, j;
+    
+    uchar j;
     char c;
 
  again:

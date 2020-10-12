@@ -97,6 +97,8 @@ void playNotes(const char* m)
     uint tempo = 12;
     char u = 0;
 
+    disableInterrupts();
+
     for (;;)
     {
         char c = *m++;
@@ -159,6 +161,8 @@ void playNotes(const char* m)
             dt2 = 0;
         }
     }
+
+    enableInterrupts();
 }
 
 

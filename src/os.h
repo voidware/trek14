@@ -46,6 +46,8 @@ void uninitModel();
 void pause();
 void setStack();
 void revertStack();
+
+void disableInterrupts();
 void enableInterrups();
 
 void outs(const char* s);

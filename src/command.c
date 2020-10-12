@@ -85,7 +85,7 @@ static const char* msgTable[] =
     "^5: Phasers can't lock on, ^1!",
     "^4: [No dock ship|Ya canny' dock], ^0!",
     "^6: ^2, you are relieved of command pending court martial.",
-    "^6: You [violated the prime directive.|blew it up!] Your command is suspended.",
+    "^6: You [violated the prime directive.|blew it up!] You are relieved of your command.",
     "^6: Enemy shields absorbed impact, ^2",
     "^6: Lifeless G Planet, ^2",
     "^6: Class M Planet, ^2. Fascinating!",

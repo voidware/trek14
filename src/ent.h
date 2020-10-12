@@ -177,6 +177,9 @@ typedef struct
 
     // alternate, for animation if defined.
     const uchar*        _spriteAlt;
+
+    uchar               _altRateDiv;
+    
 } EntObj;
 
 

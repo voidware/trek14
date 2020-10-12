@@ -23,7 +23,12 @@
 #ifndef __sound_h__
 #define __sound_h__
 
+// correctly disables & re-enables interrupts
+extern void bit_soundi(int duration, int frequency);
+
+// assumes interrupts off
 extern void bit_sound(int duration, int frequency);
+
 extern void playNotes(const char* m);
 extern void explode_sound(int d);
 extern void playVictory();
