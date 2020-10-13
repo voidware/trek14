@@ -34,6 +34,7 @@
 #include "os.h"
 #include "ent.h"
 #include "command.h"
+#include "damage.h"
 #include "sound.h"
 #include "utils.h"
 

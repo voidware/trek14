@@ -200,12 +200,9 @@ void tanfxDeg(short v, short* s, short* c)
 
 char getSingleCommand(const char* msg)
 {
-    char c;
     lastLine();
     outs(msg);
-    c = getkey();
-    c = toupper(c);
-    return c;
+    return toupper(getkey());
 }
 
 void peformRAMTest()

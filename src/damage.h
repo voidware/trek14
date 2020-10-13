@@ -31,6 +31,7 @@
 #define L_COUNT         7
 
 extern uchar operations[];
+extern uchar opCol;
 
 #define GET_SHIELD_ENERGY       (operations[L_SHIELDS]<<3)
 #define SET_SHIELD_ENERGY(_v)   operations[L_SHIELDS] = (_v)>>3
@@ -42,3 +43,4 @@ uchar operational(uchar i);
 uchar opCheck(uchar i);
 uchar opCheckSR();
 void redrawSidebar();
+void drawOperations();

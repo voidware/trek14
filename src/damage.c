@@ -103,27 +103,37 @@ uchar opCheck(uchar i)
     return u;
 }
 
+// column for sidebar
+uchar opCol = 65;
+
+static void drawOperation(uchar op)
+{
+    // map operations from -100% to +100% with OP_MIN at 1%
+    // so, ((op - 127)*100)/128, then round as ((op - 127)*100 + 64)/128
+    int v = ((int)((uint)operations[op]*100) - 12636)>>7;
+    printfat(opCol,op,"%s%-4d%%", opTableShort[op], v);    
+}
+
+void drawOperations()
+{
+    uchar i;
+
+    printfat(opCol,0, "Operations:");
+    for (i = 1; i < L_COUNT; ++i) drawOperation(i);
+    printfat(opCol,i, "Score:%-4d/%4d", score, scoremax);
+}
+
 static void redrawOperation(uchar op)
 {
-    if (cols80)
-    {
-        // map operations from -100% to +100% with OP_MIN at 1%
-        // so, ((op - 127)*100)/128, then round as ((op - 127)*100 + 64)/128
-        int v = ((int)((uint)operations[op]*100) - 12636)>>7;
-        printfat(65,op,"%s%-4d%%", opTableShort[op], v);    
-    }
+    if (cols80) drawOperation(op);
 }
 
 void redrawSidebar()
 {
-    uchar i;
-
     if (cols80)
     {
         plotVLine(129,0, 47, 1);
-        printfat(65,0, "Operations");
-        for (i = 1; i < L_COUNT; ++i) redrawOperation(i);
-        printfat(65,i, "Score:%-4d/%4d", score, scoremax);
+        drawOperations();
     }
 }
 

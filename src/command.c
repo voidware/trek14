@@ -48,7 +48,9 @@ void command()
                "  (W)arp\n"
                "  (P)hasers\n"
                "  (T)orpedoes\n"
-               "  (C)omputer\n");
+               "  (C)omputer\n"
+               "  (D)amage Report\n"
+                      );
     } while (!conn());
 }
 
@@ -83,7 +85,7 @@ static const char* msgTable[] =
     "^4: Shields [Buckling|Collapsing], ^0!",
     "^4: Shields [holding|absorbed it], ^0",
     "^5: Phasers can't lock on, ^1!",
-    "^4: [No dock ship|Ya canny' dock], ^0!",
+    "^4: [Nothing to dock wi'|Ya canny' dock], ^0!",
     "^6: Destroying a Federation base is grounds for court martial!",
     "^6: You [violated the prime directive.|destroyed it!] You are relieved of your command.",
     "^6: Enemy shields absorbed impact, ^2",
@@ -246,19 +248,20 @@ void torpCommand()
     }
 }
 
-static uchar* orbitAlready(uchar t)
+static uchar* orbitAlready(uchar t, uchar msg)
 {
+    // 0 => nothing here
+    // !0 => handled
     uchar* ep = adjacentTo(galaxy, t);
     if (ep)
     {
         if (ENT_DOCKED(ep))
-        {
             messageCode(MSG_CODE_ORBIT_ALREADY_M);
-            ep = 0;
-        }
         else
         {
+            // mark we've been here
             ENT_SET_DOCKED(ep);
+            messageCode(msg);
         }
     }
     return ep;
@@ -283,16 +286,18 @@ void dockCommand()
     }
     else
     {
-        if (orbitAlready(ENT_TYPE_PLANET))
-            messageCode(MSG_CODE_PLANET_G);
-        else
+        if (!orbitAlready(ENT_TYPE_PLANET, MSG_CODE_PLANET_G))
         {
-            if (orbitAlready(ENT_TYPE_PLANET_M))
+            if (orbitAlready(ENT_TYPE_PLANET_M, MSG_CODE_PLANET_M))
             {
-                messageCode(MSG_CODE_PLANET_M);
                 warpcall();
                 score += SCORE_PLANET_M;
                 redrawsr = TRUE;
+            }
+            else
+            {
+                // nothing
+                messageCode(MSG_CODE_NO_DOCK);
             }
         }
     }
@@ -374,7 +379,7 @@ static void computerScan(uchar type)
     getkey();
 }
 
-void computerCommand()
+static void computerCommand()
 {
     char c;
 
@@ -403,7 +408,19 @@ void computerCommand()
             computerScan(ENT_TYPE_PLANET);
             break;
         }
-    } while (c != 'R');
+    } while (c != '\r' && c != 'R');
+}
+
+static void damageReport()
+{
+    cls();
+
+    uchar c = opCol;
+    opCol = 10;
+
+    drawOperations();
+    
+    opCol = c;
 }
 
 // mr spock, you have the conn :-)
@@ -438,6 +455,9 @@ static uchar conn()
         case 'P':
         case 'T':
             k = srScan(c);
+            break;
+        case 'D':
+            damageReport();
             break;
         case 'C':
             computerCommand();
