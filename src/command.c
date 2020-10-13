@@ -84,8 +84,8 @@ static const char* msgTable[] =
     "^4: Shields [holding|absorbed it], ^0",
     "^5: Phasers can't lock on, ^1!",
     "^4: [No dock ship|Ya canny' dock], ^0!",
-    "^6: ^2, you are relieved of command pending court martial.",
-    "^6: You [violated the prime directive.|blew it up!] You are relieved of your command.",
+    "^6: Destroying a Federation base is grounds for court martial!",
+    "^6: You [violated the prime directive.|destroyed it!] You are relieved of your command.",
     "^6: Enemy shields absorbed impact, ^2",
     "^6: Lifeless G Planet, ^2",
     "^6: Class M Planet, ^2. Fascinating!",
@@ -276,9 +276,10 @@ void dockCommand()
         
         // refuel sound
         warpcall();
-
-        if ((uchar)(QX + QY + QZ) == 16) // 772
-            endgame(MSG_CODE_ENDGAME_RESIGN);
+    }
+    else if (adjacentTo(galaxy, ENT_TYPE_BASEHQ))
+    {
+        endgame(MSG_CODE_ENDGAME_RESIGN);
     }
     else
     {

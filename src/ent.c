@@ -34,7 +34,8 @@ uchar* galaxyEnd;
 unsigned int stardate;
 int score;
 int scoremax;
-const char entTypeChar[] = { 'B', 'F', 'S', 'P', 'M', 'K', 'K', 'D', 'R', 0 };
+uint galaxyNumber;
+const char entTypeChar[] = { 'B', 'H', 'F', 'S', 'P', 'M', 'K', 'K', 'D', 'R', 0 };
 
 // current location
 uchar QX, QY, QZ;
@@ -52,10 +53,15 @@ uchar quadCounts[ENT_TYPE_COUNT];
 uchar* quadrant[ENT_QUAD_MAX];
 
 // RLE sprites
-static const uchar base[] = { 0x33, 0x00, 0x01,
-                              0x01, 0x00, 0x06,
-                              0x0c, 0x00,
+static const uchar base[] = { 0x33, 0, 1, 
+                              0x01, 0, 6,
+                              0x0c, 0,
                               0x00 };
+
+static const uchar basehq[] = { 0x14, 0x44, 0, 13,
+                                0x31, 0x61, 0, 11, 
+                                0x0e, 0,
+                                0x00 };
 
 const uchar fedship[] = { 0x06, 0, 0x02,
                           0x01, 0x47, 0, 0x0d,
@@ -184,11 +190,12 @@ const EntObj objTable[] =
 {
     // high negative scores will ensure the game ends if you
     // destroy them
-    { CW(12), 1, -1000, 0, base },
-    { CW(16), 1, -1000, 8000, fedship }, 
-    { CW(6), 1, -1000, STAR_ENERGY, star, staralt, 2 },  // recharge energy
-    { CW(7), 1, -1000, PLANET_ENERGY, planet }, // planet G
-    { CW(7), 1, -1000, PLANET_ENERGY_M, planetm }, // PLANET_M
+    { CW(12), 1, SCORE_LOSE, 0, base },
+    { CW(14), 1, SCORE_LOSE, 0, basehq },
+    { CW(16), 1, SCORE_LOSE, 8000, fedship }, 
+    { CW(6), 1, SCORE_LOSE, STAR_ENERGY, star, staralt, 2 },  // recharge energy
+    { CW(7), 1, SCORE_LOSE, PLANET_ENERGY, planet }, // planet G
+    { CW(7), 1, SCORE_LOSE, PLANET_ENERGY_M, planetm }, // PLANET_M
     { CW(11), 1, SCORE_KLINGON, KLINGON_ENERGY, klingon, klingonAlt },
     { CW(15), 1, SCORE_KLINGON*2, KLINGON2_ENERGY, klingon2, klingon2Alt },
     { CW(19), 2, SCORE_KLINGON*4, KLINGOND_ENERGY, klingon_destroyer },
@@ -202,7 +209,8 @@ uchar mainType(uchar* ep)
     uchar t = ENT_TYPE(ep);
     if (t > ENT_TYPE_KLINGON && t <= ENT_TYPE_KLINGON_DESTROYER)
         t = ENT_TYPE_KLINGON;
-    if (t == ENT_TYPE_PLANET_M) t = ENT_TYPE_PLANET;
+    else if (t == ENT_TYPE_PLANET_M) t = ENT_TYPE_PLANET;
+    else if (t ==  ENT_TYPE_BASEHQ) t = ENT_TYPE_BASE;
     return t;
 }
 
@@ -571,12 +579,13 @@ uchar takeEnergy(uchar* ep, unsigned int d)
 void removeEnt(uchar *ep)
 {
     // adjust score
-    uchar t = ENT_TYPE(ep);
-    score += objTable[t]._score;
+    // if friendly object, score will go negative
+    score += objTable[ENT_TYPE(ep)]._score;
+    
     if (score < 0)
     {
-        // attacked a planet etc.
-        endgame(t == ENT_TYPE_BASE ? 
+        // attacked a base/planet etc.
+        endgame(mainType(ep) == ENT_TYPE_BASE ? 
                 MSG_CODE_COURT_MARTIAL : MSG_CODE_INCOMPETENCE);
     }
     else
@@ -635,15 +644,18 @@ void genGalaxy()
     QZ = 2;
 
     // populate bases
-    for (i = 0; i < TOTAL_BASES; ++i)
+    for (i = 0; i < TOTAL_BASES-1; ++i)
     {
         genEntLocation(galaxyEnd, ENT_TYPE_BASE, 1);
         galaxyEnd += ENT_SIZE; 
     }
 
-    // last one is starfleet HQ
+    // add starfleet HQ
+    genEntLocation(galaxyEnd, ENT_TYPE_BASEHQ, 1);
+
     // put HQ in our start quadrant (ok to move since nothing else there)
-    setQuadrant(galaxyEnd - ENT_SIZE, QX, QY, QZ);
+    setQuadrant(galaxyEnd, QX, QY, QZ);
+    galaxyEnd += ENT_SIZE; 
 
     scoremax = TOTAL_BASES + TOTAL_STARS + TOTAL_PLANETS + TOTAL_PLANETS_M*SCORE_PLANET_M;
     

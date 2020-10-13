@@ -141,19 +141,20 @@
 #define ENT_QUAD_MAX    12  //1 spare for "guests"?
 
 #define ENT_TYPE_BASE   0
-#define ENT_TYPE_FEDERATION 1
-#define ENT_TYPE_STAR 2
-#define ENT_TYPE_PLANET  3
-#define ENT_TYPE_PLANET_M  4
-#define ENT_TYPE_KLINGON 5
-#define ENT_TYPE_KLINGON2 6
-#define ENT_TYPE_KLINGON_DESTROYER 7
-#define ENT_TYPE_ROMULAN 8
-#define ENT_TYPE_TORPEDO 9
-#define ENT_TYPE_COUNT 10
+#define ENT_TYPE_BASEHQ   1
+#define ENT_TYPE_FEDERATION 2
+#define ENT_TYPE_STAR 3
+#define ENT_TYPE_PLANET  4
+#define ENT_TYPE_PLANET_M  5
+#define ENT_TYPE_KLINGON 6
+#define ENT_TYPE_KLINGON2 7
+#define ENT_TYPE_KLINGON_DESTROYER 8
+#define ENT_TYPE_ROMULAN 9
+#define ENT_TYPE_TORPEDO 10
+#define ENT_TYPE_COUNT 11
 
 // total of entities should not exceed ENT_COUNT_MAX
-#define TOTAL_BASES     10
+#define TOTAL_BASES     10  // including HQ
 #define TOTAL_KLINGONS  50
 #define TOTAL_PLANETS   95
 #define TOTAL_PLANETS_M 5
@@ -189,6 +190,9 @@ typedef struct
 #define SCORE_EXPLORE   1
 #define SCORE_PLANET_M  99 // NB: +1 for seeing it at all =100
 
+// causes score to go negative and ends game
+#define SCORE_LOSE -20000
+
 #define MASK_RIGHT  1
 #define MASK_LEFT   2
 #define MASK_TOP    4
@@ -210,6 +214,7 @@ extern uchar* galaxyEnd;
 extern unsigned int stardate;
 extern int score;
 extern int scoremax;
+extern uint galaxyNumber;
 extern uchar alertLevel;
 extern uchar redrawsr;
 extern uchar gameover;

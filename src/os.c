@@ -696,7 +696,7 @@ static void _pad(char w)
 static void _printf_simple(const char* f, va_list args)
 {
     // handles:
-    // %c, %d, %x, %s, %ld, with field width
+    // %c, %d, %u, %x, %s, %ld, with field width
     for (;;)
     {
         char c = *f++;
@@ -719,6 +719,10 @@ static void _printf_simple(const char* f, va_list args)
                 break;
             case 'x':
                 _itoa(va_arg(args, int), buf, 16);  // STDCC extention
+                s = buf;
+                break;
+            case 'u':
+                _uitoa(va_arg(args, uint), buf, 10);  // STDCC extention
                 s = buf;
                 break;
             case 's':

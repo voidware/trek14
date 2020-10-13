@@ -96,8 +96,10 @@ static void startGame()
 
     // restore previous galaxy from command line
     if (*CmdArg) seed = atoi(CmdArg);
-    
-    printf_simple("Generating Galaxy %d...\n", seed);
+
+    galaxyNumber = seed;
+
+    printf_simple("Generating Galaxy %u...\n", galaxyNumber);
 
     genGalaxy();
     command();
@@ -117,6 +119,8 @@ static void mainloop()
             if (c == 'Y') break; 
         }
     } while (!gameover);
+
+    printf_simple("\nYou played galaxy %u\n", galaxyNumber);
 }
 
 int main()
