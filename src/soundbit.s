@@ -112,8 +112,13 @@ _explode_sound::
         pop hl                  ; HL=d
         push hl
         push bc
-
-       ld     a,#1
+        ld    a,(_useSVC)       
+        or    a
+        jr    z,.exp0
+        sla   l
+        rl    h         ; hl*2 for M4 (approx)
+.exp0:        
+        ld     a,#1
 .expl:
           push    hl
           push    af

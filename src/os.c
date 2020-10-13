@@ -1027,8 +1027,10 @@ void srand(uint v)
     seed = v;
 }
 
+#if 0
 unsigned int rand16()
 {
+    // this not very good
     uint v;
     uchar a;
 
@@ -1038,6 +1040,19 @@ unsigned int rand16()
     seed = ((v & 0xff00) | a) - 1;
     return seed;
 }
+
+#else
+
+unsigned int rand16()
+{
+    uint x = seed;
+    x ^= x << 7;
+    x ^= x >> 9;
+    x ^= x << 8;
+    seed = x;
+    return x;
+}
+#endif
 
 uint randn(uint n)
 {

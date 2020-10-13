@@ -416,7 +416,7 @@ void enemyMove()
 
 static char rand3(char* p)
 {
-    // random number -1,0,1,2
+    // random number -1,0,1
     char c = rand16();
     c = (c & 3) - 1;
     if (*p < 0) c = -c;

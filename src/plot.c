@@ -181,8 +181,9 @@ uchar pixelsRLE(const uchar* dp, char* pix)
         {
             x += pair >> 4; // skip
             pair &= 0xf;
-            while (pair--)
+            while (pair)
             {
+                --pair;
                 *pix++ = x++;
                 *pix++ = y;
                 ++c;

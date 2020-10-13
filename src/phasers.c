@@ -88,9 +88,14 @@ static uchar* trackPoint(uchar* ep,
         
         if (plot)
         {
-            uchar i;
-            for (i = 0; i < 10; ++i)
-                (*plot)(sx, sy);
+            (*plot)(sx, sy);
+
+            if (unplot)
+            {
+                // plot + unplot is a torp moving
+                int f = useSVC ? 1000 : 500; // XX M4 adjust
+                bit_soundi(4, f);
+            }
         }
 
         hit = torpCollide(ep, sx, sy);
