@@ -1,27 +1,33 @@
-## Features
+## TODO for v1
+* merge manual with readme
+* Kirk's tips
+* Admirals review
+* scrolling long range scan??
+* Bones' comments.
 
-* consider one-on-one battle screens
+
+## Bugs
+
+## Wishlist
 * klingons hide behind planets (shadow tactics)
 * torps drift with distance if less than 100% operational
 * chance of phaser miss more if less operational
 * cannot phaser through obstacles.
-* two best phasers
 * large planets and stars
-* dock with planets
-* romulans
-* class M planets.
 * collide damage
 * klingons cross quadrant boundaries
 * torpedoes to damage entities in adjacent quadrants.
 * black hole
 * quasars
-* ships computer
-* K attack bases
+* Enemies attack bases
 * neutral zone
+* Klingons can ram you!
 
-## BUGS or MISSING
-* explosion sound wrong picture for M3/M4
-* support high speed for M4 (involves fixing sound pitch again)
-* K routing algorithm a bit slow for M1 esp when multiple enemies in quadrant.
+## Version2
+* romulans
+* beam down to M planets
+
+
+
 
 

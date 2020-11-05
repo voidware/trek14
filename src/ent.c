@@ -272,7 +272,10 @@ uchar distm(char x1, char y1, char x2, char y2)
 
 uchar distmTo(uchar x, uchar y, uchar z)
 {
-    return ABSC(QX - x) + ABSC(QY - y) + ABSC(QZ - z);
+    // 3D Manhattan distance to (x,y,z)
+    char dz = QZ - z;
+    if (dz < 0) dz -= dz;
+    return distm(QX, QY, x, y) + dz;
 }
 
 uchar getWidth(uchar* ep)

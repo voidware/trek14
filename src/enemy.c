@@ -507,7 +507,10 @@ uchar hitEnergy(uchar* ep, unsigned int d)
         else
         {
             // destroyed an enemy
-            messageCode(MSG_CODE_DESTROYED);
+
+            // dont call messageCode because we want to see the
+            // explosion right now.
+            emitStoryCmdM(MSG_CODE_DESTROYED);
 
             // remove from screen
             undrawEnt(ep);
@@ -519,6 +522,9 @@ uchar hitEnergy(uchar* ep, unsigned int d)
             removeEnt(ep);
 
             if (!gameover) playVictory();
+
+            // clear message after explosion!
+            clearMessage();
                 
             // indicate screen redraw
             redrawsr = TRUE;

@@ -30,8 +30,9 @@ void dockCommand();
 void torpCommand();
 char warpCommand();
 
+void clearMessage();
 void messageCode(uchar mc);
-void message(const char*);
+void emitStoryCmdM(uchar mc);
 
 extern const char* crewTable[];
 

@@ -70,7 +70,7 @@ static void emitStory(const char* m)
     st.subSize[1] = DIM(opTable);
 
     // emit on the message line
-    lastLinex(MSG_X);
+    clearMessage();
     story(m, &st);    
 }
 
@@ -99,6 +99,7 @@ uchar opCheck(uchar i)
         sprintf_simple(buf, "^4: ^b%d [are out|inoperative|[still |]dunny' work], ^0!", (int)i);
         emitStory(buf);
         alertsound();  // also pause
+        clearMessage();
     }
     return u;
 }

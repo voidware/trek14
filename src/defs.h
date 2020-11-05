@@ -68,7 +68,6 @@ typedef int int16;
 
 #define ROM_CURSOR  ((char**)0x4020)
 
-#define ABSC(_c) ((char)(_c) < 0 ? -(_c) : (_c))
 #define ABS(_c) ((_c) < 0 ? -(_c) : (_c))
 #define SIGN(_c) ((_c) < 0 ? -1 : 1)
 #define DIM(_x)  (sizeof(_x)/sizeof((_x)[0]))

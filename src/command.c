@@ -81,13 +81,13 @@ static const char* msgTable[] =
     "Out of Energy. You die drifting through space",
     "Ship and crew killed in battle",
     "^6: ^2, you are relieved of command.", // for disobeying orders
-    "^7: ^2, Starfleet orders you to return to HQ, Quadrant 7,7,2.",
+    "^7: ^2, Starfleet orders you to HQ 772",
     "^4: Shields [Buckling|Collapsing], ^0!",
     "^4: Shields [holding|absorbed it], ^0",
     "^5: Phasers can't lock on, ^1!",
     "^4: [Nothing to dock wi'|Ya canny' dock], ^0!",
     "^6: Destroying a Federation base is grounds for court martial!",
-    "^6: You [violated the prime directive.|destroyed it!] You are relieved of your command.",
+    "^6: You [violated the prime directive.|destroyed it!] You are relieved of command.",
     "^6: Enemy shields absorbed impact, ^2",
     "^6: Lifeless G Planet, ^2",
     "^6: Class M Planet, ^2. Fascinating!",
@@ -111,31 +111,41 @@ static void emitStoryCmd(const char* m)
     emitStory(m, &st);    
 }
 
-static void emitStoryCmdM(uchar mc)
+void emitStoryCmdM(uchar mc)
 {
     char buf[16];
     sprintf_simple(buf, "^b%d", (int)mc);
     emitStoryCmd(buf);
 }
 
+void clearMessage()
+{
+    lastLinex(MSG_X);
+}
+
+#if 0
 void message(const char* m)
 {
     // emit a given message on the message line
-    lastLinex(MSG_X);
+    clearMessage();
     emitStoryCmd(m);
 }
+#endif
 
 void messageCode(uchar mc)
 {
     // emit a message with a code on the message line.
-    lastLinex(MSG_X);
+    // pause and clear it
+    clearMessage();
     emitStoryCmdM(mc);
+    pause();
+    clearMessage();
 }
 
 void cMessage(const char* s)
 {
     // set cursor for command input. always the base of the screen
-    lastLinex(MSG_X);
+    clearMessage();
     emitStoryCmd(s);
 }
 
@@ -172,6 +182,8 @@ char warpCommand()
 
         // can type 7,7,2 or 772
         uchar c = scanf_simple("%d,%d,%d", &x, &y, &z);
+        clearMessage();
+        
         if (c == 1)
         {
             z = x % 10;
@@ -201,6 +213,7 @@ void phaserCommand()
             int e;
             cMessage("^5, Energy: ");
             scanf_simple("%d", &e);
+            clearMessage();
 
             if (e > 0)
             {
@@ -233,8 +246,9 @@ void torpCommand()
         if (u > 0)
         {
             int dir;
-            message("^5, [Direction|Angle|Vector]: ");
+            cMessage("^5, [Direction|Angle|Vector]: ");
             scanf_simple("%d", &dir);
+            clearMessage();
 
             // if out of range, abort command
             if (dir >= 0 && dir <= 360)
