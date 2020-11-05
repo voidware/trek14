@@ -149,6 +149,22 @@ void cMessage(const char* s)
     emitStoryCmd(s);
 }
 
+typedef struct 
+{
+    char       _score;
+    const char* _review;
+} Review;
+
+static const Review reviewTable[] =
+{
+ { 15, "promoted." },   // 15/16 = 93%
+ { 14, "decorated." },  // 87.5%
+ { 12, "reassigned." }, // 75%
+ { 8, "demoted." },  // 50%
+ { 0, "resigned!" },
+ { -1, "executed!!" },
+};
+
 void endgame(uchar msg)
 {
     char buf[16];
@@ -165,7 +181,21 @@ void endgame(uchar msg)
     if (msg == MSG_CODE_ENDGAME_RESIGN)
     {
         // score review
-        story("\n\nAdmiral [Fitzpatrick|Komack|Westervliet|Barstow|Fitzgerald] here,\nAfter reviewing your tapes and logs, I [can only|must|have to] recommend that you be demoted.", &st);
+        story("\n\nAdmiral [Fitzpatrick|Komack|Westervliet|Barstow|Fitzgerald] here;\nCaptain, after reviewing your tapes and logs, I [can only|must|have to] recommend that you be ", &st);
+
+        const Review* rp = reviewTable;
+        for (;;)
+        {
+            // score table is fractions of 1/16.
+            // scoremax < 65535/16 = 4095
+            // so multiply up to 16 is ok.
+            char s = rp->_score;
+            if (s < 0) break;
+            uint slim = (((uint)s)*((uint)scoremax))>>4;
+            if (score >= slim) break;
+            ++rp;
+        }
+        story(rp->_review, &st);
     }
 
     if (score < 0) score = 0;

@@ -112,7 +112,7 @@ static void emit(uchar c, Story* st)
     }
 }
 
-void _story(const char* s, Story* st)
+static void _story(const char* s, Story* st)
 {
     char c;
     while ((c = *s) != 0)

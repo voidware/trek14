@@ -204,6 +204,18 @@ You can search those memory banks for known locations of enemies or bases. For e
 
 Helpfully, the computer will tell you the closest base or enemy.
 
+## Replay:
+
+Each galaxy has a code number. You'll be told this at the start, when the galaxy is generated and also when the game is over.
+
+If you wish to replay the _same_ galaxy, run the game with this galaxy code as input parameter on the command line;
+
+eg;
+`TREK14 1234`
+
+Will run galaxy 1234.
+
+
 ## Tactics:
 
 _Kirk Says:_
@@ -333,9 +345,22 @@ Winning the mini-games will give you new technologies such as;
 * Cloaking devices
 * Phaser upgrades
 * Extra energy banks
+* Upgraded shields
 * Enhanced warp capacity (eg hyperspace command)
-* Deeper long range scans
-* The Corbomite manoeuvre
+* Deeper long range scan
+* The Corbomite manoeuvre (one-shot escape or smart bomb?)
+
+## Model 4/4P
+
+Takes advantage of 80 column mode. Although the quadrant is the same size, the ships operational systems are displayed on the right sidebar.
+
+Unfortunately, due to limitation of the 4/4P graphics, the lower edge of the sprite pixels are stunted, which makes the sprites somewhat asymmetric.
+
+_For v2_; work is underway to support the high-res Grafyx card on the M4. Hopefully we can have high-res game spites!!
+
+
+
+
 
 
 
