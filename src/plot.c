@@ -82,14 +82,13 @@ void plot(uchar x, uchar y, uchar c)
         *m = q & ~mask;
 }
 	
-static uchar plotSpan(uchar x, uchar y, uchar n0, uchar c)
+void plotSpan(uchar x, uchar y, uchar n, uchar c)
 {
     // plot (x,y) to (x+n, y) colour c
     
     uchar q, mask;
     char* m;
     signed char v;
-    uchar n = n0;
 
     if (n)
     {
@@ -97,7 +96,7 @@ static uchar plotSpan(uchar x, uchar y, uchar n0, uchar c)
 
         // cols*(y/3) + x/2
         m = vidaddr(x>>1, q);
-        if (!m) return 0;
+        if (!m) return;
 
         // remainder
         q = y - q*3;
@@ -142,7 +141,6 @@ static uchar plotSpan(uchar x, uchar y, uchar n0, uchar c)
                 *m = v & ~leftCol[q];
         }
     }
-    return n0;
 }
 
 void plotHLine(uchar x1, uchar y, uchar x2, uchar c)
@@ -217,7 +215,9 @@ void drawRLE(char x, char y, const uchar* dp, uchar c)
         while (pair = *dp++)
         {
             x += pair >> 4; // skip
-            x += plotSpan(x, y, pair & 0xf, c); // plot
+            uchar t = pair & 0xf;
+            plotSpan(x, y, t, c); // plot
+            x += t;
         }
         
         // flyback
@@ -254,8 +254,12 @@ void moveRLE(char x, char y, const uchar* dp, signed char dx)
         // plot each line span of sprite
         while (pair = *dp++)
         {
-            x += plotSpan(x, y, pair >> 4, 0); // reset skip
-            x += plotSpan(x, y, pair & 0xf, 1); // set region
+            uchar t = pair >> 4;
+            plotSpan(x, y, t, 0); // reset skip
+            x += t;
+            t = pair & 0xf;
+            plotSpan(x, y, t, 1); // set region
+            x += t;
         }
 
         // if moving left, reset last pixel of row

@@ -140,6 +140,7 @@
 #define ENT_COUNT_MAX   300
 #define ENT_QUAD_MAX    12  //1 spare for "guests"?
 
+// these have to agree with letters in array `entTypeChar`
 #define ENT_TYPE_BASE   0
 #define ENT_TYPE_BASEHQ   1
 #define ENT_TYPE_FEDERATION 2
@@ -233,7 +234,6 @@ char collision(uchar* ep1, uchar* ep2);
 char collisionBorder(uchar* ep);
 uchar setSector(uchar* ep, uchar x, uchar y, uchar cancross);
 uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z);
-void updateQuadrant();
 uchar distance(uchar* ep1, uchar* ep2);
 uchar getWidth(uchar* ep);
 uchar enoughEnergy(uchar* ep, unsigned int d);
@@ -242,3 +242,4 @@ void removeEnt(uchar *ep);
 uchar* adjacentTo(uchar* ep, uchar type);
 uchar distm(char x1, char y1, char x2, char y2);
 uchar distmTo(uchar x, uchar y, uchar z);
+void markVisited(uchar** epp);

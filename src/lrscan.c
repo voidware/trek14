@@ -29,7 +29,7 @@
 #include "damage.h"
 #include "sound.h"
 
-uchar lrScan()
+static void lrScanAt(char qx, char qy, char qz, uchar visit)
 {
     // long range scan
 
@@ -37,13 +37,104 @@ uchar lrScan()
     uchar x, y, z;
     uchar cx, cy;
 
-    // counts for each type
-    uchar quad[ENT_TYPE_COUNT];
+    printfat(0, 0, "Long Range Scan, Quadrant %d,%d,%d\n",
+             (int)qx, (int)qy, (int)qz);
+
+    cy = 3;
+    y = qy-1;
+    for (i = 0; i <= 2; ++i, ++y)  // loop quadrant Y
+    {
+        cx = 2; 
+        x = qx-1;
+        for (j = 0; j <= 2; ++j, ++x) // loop quadrant X
+        {
+            char k;
+            
+            if (!i) printfat(cx + 8, 1, "%d", (int)x);
+            z = qz-1;
+
+            for (k = 0; k <= 2; ++k, ++z) // loop quadrant Z
+            {
+                char buf[ENT_TYPE_COUNT*2+1];
+                char* bp;
+                if (x < 8 && y < 8 && z < 3)
+                {
+                    // counts for each type
+                    uchar quad[ENT_TYPE_COUNT];
+                    
+                    // find out what we have in the quadrant
+                    uchar* ents[ENT_QUAD_MAX];
+                    getQuad(x, y, z, quad, ents);
+                    if (visit) markVisited(ents);
+                    
+                    uchar* cp = quad;
+                    uchar** epp = ents;
+                    bp = buf;
+                    
+                    const char* tc = entTypeChar;
+                    for (tc = entTypeChar; *tc; ++tc)
+                    {
+                        uchar c = *cp;
+
+                        // find out if any visible
+                        uchar vis = 0;
+                        while (c)
+                        {
+                            --c;
+                            if (ENT_MARKED(*epp)) ++vis;
+                            ++epp;
+                        }
+
+                        if (!strchr("HMWD", *tc))
+                        {
+                            if (vis)
+                            {
+                                *bp = *tc;
+                                bp[1] = '0' + *cp;
+
+                                if (*bp == 'K')
+                                    playNotes("18t+EC"); // nameF, nameH
+                            }
+                            else
+                            {
+                                *bp = ' ';
+                                bp[1] = ' ';
+                            }
+                            bp += 2;
+                        }
+                        ++cp;
+                    }
+                    *bp = 0;
+                    bp = buf;
+                    
+
+
+                }
+                else
+                {
+                    bp = (char*)"     Void     ";
+                }
+                printfat(cx, cy + k, bp);
+            }
+            cx += 19;
+        }
+        --cx;
+        printfat(cx, cy, "%2d", (int)(qz-1));
+        printfat(cx, cy + 1, "%2d %d", (int)qz, (int)y);
+        printfat(cx, cy + 2, "%2d", (int)(qz+1));
+        cy += 4;
+    }
+}
+
+char lrScan()
+{
+    char i;
+    uchar x, y;
+    char c;
 
     if (!opCheck(L_SCANL)) return 0;
 
     cls();
-    printf_simple("Long Range Scan, Quadrant %d %d %d\n", (int)QX, (int)QY, (int)QZ);
 
     y = 7; // 2*cy+1
     x = 0;
@@ -56,59 +147,42 @@ uchar lrScan()
         x += (1 + 18)*2; // self + 18 chars
     }
 
-    cy = 3;
-    y = QY - 1;
-    for (i = 0; i <= 2; ++i, ++y)  // loop quadrant Y
+    // enter interactive loop
+    char qx = QX;
+    char qy = QY;
+    char qz = QZ;
+    uchar visit = 1; // visit first pass to explore.
+    for (;;)
     {
-        cx = 2; 
-        x = QX - 1;
-        for (j = 0; j <= 2; ++j, ++x) // loop quadrant X
+        lrScanAt(qx, qy, qz, visit);
+        visit = 0;
+
+        // subsequent scans from level 1
+        qz = 1;
+
+    again:
+        
+        c = getSingleCommand("Command: ");
+
+        if (c == KEY_ARROW_LEFT)
         {
-            char k;
-            
-            if (!i) printfat(cx + 8, 1, "%d", (int)x);
-            z = QZ - 1;
-
-            for (k = 0; k <= 2; ++k, ++z) // loop quadrant Z
-            {
-                char buf[ENT_TYPE_COUNT*2+1];
-                char* bp;
-                if (x < 8 && y < 8 && z < 3)
-                {
-                    const char* tc = entTypeChar;
-                    uchar* cp = quad;
-
-                    // find out what we have in the quadrant
-                    getQuad(x, y, z, cp, 0);
-                    
-                    bp = buf;
-                    while (*bp = *tc++)
-                    {
-                        if (*cp)
-                        {
-                            bp[1] = '0' + *cp;
-                            if (*bp == 'K')
-                                playNotes("18t+EC"); // nameF, nameH
-                            bp += 2;
-                        }
-                        ++cp;
-                    }
-                    bp = buf;
-                }
-                else
-                {
-                    bp = (char*)"     Void";
-                }
-                printfat(cx, cy + k, bp);
-            }
-            cx += 19;
+            if (--qx < 0) { qx = 0; goto again; }
         }
-        --cx;
-        printfat(cx, cy, "%2d", (int)(QZ-1));
-        printfat(cx, cy + 1, "%2d %d", (int)QZ, (int)(char)y);
-        printfat(cx, cy + 2, "%2d", (int)(QZ+1));
-        cy += 4;
+        else if (c == KEY_ARROW_RIGHT)
+        {
+            if (++qx > 7) { qx = 7; goto again; }
+        }
+        else if (c == KEY_ARROW_UP || c == KEY_ARROW_UP_M4)
+        {
+            if (--qy < 0) { qy = 0; goto again; }
+        }
+        else if (c == KEY_ARROW_DOWN)
+        {
+            if (++qy > 7) { qy = 7; goto again; }
+        }
+        else break;
     }
-    return 1;
+
+    return c;
 }
 

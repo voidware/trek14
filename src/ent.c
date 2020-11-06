@@ -35,7 +35,7 @@ unsigned int stardate;
 int score;
 int scoremax;
 uint galaxyNumber;
-const char entTypeChar[] = { 'B', 'H', 'F', 'S', 'P', 'M', 'K', 'K', 'D', 'R', 0 };
+const char entTypeChar[] = { 'B', 'H', 'F', 'S', 'P', 'M', 'K', 'W', 'D', 'R', 0 };
 
 // current location
 uchar QX, QY, QZ;
@@ -103,8 +103,8 @@ static const uchar klingonAlt[] = {
     0x00
 };
 
-// bigger klingon
-static const uchar klingon2[] = {   // 15 pixel version
+// klingon warship
+static const uchar kwarship[] = {   // 15 pixel version
     0x03, 0x11, 0x51, 0x13, 0,
     0x0f,
     0x0f, 0,
@@ -113,7 +113,7 @@ static const uchar klingon2[] = {   // 15 pixel version
     00
 };
 
-static const uchar klingon2Alt[] = { 
+static const uchar kwarshipAlt[] = { 
     0x03, 0x93,0,
     0x0f,
     0x0f, 0,
@@ -197,7 +197,7 @@ const EntObj objTable[] =
     { CW(7), 1, SCORE_LOSE, PLANET_ENERGY, planet }, // planet G
     { CW(7), 1, SCORE_LOSE, PLANET_ENERGY_M, planetm }, // PLANET_M
     { CW(11), 1, SCORE_KLINGON, KLINGON_ENERGY, klingon, klingonAlt },
-    { CW(15), 1, SCORE_KLINGON*2, KLINGON2_ENERGY, klingon2, klingon2Alt },
+    { CW(15), 1, SCORE_KLINGON*2, KLINGON2_ENERGY, kwarship, kwarshipAlt },
     { CW(19), 2, SCORE_KLINGON*4, KLINGOND_ENERGY, klingon_destroyer },
     { CW(0), 1, SCORE_KLINGON, 2000, romulan },
     { 1, 1, 0, 0, romulan }, // additional entry used for torpedo
@@ -210,7 +210,7 @@ uchar mainType(uchar* ep)
     if (t > ENT_TYPE_KLINGON && t <= ENT_TYPE_KLINGON_DESTROYER)
         t = ENT_TYPE_KLINGON;
     else if (t == ENT_TYPE_PLANET_M) t = ENT_TYPE_PLANET;
-    else if (t ==  ENT_TYPE_BASEHQ) t = ENT_TYPE_BASE;
+    else if (t == ENT_TYPE_BASEHQ) t = ENT_TYPE_BASE;
     return t;
 }
 
@@ -227,23 +227,12 @@ void getQuad(uchar x, uchar y, uchar z, uchar* quadCounts, uchar** eplist)
     {
         if (ENT_QX(ep) == x && ENT_QY(ep) == y && ENT_QZ(ep) == z)
         {
-            // now seen if not already, increase explore score
-            if (!ENT_MARKED(ep))
-            {
-                ENT_SET_MARK(ep);
-                score += SCORE_EXPLORE;
-            }
-
-            if (eplist)
-            {
-                *eplist++ = ep;
-                *eplist = 0;
-            }
-
+            if (eplist) *eplist++ = ep;
             ++quadCounts[mainType(ep)];
         }
         ep += ENT_SIZE;
     }
+    if (eplist) *eplist = 0;
 }
 
 uchar distance(uchar* ep1, uchar* ep2)
@@ -363,10 +352,26 @@ char collision(uchar* ep1, uchar* ep2)
     return 0;
 }
 
-void updateQuadrant()
+void markVisited(uchar** epp)
+{
+    // mark all objects as visited
+    uchar* ep;
+    while ((ep = *epp++) != 0)
+    {
+        // now seen if not already, increase explore score
+        if (!ENT_MARKED(ep))
+        {
+            ENT_SET_MARK(ep);
+            score += SCORE_EXPLORE;
+        }
+    }
+}
+
+static void updateCurrentQuadrant()
 {
     // update list of things in this quadrant
     getQuad(QX, QY, QZ, quadCounts, quadrant);
+    markVisited(quadrant);
 }
 
 uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z)
@@ -386,7 +391,7 @@ uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z)
             QZ = z;
 
             // refresh content of quadrant
-            updateQuadrant();
+            updateCurrentQuadrant();
         }
         return 1;
     }
@@ -534,18 +539,6 @@ static uchar genEntLocation(uchar* ep, uchar type, uchar n)
     return n;
 }
 
-void clearMarks()
-{
-    // except the first entry
-    uchar* ep = galaxy;
-    for (;;)
-    {
-        ep += ENT_SIZE;
-        if (ep == galaxyEnd) break;
-        ENT_CLEAR_MARK(ep);
-    } 
-}
-
 uchar enoughEnergy(uchar* ep, unsigned int d)
 {
     // reduce energy by `d' if possible
@@ -597,7 +590,7 @@ void removeEnt(uchar *ep)
         memmove(ep, ep + ENT_SIZE, galaxyEnd - ep);
 
         // rebuild quadrant content
-        updateQuadrant();
+        updateCurrentQuadrant();
     }
 }
 
@@ -660,7 +653,8 @@ void genGalaxy()
     setQuadrant(galaxyEnd, QX, QY, QZ);
     galaxyEnd += ENT_SIZE; 
 
-    scoremax = TOTAL_BASES + TOTAL_STARS + TOTAL_PLANETS + TOTAL_PLANETS_M*SCORE_PLANET_M;
+    // HQ doesn't count in score.
+    scoremax = (TOTAL_BASES-1) + TOTAL_STARS + TOTAL_PLANETS + TOTAL_PLANETS_M*SCORE_PLANET_M;
     
     // populate klingons
     for (i = 0; i < TOTAL_KLINGONS;)
@@ -706,13 +700,12 @@ void genGalaxy()
     }
 #endif
 
-    clearMarks();
     
     // start with everything operational
     repairAll();
 
-    // +1 for starfleet HQ, not to count
-    score = -1;
+    // discount score for HQ + self
+    score = -2;
 
     // reset (eg new game)
     alertLevel = 0;

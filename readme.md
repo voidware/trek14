@@ -78,6 +78,12 @@ The long range scan shows a summary of content in each quadrant, For example:
 
 Means, 1 *Federation* vessel, 1 *Star* and 2 *Planets*. Other codes are K for Klingons and B for bases.
 
+You can use arrow keys within long range scan to move around. However, only the known galatic content will be available. So areas not yet scanne will remain blank.
+
+_Kirk's tip:_
+> Be sure to locate a nearby base _before_ going into battle. Use the long range scan movement arrows to remind you where the base is when you want to warp out.
+
+
 ## Warp Drive
 
 Press "W" from the command menu or from short range scan.

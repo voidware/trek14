@@ -483,7 +483,7 @@ static uchar conn()
         switch (c)
         {
         case 'L':
-            lrScan();
+            k = lrScan();
             tick();
             break;
         case 'W':
