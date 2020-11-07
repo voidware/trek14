@@ -315,14 +315,17 @@ void dockCommand()
 {
     if (adjacentTo(galaxy, ENT_TYPE_BASE))
     {
+        emitStoryCmdM(MSG_CODE_DOCKED);
+        
         // full house
         ENT_SET_DAT(galaxy, ENT_REFUEL_DATA);
         repairAll();
         redrawSidebar();
-        messageCode(MSG_CODE_DOCKED);
         
         // refuel sound
         warpcall();
+
+        clearMessage();
     }
     else if (adjacentTo(galaxy, ENT_TYPE_BASEHQ))
     {
@@ -394,17 +397,17 @@ static void computerScan(uchar type)
 
     for (ep = galaxy; ep != galaxyEnd; ep += ENT_SIZE)
     {
-        if (mainType(ep) == type && ENT_MARKED(ep))
+        if (mainType(ep) == type)
         {
             uchar x, y, z, d;
-            if ((c++ & 0x3) == 0) outs("\n");
-
+            
             x = ENT_QX(ep);
             y = ENT_QY(ep);
             z = ENT_QZ(ep);
 
-            d = distmTo(x, y, z);
+            if (!GET_EXPLORED(x, y, z)) continue;
 
+            d = distmTo(x, y, z);
             if (d < nearest)
             {
                 nearest = d;
@@ -412,7 +415,8 @@ static void computerScan(uchar type)
                 ny = y;
                 nz = z;
             }
-            
+
+            if ((c++ & 0x3) == 0) outs("\n");
             printf_simple("%c%d,%d,%d ", entTypeChar[ENT_TYPE(ep)], (int)x, (int)y, (int)z);
         }
     } 
@@ -467,6 +471,13 @@ static void damageReport()
     opCol = c;
 }
 
+char getACommand()
+{
+    char c = getSingleCommand("Command: ");
+    clearMessage();
+    return c;
+}
+
 // mr spock, you have the conn :-)
 static uchar conn()
 {
@@ -478,7 +489,7 @@ static uchar conn()
     {
         if (k) { c = k; k = 0; }
         else
-            c = getSingleCommand("Command: ");
+            c = getACommand();
         
         switch (c)
         {

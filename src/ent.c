@@ -52,6 +52,9 @@ uchar recalled;
 uchar quadCounts[ENT_TYPE_COUNT];
 uchar* quadrant[ENT_QUAD_MAX];
 
+// 1 bit per quad * 8 rows * 3
+uchar quadsExplored[8*3];
+
 // RLE sprites
 static const uchar base[] = { 0x33, 0, 1, 
                               0x01, 0, 6,
@@ -352,26 +355,47 @@ char collision(uchar* ep1, uchar* ep2)
     return 0;
 }
 
+#if 0
+void markEntVisited(uchar* ep)
+{
+    // now seen if not already, increase explore score
+    if (!ENT_MARKED(ep))
+    {
+        ENT_SET_MARK(ep);
+        score += SCORE_EXPLORE;
+    }
+}
+
 void markVisited(uchar** epp)
 {
     // mark all objects as visited
-    uchar* ep;
-    while ((ep = *epp++) != 0)
+    while (*epp) markEntVisited(*epp++);
+}
+#endif
+
+uchar markQuadVisited(char x, char y, char z, uchar v)
+{
+    // mark (x,y,z) visited, return 1 if visited
+    // ASSUME x, y, z in range
+    
+    uchar* p = EXPLORED_ADDR(y, z);
+    uchar m = EXPLORED_MASK(x);
+    uchar r = (*p & m) == m;  // already marked?
+    if (v && !r)
     {
-        // now seen if not already, increase explore score
-        if (!ENT_MARKED(ep))
-        {
-            ENT_SET_MARK(ep);
-            score += SCORE_EXPLORE;
-        }
+        r = 1;
+        *p |= m;
+        score += SCORE_EXPLORE;
     }
+    return r;
 }
 
 static void updateCurrentQuadrant()
 {
     // update list of things in this quadrant
     getQuad(QX, QY, QZ, quadCounts, quadrant);
-    markVisited(quadrant);
+    markQuadVisited(QX, QY, QZ, 1);
+    //markVisited(quadrant);
 }
 
 uchar setQuadrant(uchar* ep, uchar x, uchar y, uchar z)
@@ -653,8 +677,7 @@ void genGalaxy()
     setQuadrant(galaxyEnd, QX, QY, QZ);
     galaxyEnd += ENT_SIZE; 
 
-    // HQ doesn't count in score.
-    scoremax = (TOTAL_BASES-1) + TOTAL_STARS + TOTAL_PLANETS + TOTAL_PLANETS_M*SCORE_PLANET_M;
+    scoremax = 192*SCORE_EXPLORE + TOTAL_PLANETS_M*SCORE_PLANET_M;
     
     // populate klingons
     for (i = 0; i < TOTAL_KLINGONS;)
@@ -704,8 +727,9 @@ void genGalaxy()
     // start with everything operational
     repairAll();
 
-    // discount score for HQ + self
-    score = -2;
+    memset(quadsExplored, 0, sizeof(quadsExplored));
+
+    score = 0;
 
     // reset (eg new game)
     alertLevel = 0;

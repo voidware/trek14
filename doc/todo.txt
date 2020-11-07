@@ -1,8 +1,4 @@
 ## TODO for v1
-* merge manual with readme
-* Kirk's tips
-* Admirals review
-* scrolling long range scan??
 * Bones' comments.
 
 
@@ -17,11 +13,12 @@
 * collide damage
 * klingons cross quadrant boundaries
 * torpedoes to damage entities in adjacent quadrants.
-* black hole
 * quasars
 * Enemies attack bases
 * neutral zone
 * Klingons can ram you!
+* class O star (fatal to enter quadrant)
+* black hole (fatal to enter quadrant)
 
 ## Version2
 * romulans

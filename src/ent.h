@@ -64,20 +64,24 @@
 
 */
 
-#define ENT_TYPE(_p)  (*(_p) & 0xf)
-#define ENT_MARKED(_p) (*((char*)(_p)) < 0)
+#define ENT_TYPE(_p)  ((uchar)(*(_p) & 0xf))
 
-#define ENT_DOCKED(_p) (*(_p) & 0x40)
+#if 0
+// mark currently not used
+#define ENT_MARKED(_p) (*((char*)(_p)) < 0)
+#define ENT_SET_MARK(_p)   *(_p) |= 0x80
+#define ENT_CLEAR_MARK(_p)  *(_p) &= 0x7f
+#endif
+
+#define ENT_DOCKED(_p) ((uchar)((*(_p) & 0x40)))
 #define ENT_SET_DOCKED(_p)  *(_p) |= 0x40
 
 // NB: used to initialise whole byte
 #define ENT_SET_TYPE(_p, _v) *(_p) = (_v)
-#define ENT_SET_MARK(_p)   *(_p) |= 0x80
-#define ENT_CLEAR_MARK(_p)  *(_p) &= 0x7f
 
-#define ENT_QX(_p) ((_p)[1] & 7)
-#define ENT_QY(_p) ((_p)[2] & 7)
-#define ENT_QZ(_p) (((*(_p)) >> 4) & 0x3)
+#define ENT_QX(_p) ((uchar)((_p)[1] & 7))
+#define ENT_QY(_p) ((uchar)((_p)[2] & 7))
+#define ENT_QZ(_p) ((uchar)(((*(_p)) >> 4) & 0x3))
 
 #define ENT_SET_QZ(_p, _v)  *(_p) = ((*(_p) & ~0x30) | ((_v)<<4))
 #define ENT_SET_QX(_p, _v) (_p)[1] = (((_p)[1] & ~0x7) | (_v))
@@ -185,11 +189,9 @@ typedef struct
 } EntObj;
 
 
-#define SCORE_KLINGON  50
-
-// every entity when seen gives a small score
+#define SCORE_KLINGON  20
 #define SCORE_EXPLORE   1
-#define SCORE_PLANET_M  99 // NB: +1 for seeing it at all =100
+#define SCORE_PLANET_M  50
 
 // causes score to go negative and ends game
 #define SCORE_LOSE -20000
@@ -204,11 +206,19 @@ typedef struct
 #define STARDATE_GRACE 100
 #define STARDATE_WARP 10
 
+#define EXPLORED_ADDR(_y, _z) (&quadsExplored[((_z)<<3)+(_y)])
+#define EXPLORED_MASK(_x) ((uchar)(1<<(_x)))
+
+#define GET_EXPLORED(_x, _y, _z) (*EXPLORED_ADDR(_y, _z) & EXPLORED_MASK(_x))
+#define SET_EXPLORED(_x, _y, _z) *EXPLORED_ADDR(_y, _z) |= EXPLORED_MASK(_x)
+
+
 // -- data
 
 extern uchar galaxy[];
 extern uchar* quadrant[];
 extern uchar quadCounts[];
+extern uchar quadsExplored[];
 
 extern uchar QX, QY, QZ;
 extern uchar* galaxyEnd;
@@ -242,4 +252,4 @@ void removeEnt(uchar *ep);
 uchar* adjacentTo(uchar* ep, uchar type);
 uchar distm(char x1, char y1, char x2, char y2);
 uchar distmTo(uchar x, uchar y, uchar z);
-void markVisited(uchar** epp);
+uchar markQuadVisited(char x, char y, char z, uchar v);

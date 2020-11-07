@@ -45,6 +45,7 @@ unsigned int cursorPos;
 // are we in 80 col mode?
 uchar cols80;
 uchar rowCount;
+uchar colCount;  // 64 or 80
 
 // location of video ram 0x3c00 or 0xf800
 uchar* vidRam;
@@ -926,6 +927,7 @@ void initModel()
     
     cols80 = 0;
     rowCount = 16;
+    colCount = 64;
     vidRam = VIDRAM;
     TRSMemory = 0;
 
@@ -942,6 +944,7 @@ void initModel()
         
         cols80 = 1;
         rowCount = 24;
+        colCount = 80;
         useSVC = 1;
         vidRam = VIDRAM80;
 

@@ -84,6 +84,7 @@ extern uchar TRSMemory;
 extern uchar* TRSMemoryFail;
 extern uchar cols80;
 extern uchar rowCount;
+extern uchar colCount;
 extern unsigned int scrollPos;
 extern unsigned int cursorPos;
 extern uchar* vidRam;

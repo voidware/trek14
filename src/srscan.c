@@ -305,7 +305,7 @@ char srScan(char k)
         if (k) { c = k; k = 0; }
         else
         {
-            c = getSingleCommand("Command: ");
+            c = getACommand();
         }
         
         dx = 0;

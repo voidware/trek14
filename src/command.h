@@ -33,6 +33,7 @@ char warpCommand();
 void clearMessage();
 void messageCode(uchar mc);
 void emitStoryCmdM(uchar mc);
+char getACommand();
 
 extern const char* crewTable[];
 
