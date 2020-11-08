@@ -266,7 +266,7 @@ uchar distmTo(uchar x, uchar y, uchar z)
 {
     // 3D Manhattan distance to (x,y,z)
     char dz = QZ - z;
-    if (dz < 0) dz -= dz;
+    if (dz < 0) dz = -dz;
     return distm(QX, QY, x, y) + dz;
 }
 

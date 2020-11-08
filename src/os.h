@@ -44,6 +44,7 @@ void setWide(uchar v);
 void initModel();
 void uninitModel();
 void pause();
+void pausen(uint c);
 void setStack();
 void revertStack();
 

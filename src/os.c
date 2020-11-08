@@ -614,14 +614,19 @@ uchar getline(char* buf, uchar nmax)
     return n;
 }
 
-void pause()
+void pausen(uint c)
 {
-    // delay, unless key pressed
-    int c = 1000;  // XX scale delay by machine speed
+    if (useSVC) c <<= 1;   // bogus speed adjust
     while (--c)
     {
         if (scanKey()) return;
-    }
+    }    
+}
+
+void pause()
+{
+    // delay, unless key pressed
+    pausen(1500);
 }
 
 void outs(const char* s)

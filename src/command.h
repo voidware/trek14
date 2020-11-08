@@ -59,5 +59,6 @@ extern const char* crewTable[];
 #define MSG_CODE_PLANET_G 17
 #define MSG_CODE_PLANET_M 18
 #define MSG_CODE_ORBIT_ALREADY_M 19
+#define MSG_CODE_BONES1 20
 
 

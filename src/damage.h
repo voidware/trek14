@@ -28,7 +28,8 @@
 #define L_WARP          4
 #define L_PHASERS       5
 #define L_SCANL         6
-#define L_COUNT         7
+#define L_LIFESUP       7
+#define L_COUNT         8
 
 extern uchar operations[];
 extern uchar opCol;

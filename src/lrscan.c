@@ -57,15 +57,35 @@ static void renderBarH(char* cp, uchar w)
     for (i = w; i > 0; --i) *cp++ = COL_BARH;
 }
 
+static void emitnum(char* p, char v)
+{
+    // single digit, but can be negative
+    if (v < 0)
+    {
+        *p++ = '-';
+        *p = '0' - v;
+    }
+    else
+    {
+        *p++ = '0' + v;
+        *p = ' ';  // blank out 2 char field
+    }
+}
+
+static void emit(char* p, const char* s)
+{
+    while (*s) *p++ = *s++;
+}
+
 static void voidMark(char* cp, char x, char y, char z)
 {
     // mark void if outside grid
-    if (((x & 7) != x) || ((y & 7) != y)) strcpy(cp + 6 + 2, "Void");
+    if (((x & 7) != x) || ((y & 7) != y)) emit(cp + 6 + 2, "VOID");
     else
     {
         // check we're in Z range before marking visited
         uchar v = visit && ABS(QZ-z) <= 1;
-        if (!markQuadVisited(x, y, z, v)) strcpy(cp + 8, "????");
+        if (!markQuadVisited(x, y, z, v)) emit(cp + 8, "????");
     }
 }
 
@@ -76,8 +96,7 @@ static uchar renderCol(char* col, char x0, char y0)
     
     memset(col, ' ', COL_W*COL_H);
 
-    // NB: x0 can be < 0
-    _itoa(x0, col + COL_W/2, 10); // SDCC extention
+    emitnum(col + COL_W/2, x0);
 
     // draw the bars
     char* cp = col + COL_W;
@@ -324,12 +343,13 @@ static void moveL(char* col)
     }
 }
 
+#define SCROLL_DELAY 50
+
 static void moveD(char* row)
 {
     char i;
 
     row += ROW_W*(ROW_H-1);
-    
     for (i = 0; i < ROW_H; ++i)
     {
         // +1 for title -1 to leave last hline
@@ -344,6 +364,7 @@ static void moveD(char* row)
         }
         memcpy(p, row, ROW_W);
         row -= ROW_W;
+        pausen(SCROLL_DELAY);  // amazingly the scroll is too fast!
     }
 }
 
@@ -363,9 +384,9 @@ static void moveU(char* row)
         }
         memcpy(p, row, ROW_W);
         row += ROW_W;
+        pausen(SCROLL_DELAY); // amazingly the scroll is too fast!
     }
 }
-
 
 static void renderEdge(char qy)
 {
@@ -390,7 +411,7 @@ static void renderEdge(char qy)
             if (z == 1)
             {
                 char y = (j>>2) + qy-1;
-                _itoa(y, p + 4, 10); // SDCC extention
+                emitnum(p + 4, y);
             }
         }
         p += colCount;

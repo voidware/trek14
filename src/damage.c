@@ -40,24 +40,26 @@ uchar operations[L_COUNT];
 
 static const char* opTable[] = 
 {
-    "Shields",
+    0, // shields
     "Short Range Scan",
     "Impulse Engines",
     "Photon Torpedoes",
     "Warp Drive",
     "Phasers",
     "Long Range Scan",
+    "Life Support",
 };
 
 static const char* opTableShort[] = 
 {
-    "SH",
+    0, // shields
     "SR Scan:  ",
     "Impulse:  ",
     "Torpedoes:",
     "Warp:     ",
     "Phasers:  ",
     "LR Scan:  ",
+    "Life Sup: ",
 };
 
 static void emitStory(const char* m)
@@ -161,6 +163,9 @@ static void subop(uchar op, int val)
         // emit message
         alert2(opTable[op], " Inoperative", 2);
 
+        if (op == L_LIFESUP)
+            messageCode(MSG_CODE_BONES1);
+
         // signal we should redraw SR view
         redrawsr = TRUE;
     }
@@ -210,7 +215,8 @@ void takeDamage(int dam)
     for (i = 1; i < 11; ++i)
     {
         // shake the ship
-        for (j = 0; j < 200; ++j) setWide(i & 1);
+        setWide(i & 1);
+        pausen(100);
     }
     
     // absorption of shields

@@ -66,6 +66,7 @@ const char* crewTable[] =
     "Uhura", // 7
     "Bones", // 8
     "Sulu", // 9 helmsman
+    "Jim",
 };
 
 // syntax allows message variations in [] and references to another 
@@ -92,6 +93,7 @@ static const char* msgTable[] =
     "^6: Lifeless G Planet, ^2",
     "^6: Class M Planet, ^2. Fascinating!",
     "^9: We've already been here, ^2!",
+    "^8: I've got sick people down here, ^10!",
 };
 
 static void emitStory(const char* m, Story* st)
@@ -129,6 +131,8 @@ void message(const char* m)
     // emit a given message on the message line
     clearMessage();
     emitStoryCmd(m);
+    pause();
+    clearMessage();
 }
 #endif
 
