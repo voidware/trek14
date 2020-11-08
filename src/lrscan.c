@@ -30,125 +30,43 @@
 #include "damage.h"
 #include "sound.h"
 
-/*
-static void lrScanAt(char qx, char qy, char qz, uchar visit)
-{
-    // long range scan
-
-    char i, j;
-    uchar x, y, z;
-    uchar cx, cy;
-
-    printfat(0, 0, "Long Range Scan, Quadrant %d,%d,%d\n",
-             (int)qx, (int)qy, (int)qz);
-
-    cy = 3;
-    y = qy-1;
-    for (i = 0; i <= 2; ++i, ++y)  // loop quadrant Y
-    {
-        cx = 2; 
-        x = qx-1;
-        for (j = 0; j <= 2; ++j, ++x) // loop quadrant X
-        {
-            char k;
-            
-            if (!i) printfat(cx + 8, 1, "%d", (int)x);
-            z = qz-1;
-
-            for (k = 0; k <= 2; ++k, ++z) // loop quadrant Z
-            {
-                char buf[ENT_TYPE_COUNT*2+1];
-                char* bp;
-                if (x < 8 && y < 8 && z < 3)
-                {
-                    // counts for each type
-                    uchar quad[ENT_TYPE_COUNT];
-                    
-                    // find out what we have in the quadrant
-                    uchar* ents[ENT_QUAD_MAX];
-                    getQuad(x, y, z, quad, ents);
-                    if (visit) markVisited(ents);
-                    
-                    uchar* cp = quad;
-                    uchar** epp = ents;
-                    bp = buf;
-                    
-                    const char* tc = entTypeChar;
-                    for (tc = entTypeChar; *tc; ++tc)
-                    {
-                        uchar c = *cp;
-
-                        // find out if any visible
-                        uchar vis = 0;
-                        while (c)
-                        {
-                            --c;
-                            if (ENT_MARKED(*epp)) ++vis;
-                            ++epp;
-                        }
-
-                        if (!strchr("HMWD", *tc))
-                        {
-                            if (vis)
-                            {
-                                *bp = *tc;
-                                bp[1] = '0' + *cp;
-
-                                if (*bp == 'K')
-                                    playNotes("18t+EC"); // nameF, nameH
-                            }
-                            else
-                            {
-                                *bp = ' ';
-                                bp[1] = ' ';
-                            }
-                            bp += 2;
-                        }
-                        ++cp;
-                    }
-
-                    *bp = 0;
-                    bp = buf;
-                    
-
-
-                }
-                else
-                {
-                    // each window has 16 chars for max 8 totals
-                    // BFPSKR
-                    //bp = (char*)"123456Void789012";
-                    bp = (char*)"      Void      ";
-                }
-                printfat(cx, cy + k, bp);
-            }
-            cx += 19;
-        }
-        --cx;
-        printfat(cx, cy, "%2d", (int)(qz-1));
-        printfat(cx, cy + 1, "%2d %d", (int)qz, (int)y);
-        printfat(cx, cy + 2, "%2d", (int)(qz+1));
-        cy += 4;
-    }
-}
-*/
-
 #define COL_W   19
 #define COL_H   14
 #define COL_BARV (char)0xbf
 #define COL_BARH (char)0x8c
 
+#define ROW_W   COL_W*3
+#define ROW_H   4
+
 static uchar visit;
 
-static void renderBar(char* cp, uchar w)
+static void renderBarV(char* cp, uchar w)
 {
     char i;
-    for (i = 0; i < COL_H-1; ++i)
+    for (i = COL_H-1; i > 0; --i)
     {
         *cp = COL_BARV;
         cp += w;
     }
     *cp = (char)0x8f; // miss out bottom pixel
+}
+
+static void renderBarH(char* cp, uchar w)
+{
+    uchar i;
+    for (i = w; i > 0; --i) *cp++ = COL_BARH;
+}
+
+static void voidMark(char* cp, char x, char y, char z)
+{
+    // mark void if outside grid
+    if (((x & 7) != x) || ((y & 7) != y)) strcpy(cp + 6 + 2, "Void");
+    else
+    {
+        // check we're in Z range before marking visited
+        uchar v = visit && ABS(QZ-z) <= 1;
+        if (!markQuadVisited(x, y, z, v)) strcpy(cp + 8, "????");
+    }
 }
 
 static uchar renderCol(char* col, char x0, char y0)
@@ -163,42 +81,32 @@ static uchar renderCol(char* col, char x0, char y0)
 
     // draw the bars
     char* cp = col + COL_W;
-    char i,j;
+    char j;
 
-    char y;
-    char z;
+    char y, z;
     uchar kk = 0;
 
     for (j = 0; j < COL_H-1; ++j)
     {
         if ((j & 0x3) == 0)
         {
-            for (i = 0; i < COL_W; ++i) *cp++ = COL_BARH;
+            renderBarH(cp, COL_W);
         }
         else
         {
-            y = (j>>2) + y0;
+            voidMark(cp, x0, (j>>2)+y0, (j&3)-1);
 
-            // mark void if outside grid
-            if (((x0 & 7) != x0) || ((y & 7) != y)) strcpy(cp + 6 + 2, "Void");
-            else
-            {
-                // check we're in Z range before marking visited
-                z = (j&3)-1;
-                uchar v = visit && ABS(QZ-z) <= 1;
-                if (!markQuadVisited(x0, y, z, v)) strcpy(cp + 8, "????");
-            }
-            cp += COL_W;
         }
+        cp += COL_W;
     }
 
-    renderBar(col, COL_W);
+    renderBarV(col,  COL_W);
 
     // fill in the content
     uchar* ep;
     for (ep = galaxy; ep != galaxyEnd; ep += ENT_SIZE)
     {
-        if (ENT_QX(ep) == (uchar)x0)
+        if (ENT_QX(ep) == (uchar)x0) // fail when x0 < 0
         {
             y = ENT_QY(ep);
             z = ENT_QZ(ep);
@@ -210,8 +118,58 @@ static uchar renderCol(char* col, char x0, char y0)
                 uchar t = mainType(ep);
                 if (t == ENT_TYPE_KLINGON) ++kk;
                 
-                uchar cy = dy*4 + z + 2; // +2 for header
+                uchar cy = dy*ROW_H + z + 2; // +2 for header
                 cp = col + (cy*COL_W + t*2 + 2 + 1); // +2 for bar+margin
+                if (*cp == ' ')
+                {
+                    *cp = '0';
+                    cp[-1] = entTypeChar[t];
+                }
+                ++*cp;
+            }
+        }
+    }
+    return kk;
+}
+
+static uchar renderRow(char* row, char x0, char y0)
+{
+    memset(row, ' ', ROW_W*ROW_H);
+
+    renderBarH(row, ROW_W);
+
+    // render v bars
+    char i, j;
+    char* rp = row;
+    for (j = 0; j < ROW_H; ++j)
+    {
+        for (i = 0; i < 3; ++i)  
+        {
+            *rp = COL_BARV;
+            if (j) voidMark(rp, i+x0, y0, j-1);
+            rp += COL_W;
+        }
+    }
+    
+    uchar kk = 0;
+
+    // fill in the content
+    uchar* ep;
+    for (ep = galaxy; ep != galaxyEnd; ep += ENT_SIZE)
+    {
+        if (ENT_QY(ep) == (uchar)y0)
+        {
+            char x = ENT_QX(ep);
+            char z = ENT_QZ(ep);
+            if (!GET_EXPLORED(x, y0, z)) continue; 
+            
+            uchar dx = x - x0;
+            if (dx < 3)  
+            {
+                uchar t = mainType(ep);
+                if (t == ENT_TYPE_KLINGON) ++kk;
+
+                char* cp = row + ((z + 1)*ROW_W + dx*COL_W + t*2 + 1 + 1);
                 if (*cp == ' ')
                 {
                     *cp = '0';
@@ -236,6 +194,21 @@ static void blitCol(char* col, char x)
         p += colCount;
     }
 }
+
+#if 0
+static void blitRow(char* row, char y)
+{
+    uchar* p = vidaddr(0, y);
+    uchar* cp = row;
+    uchar i;
+    for (i = 0; i < ROW_H; ++i)
+    {
+        memcpy(p, cp, ROW_W);
+        cp += ROW_W;
+        p += colCount;
+    }
+}
+#endif
 
 #if 1
 // need these line movements to be fast
@@ -313,16 +286,15 @@ static void _moveL(char* p)
         q = t;
     }
 }
-
 #endif
 
-
-static void moveR(uchar* col)
+static void moveR(char* col)
 {
+    // scroll right
     char i, j;
     for (j = COL_W-1; j >= 0; --j)
     {
-        uchar* cp = col + j;
+        char* cp = col + j;
         char* p = vidaddr(0, 1); // always row 1
         for (i = COL_H; i > 0; --i)
         {
@@ -334,13 +306,13 @@ static void moveR(uchar* col)
     }
 }
 
-
-static void moveL(uchar* col)
+static void moveL(char* col)
 {
+    // scroll left
     char i, j;
     for (j = 0; j < COL_W; ++j)
     {
-        uchar* cp = col + j;
+        char* cp = col + j;
         char* p = vidaddr(COL_W*3-1, 1); // always row 1
         for (i = COL_H; i > 0; --i)
         {
@@ -352,11 +324,54 @@ static void moveL(uchar* col)
     }
 }
 
+static void moveD(char* row)
+{
+    char i;
+
+    row += ROW_W*(ROW_H-1);
+    
+    for (i = 0; i < ROW_H; ++i)
+    {
+        // +1 for title -1 to leave last hline
+        char* p = vidaddr(0, COL_H-1); 
+        char y = COL_H-2-1;
+        while (y)
+        {
+            --y;
+            char* q = p - colCount;
+            memcpy(p, q, ROW_W);
+            p = q;
+        }
+        memcpy(p, row, ROW_W);
+        row -= ROW_W;
+    }
+}
+
+static void moveU(char* row)
+{
+    char i;
+    for (i = 0; i < ROW_H; ++i)
+    {
+        char* p = vidaddr(0, 2);
+        char y = COL_H-2-1; // leave last line
+        while (y)
+        {
+            --y;
+            char* q = p + colCount;
+            memcpy(p, q, ROW_W);
+            p = q;
+        }
+        memcpy(p, row, ROW_W);
+        row += ROW_W;
+    }
+}
+
+
 static void renderEdge(char qy)
 {
-    char i, j;
-
     // draw right edge h bars
+    
+    char i, j;
     char* p = vidaddr(COL_W*3, 2);
     for (j = 0; j < COL_H-1; ++j)
     {
@@ -383,7 +398,7 @@ static void renderEdge(char qy)
 
     if (visit)
     {
-        renderBar(vidaddr(COL_W*3,1), colCount);
+        renderBarV(vidaddr(COL_W*3,1), colCount);
     }
 }
 
@@ -457,12 +472,14 @@ char lrScan()
         else if (c == KEY_ARROW_UP || c == KEY_ARROW_UP_M4)
         {
             if (--qy < 0) { qy = 0; goto again; }
-            redraw =1 ;
+            kk += renderRow(col, qx-1, qy-1);
+            moveD(col);
         }
         else if (c == KEY_ARROW_DOWN)
         {
             if (++qy > 7) { qy = 7; goto again; }
-            redraw =1 ;
+            kk += renderRow(col, qx-1, qy+1);
+            moveU(col);
         }
         else break;
     }
