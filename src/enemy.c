@@ -371,25 +371,16 @@ static uchar klingonMove(uchar* kp)
         if (c == 127) return 0;  // expired
 
         // bip sound as K moves
-        bit_soundi(10, 1000);
+        playNotes("-1B"); 
 
         if (ttype == ENT_TYPE_STAR)
         {
             // near enough to recharge?
             if (collision(kp, rt.target) != 0)
             {
-                int f = useSVC ? 1000 : 500; // XX M4 adjust
-
                 // klingons recharge from stars, collect energy
                 enemyRecharge(kp, ENT_DAT(rt.target));
-
-                disableInterrupts();
-                do 
-                {
-                    bit_sound(4, f);
-                    f -= 10;
-                } while (f > 100);
-                enableInterrupts();
+                upSound();
             }
         }
     }

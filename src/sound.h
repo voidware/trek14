@@ -37,9 +37,8 @@ extern void blastsound(int length);
 extern void zapsound();
 extern void alertsound();
 extern void squoink();
-extern void warpcall();
+extern void upSound();
 
-//extern void clackson();
-//extern void zap3();
+#define MIN_FREQ  20
 
 #endif // __sound_h__

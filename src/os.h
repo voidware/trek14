@@ -49,7 +49,7 @@ void setStack();
 void revertStack();
 
 void disableInterrupts();
-void enableInterrups();
+void enableInterrupts();
 
 void outs(const char* s);
 void outsn(const char* s, uchar n);

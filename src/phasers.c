@@ -93,8 +93,8 @@ static uchar* trackPoint(uchar* ep,
             if (unplot)
             {
                 // plot + unplot is a torp moving
-                int f = useSVC ? 1000 : 500; // XX M4 adjust
-                bit_soundi(4, f);
+                int f = useSVC ? 300 : 150; // XX M4 adjust
+                bit_soundi(2, f);
             }
         }
 

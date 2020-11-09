@@ -170,8 +170,8 @@ static void animateOut()
     uchar x, y;
     const EntObj* obj = objTable + ENT_TYPE_FEDERATION;
     uchar w2 = obj->_w;
-    int f = 1000;
-    uchar df = 10;
+    int f = 200;
+    uchar df = 2;
     uchar n;
 
     // current sector
@@ -197,10 +197,10 @@ static void animateOut()
         // if we've finished moving, then we're done
         bit_soundi(4, f);
         f -= df;
-        if (f < 100)
+        if (f < MIN_FREQ)
         {
+            f = MIN_FREQ;
             if (!n) break;
-            f = 100;
         }
     }
 }

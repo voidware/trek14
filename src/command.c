@@ -327,7 +327,7 @@ void dockCommand()
         redrawSidebar();
         
         // refuel sound
-        warpcall();
+        upSound();
 
         clearMessage();
     }
@@ -341,7 +341,7 @@ void dockCommand()
         {
             if (orbitAlready(ENT_TYPE_PLANET_M, MSG_CODE_PLANET_M))
             {
-                warpcall();
+                upSound();
                 score += SCORE_PLANET_M;
                 redrawsr = TRUE;
             }

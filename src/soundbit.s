@@ -2,6 +2,9 @@
 
         .globl	_useSVC
 
+        .area    _DATA
+freq::  .ds   2
+
         .area   _CODE
 
 sndbit_mask     .equ  3
@@ -50,59 +53,36 @@ _bit_sound::
         ;; preserve the wide-char bits for model I
         ;; NB: ASSUME interrupts disabled
 __beeper::
+          push ix
           in   a,(#0xff)      ; current wide status (model I) inverted
           cpl                 ; flip. Thanks to gp2000 
           and  #0x40
           rrca
           rrca
-          rrca                ; wide bit into bit 3 (other models ignored) 
-          push af
-          ld   a,l
-          srl  l
-          srl  l
-          cpl
-          and  #3
-          ld   c,a
-          ld   b,#0
-          ld   iy,#.beixp3      
-          add  iy,bc
-          pop  af
-          push af
-          or   a,#1
-.beixp3:
-          nop
-          nop
-          nop
-          inc  b
-          inc  c
-
-.behllp:  dec  c
-          jr   nz,.behllp
-          ld   c,#0x3F
-          dec  b
-          jp   nz,.behllp
-          xor  #sndbit_mask
-
+          rrca                ; wide bit into bit 3 (other models ignored)
+          ld   bc,#-1
+          or   a,#2
+          ld   (freq),hl
+          push  de
+          pop   ix
+.b2:
+          ld   hl,(freq)
+          sub  a,#1           ; a=1    
           out  (sndbit_port),a
-
-          ld   b,h
-          ld   c,a
-          bit  #1,a            ;if o/p go again!
-          jr   nz,.be_again
-          ld   a,d
-          or   e
-          jr   z,.be_end
-          ld   a,c
-          ld   c,l
-          dec  de
-          jp   (iy)
-.be_again:
-          ld   c,l
-          inc  c
-          jp   (iy)
-.be_end:
-          pop  af
+.b1:
+          add     hl,bc
+          jp      c,.b1
+          ld   hl,(freq)
+          add  a,#1           ;a=2
           out  (sndbit_port),a
+.b3:          
+          add     hl,bc
+          jp      c,.b3
+          add     ix,bc
+          jp      c,.b2
+          sub     a,#2        ;a=0
+          out  (sndbit_port),a
+          pop ix
           ret
 
         ;;;  explode_sound(int d)
@@ -210,16 +190,15 @@ _alertsound::
 .fx6_1:
           push  bc  
           push  af
-          ld    hl,#300  
-          ld    de,#10
+          ld    hl,#100
+          ld    de,#20
 .fx6_2:
           push  hl
           push  de
           call  __beeper4
           pop   de
           pop   hl
-          inc   de           ;if added in makes different sound..
-          ld    bc,#10
+          ld    bc,#5
           and   a
           sbc   hl,bc
           jr    nc,.fx6_2
@@ -266,27 +245,31 @@ _squoink::
           djnz    .qi_loop
           jp	__bit_close
 
-.if 0
+
+.if 0                
 
 ; wibble up sound
 _fx5::
           di
           ld    b,#1            ;number of times
 .fx5_1:   push  bc  
-          ld    hl,#1200        ;freq
-          ld    de,#6           ;dt
+          ld    hl,#400        ;freq
+          ld    de,#10           ;dt
 .fx5_2:   push  hl  
           push  de  
-          call  __beeper  
+          call  __beeper4
           pop   de  
           pop   hl  
-          ld    bc,#100  
-          and   a               ;clr cy
-          sbc   hl,bc           ;freq -= 100
-          jr    nc,.fx5_2  
+          ld    bc,#-20
+          add   hl,bc           ;freq -= 100
+          jr    c,.fx5_2
+          inc   de
+          inc   de
+          inc   de
           pop   bc  
           djnz  .fx5_1
-          jp    __rti
+        jp    __rti
+
 
 ; zap/alarm??
 _zap1::
@@ -356,40 +339,7 @@ _zap3::
           djnz  .zap3_3
           pop   bc
           djnz  .zap3_1
-          jp    __bit_close
+        jp    __bit_close
+
 .endif
-          
-; a kind of wibble
-_warpcall::
-          di
-          ld    hl,#1600  
-          ld    (.warps+1),hl  
-          ld    hl,#-800  
-          ld    (.warps1+1),hl  
-          ld    hl,#-100  
-          ld    (.warps2+1),hl  
-          ld   b,#20
-.warpcall1:
-          push bc
-          call .warps
-          pop  bc
-          djnz .warpcall1
-          jp    __rti
-          
-.warps:   ld    hl,#1600  
-          ld    de,#6  
-          call  __beeper  
-.warps1:  ld    hl,#-800  
-.warps2:  ld    de,#-100  
-          and   a  
-          sbc   hl,de  
-          ld    (.warps1+1),hl  
-          jr    nz,.warps3  
-          ld    de,#100  
-          ld    (.warps2+1),de  
-.warps3:  ex    de,hl  
-          ld    hl,#1600  
-          add   hl,de  
-          ld    (.warps+1),hl  
-          ret   
 

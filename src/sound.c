@@ -25,9 +25,9 @@
 #include "os.h"
 #include "sound.h"
 
-#define BASE_TSTATES_M1 221750L // 1.774MHz/8
-#define BASE_TSTATES_M3 253440L // 2.02752MHz/8
-#define BASE_TSTATES_M4 506880L // 4.05504MHz/8 
+#define BASE_M1 1774000.0  // 1.774MHz
+#define BASE_M3 2027520.0  // 2.02752MHz
+#define BASE_M4 4055040.0  // 4.05504MHz
 
 // frequencies for notes.
 // "A" above middle C is 440Hz.
@@ -49,9 +49,10 @@
 #define NOTE_B  	493.883301378     
 
 #define RND(_x)     ((int)((_x) + 0.5))
-#define TSTATE1(_n)  RND(BASE_TSTATES_M1/_n)
-#define TSTATE3(_n)  RND(BASE_TSTATES_M3/_n)
-#define TSTATE4(_n)  RND(BASE_TSTATES_M4/_n)
+
+#define TSTATE1(_n)  RND((BASE_M1/(_n) - 93.0)/42.0)
+#define TSTATE3(_n)  RND((BASE_M3/(_n) - 93.0)/42.0)
+#define TSTATE4(_n)  RND((BASE_M4/(_n) - 93.0)/42.0)
 
 typedef struct
 {
@@ -96,7 +97,12 @@ void playNotes(const char* m)
     uchar dt2 = 0;
     uint tempo = 12;
     char u = 0;
+    uchar mindex = 0;
 
+    // determine the offset for the tstate, default M1
+    if (TRSModel == 3) mindex = 1;
+    else if (TRSModel == 4) mindex = 2;
+    
     disableInterrupts();
 
     for (;;)
@@ -116,19 +122,7 @@ void playNotes(const char* m)
                 }
 
                 a = dt*n->_freq;
-
-                switch (TRSModel)
-                {
-                case 1:
-                    b = n->_tstatesM1;
-                    break;
-                case 3:
-                    b = n->_tstatesM3;
-                    break;
-                default:
-                    b = n->_tstatesM4;
-                    break;
-                }
+                b = *((&n->_tstatesM1) + mindex);
 
                 char u2 = u;
                 while (u2 > 0)
@@ -143,7 +137,7 @@ void playNotes(const char* m)
                     a >>= 1;
                     b <<= 1;
                 }
-                bit_sound(a/tempo, b - 30);
+                bit_sound(a/tempo, b);
             }
 
             if (!c) break;
@@ -164,5 +158,19 @@ void playNotes(const char* m)
 
     enableInterrupts();
 }
+
+void upSound()
+{
+    int f = useSVC ? 300 : 150; // XX M4 adjust
+
+    disableInterrupts();
+    do 
+    {
+        bit_sound(4, f);
+        f -= 3;
+    } while (f > MIN_FREQ);
+    enableInterrupts();
+}
+
 
 
