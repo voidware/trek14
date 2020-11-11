@@ -296,23 +296,22 @@ void torpCommand()
     }
 }
 
-static uchar* orbitAlready(uchar t, uchar msg)
+static uchar orbit(uchar t)
 {
     // 0 => nothing here
-    // !0 => handled
+    // !0 => t here and not orbit already
     uchar* ep = adjacentTo(galaxy, t);
     if (ep)
     {
-        if (ENT_DOCKED(ep))
-            messageCode(MSG_CODE_ORBIT_ALREADY_M);
+        if (ENT_DOCKED(ep)) messageCode(MSG_CODE_ORBIT_ALREADY);
         else
         {
             // mark we've been here
             ENT_SET_DOCKED(ep);
-            messageCode(msg);
+            return 1;
         }
     }
-    return ep;
+    return 0;
 }
 
 void dockCommand()
@@ -336,20 +335,21 @@ void dockCommand()
         endgame(MSG_CODE_ENDGAME_RESIGN);
     }
     else
+        
     {
-        if (!orbitAlready(ENT_TYPE_PLANET, MSG_CODE_PLANET_G))
+        if (orbit(ENT_TYPE_PLANET)) messageCode(MSG_CODE_PLANET_G);
+        else if (orbit(ENT_TYPE_PLANET_M))
         {
-            if (orbitAlready(ENT_TYPE_PLANET_M, MSG_CODE_PLANET_M))
-            {
-                upSound();
-                score += SCORE_PLANET_M;
-                redrawsr = TRUE;
-            }
-            else
-            {
-                // nothing
-                messageCode(MSG_CODE_NO_DOCK);
-            }
+            emitStoryCmdM(MSG_CODE_PLANET_M);
+            upSound();
+            score += SCORE_PLANET_M;
+            pause();
+            clearMessage();
+        }
+        else
+        {
+            // nothing
+            messageCode(MSG_CODE_NO_DOCK);
         }
     }
 }

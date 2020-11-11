@@ -137,7 +137,7 @@ void playNotes(const char* m)
                     a >>= 1;
                     b <<= 1;
                 }
-                bit_sound(a/tempo, b);
+                beep_sound(a/tempo, b);
             }
 
             if (!c) break;
@@ -161,13 +161,12 @@ void playNotes(const char* m)
 
 void upSound()
 {
-    int f = useSVC ? 300 : 150; // XX M4 adjust
-
+    int f = 150;
     disableInterrupts();
     do 
     {
         bit_sound(4, f);
-        f -= 3;
+        f -= 2;
     } while (f > MIN_FREQ);
     enableInterrupts();
 }

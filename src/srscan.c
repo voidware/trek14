@@ -170,8 +170,6 @@ static void animateOut()
     uchar x, y;
     const EntObj* obj = objTable + ENT_TYPE_FEDERATION;
     uchar w2 = obj->_w;
-    int f = 200;
-    uchar df = 2;
     uchar n;
 
     // current sector
@@ -185,6 +183,7 @@ static void animateOut()
     y *= 3;
     n <<= 1;
 
+    int f = 200;
     for (;;)
     {
         if (n > 0)
@@ -196,7 +195,7 @@ static void animateOut()
         // make the sound increase in pitch until it reaches a final point
         // if we've finished moving, then we're done
         bit_soundi(4, f);
-        f -= df;
+        f -= 2;
         if (f < MIN_FREQ)
         {
             f = MIN_FREQ;

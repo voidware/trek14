@@ -30,15 +30,6 @@ _bit_soundi::
         push  hl
         jp   __rti
 
-__beeper4::
-        ld    a,(_useSVC)
-        or    a
-        jr    z,.b4a
-        sla   l
-        rl    h         ; hl*2 for M4 (approx)
-.b4a:        
-        jp    __beeper
-
         ;;  bit_sound(duration, frequency)
         ;; NB: ASSUME interrupts disabled
 _bit_sound::
@@ -48,6 +39,13 @@ _bit_sound::
           push hl
           push de
           push bc
+        
+__beeper4::
+        ld    a,(_useSVC)
+        or    a
+        jr    z,__beeper
+        sla   l
+        rl    h         ; hl*2 for M4 (approx)
 
         ;; HL=freq, DE=duration
         ;; preserve the wide-char bits for model I
@@ -84,6 +82,19 @@ __beeper::
           out  (sndbit_port),a
           pop ix
           ret
+
+_beep_sound::
+        ;;  bit_sound(duration, frequency)
+        ;; raw version, does not disable interrupts
+        ;; not adjust for M4.
+          pop bc
+          pop de                ; duration
+          pop hl                ; freq
+          push hl
+          push de
+          push bc
+          jp __beeper
+                
 
         ;;;  explode_sound(int d)
 _explode_sound::

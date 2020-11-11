@@ -29,6 +29,9 @@ extern void bit_soundi(int duration, int frequency);
 // assumes interrupts off
 extern void bit_sound(int duration, int frequency);
 
+// no timing adjust version
+extern void beep_sound(int duration, int frequency);
+
 extern void playNotes(const char* m);
 extern void explode_sound(int d);
 extern void playVictory();
@@ -39,6 +42,6 @@ extern void alertsound();
 extern void squoink();
 extern void upSound();
 
-#define MIN_FREQ  20
+#define MIN_FREQ  25
 
 #endif // __sound_h__
