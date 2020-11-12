@@ -2,9 +2,6 @@
 
         .globl	_useSVC
 
-        .area    _DATA
-freq::  .ds   2
-
         .area   _CODE
 
 sndbit_mask     .equ  3
@@ -51,37 +48,56 @@ __beeper4::
         ;; preserve the wide-char bits for model I
         ;; NB: ASSUME interrupts disabled
 __beeper::
-          push ix
           in   a,(#0xff)      ; current wide status (model I) inverted
           cpl                 ; flip. Thanks to gp2000 
           and  #0x40
           rrca
           rrca
           rrca                ; wide bit into bit 3 (other models ignored)
-          ld   bc,#-1
-          or   a,#2
-          ld   (freq),hl
-          push  de
-          pop   ix
+          or   a,#1
+          inc   h
+          inc   l
+          inc   d
+          inc   e
+
+          ; first phase
 .b2:
-          ld   hl,(freq)
-          sub  a,#1           ; a=1    
-          out  (sndbit_port),a
+          out  (sndbit_port),a                  ;t11
+          inc  a                                ; t4, 
+          ld   b,l                              ; t4
+          ld   c,h                              ; t4, total=23
+
 .b1:
-          add     hl,bc
-          jp      c,.b1
-          ld   hl,(freq)
-          add  a,#1           ;a=2
+          djnz   .b1                            ;t13/8
+          dec    b                              ;t4
+          dec    c                              ;t4
+          jp    nz,.b1                          ;t10, total= f*13+f/256*26 + 26
+
+          ; second phase
+          out  (sndbit_port),a                  ;t11
+          dec   a                               ;t4, a=1
+          ld   b,l                              ;t4
+          ld   c,h                              ;t4
+.b3:
+          djnz   .b3                            ;t13/8
+          dec    b                              ;t4
+          dec    c                              ;t4
+          jp    nz,.b3                          ;t10
+
+          dec    e                              ;t4
+          jp     nz,.b2                         ;t10
+          dec    e                              ;t4
+          dec    d                              ;t4
+          jp     nz,.b2                         ;t10, total=32
+          
+          dec    a   ; a = 0
           out  (sndbit_port),a
-.b3:          
-          add     hl,bc
-          jp      c,.b3
-          add     ix,bc
-          jp      c,.b2
-          sub     a,#2        ;a=0
-          out  (sndbit_port),a
-          pop ix
           ret
+
+; timing loops
+; 2*[23 + 13f + 26f/256 + 26] + 32
+; 98 + 26.20*f + 32
+; 130 + 26.20f
 
 _beep_sound::
         ;;  bit_sound(duration, frequency)
@@ -201,8 +217,8 @@ _alertsound::
 .fx6_1:
           push  bc  
           push  af
-          ld    hl,#100
-          ld    de,#20
+          ld    hl,#200  
+          ld    de,#8
 .fx6_2:
           push  hl
           push  de
@@ -259,30 +275,6 @@ _squoink::
 
 .if 0                
 
-; wibble up sound
-_fx5::
-          di
-          ld    b,#1            ;number of times
-.fx5_1:   push  bc  
-          ld    hl,#400        ;freq
-          ld    de,#10           ;dt
-.fx5_2:   push  hl  
-          push  de  
-          call  __beeper4
-          pop   de  
-          pop   hl  
-          ld    bc,#-20
-          add   hl,bc           ;freq -= 100
-          jr    c,.fx5_2
-          inc   de
-          inc   de
-          inc   de
-          pop   bc  
-          djnz  .fx5_1
-        jp    __rti
-
-
-; zap/alarm??
 _zap1::
           di
           ld    a,#1

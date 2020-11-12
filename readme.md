@@ -37,13 +37,19 @@ At the command prompt type, `TREK14`
 
 ## How To Play
 
-Your mission is to explore the galaxy and destroy the 50 Klingons and find the 5 class M planets, before star date 2100.
+Your mission is to **boldly**:
+
+* Explore the galaxy
+* Destroy the 50 Klingons
+* Find the 5 class M planets
+
+Before star date 2100.
 
 The galaxy is a 8x8x3 (x,y,z) grid of 192 quadrants, each of which is subdivided into 64x14 sectors, corresponding to the X and Y screen position.
 
 Along with Klingons, there are also Federation bases where you can refuel, as well as planets and stars.
 
-Star Fleet HQ is in the bottom corner of the galaxy at 772. This is also where you start the game. If you dock with _this_ star base, game is ended, so _only_ do this if you with to finish the game and receive your evaluation.
+Star Fleet HQ is in the bottom corner of the galaxy at 772. This is also where you start the game. If you dock with _this_ star base, game is ended, so _only do this if you with to finish the game and receive your evaluation_.
 
 
 ## Short Range Scan
@@ -78,7 +84,7 @@ The long range scan shows a summary of content in each quadrant, For example:
 
 Means, 1 *Federation* vessel, 1 *Star* and 2 *Planets*. Other codes are K for Klingons and B for bases.
 
-You can use arrow keys within long range scan to move around. However, only the known galatic content will be available. So areas not yet scanne will remain blank.
+You can use arrow keys within long range scan to pan around. But only the _currently known_ galactic content will be available. Areas not yet scanned will be displayed as "????". Panning the Long Range Scan always renders the view from the middle Z plane (ie X,Y,1).
 
 _Kirk's tip:_
 > Be sure to locate a nearby base _before_ going into battle. Use the long range scan movement arrows to remind you where the base is when you want to warp out.
@@ -107,14 +113,14 @@ Klingons never retreat but they do fall back sometimes to recharge. This is poss
 Some Klingon ships are slightly bigger and have more energy, but are still inferior to a starship.
 
 _Kirk's tip:_
-> The Klingons have developed a technology to recharge from stars, but you cannot. Act quickly to dispatch them before they restore their energies.
+> The Klingons have developed a technology to recharge from stars, but you cannot. Act quickly to dispatch them before they restore their energies. Some stars are more powerful than others.
 
 
 ## Phasers
 
 Press "P" from the command menu or from the short range scan.
 
-Phasers are locked on to near enough enemy targets automatically. You are prompted for the amount of energy to deploy to phasers. The phasers will fire at _all_ enemies within the quadrant that are in direct line of sight, each one consuming the specified energy, providing it's available.
+Phasers automatically lock on to sufficiently near enemy targets. You are prompted for the amount of energy to deploy to phasers. The phasers will fire at _all_ enemies within the quadrant that are in direct line of sight, _each one consuming the specified energy_, providing it's available.
 
 Be sure not to deplete too much energy during a phaser attack. It can leave your ship vulnerable and unable to escape.
 
@@ -130,7 +136,7 @@ _Kirk's tip:_
 
 Press "T" from the command menu or from the short range scan.
 
-You can carry at most 3 photon torpedoes at any time. Torpedoes are very powerful and will often destroy an enemy ship in a single hit. Unlike phasers, the damage potential of torpedoes does not decrease with distance, so it's the ideal weapon to pick off an enemy before it gets close. However, enemies will try to dodge the torpedo if not at close range.
+You can carry at most 3 photon torpedoes at any time. Torpedoes are very powerful and will often destroy an enemy ship in a single hit. Unlike phasers, the damage potential of torpedoes does not decrease with distance, so it's the ideal weapon to pick off an enemy before it gets close. However, enemies will try to dodge the torpedo if they see it coming.
 
 Torpedoes do not aim themselves, you have to manually aim them by setting their direction. The direction is entered as a bearing in degrees from 0-360, where 0 points directly ahead of your ship.
 
@@ -168,7 +174,7 @@ _Kirk's tip:_
 
 ## Bases
 
-There are 10 Federation bases in the galaxy (including HQ) where you can doc to refuel. Spent photon torpedoes are also replenished. To dock, manoeuvre your ship adjacent to the base and press "D".
+There are 10 Federation bases in the galaxy, 9 of which you can dock to refuel and spent photon torpedoes are replenished. To dock, manoeuvre your ship adjacent to the base and press "D".
 
 Note that the base in quadrant 7,7,2 should **NOT** be docked, unless you wish to end your mission. This base is star fleet HQ, docking there voluntarily ends the mission giving your report and score.
 
@@ -197,7 +203,7 @@ Your engineering crew will work hard to restore damaged operations. They give pr
 Tactical combat is the crux of the game and the proving grounds of the competent captain.
 
 _Kirk's tip:_
-> If you've got a 4P (like me), the ship's operational levels are displayed in the right sidebar. Otherwise use the "D" command from the menu to display a damage report and your current score.
+> If you've got a Model 4 (like me), the ship's operational levels are displayed in the right sidebar. Otherwise use the "D" command from the main menu to display a damage report and your current score.
 
 
 ## Ship's Computer
@@ -210,7 +216,7 @@ You can search those memory banks for known locations of enemies or bases. For e
 
 Helpfully, the computer will tell you the closest base or enemy.
 
-## Replay:
+## Replay
 
 Each galaxy has a code number. You'll be told this at the start, when the galaxy is generated and also when the game is over.
 
@@ -221,8 +227,7 @@ eg;
 
 Will run galaxy 1234.
 
-
-## Tactics:
+## Tactics
 
 _Kirk Says:_
 
@@ -234,13 +239,13 @@ _Kirk Says:_
 
 > Klingons will navigate around obstacles as part of their attack.
 
-> You can cross quadrant borders using the arrow keys (impulse engines). If you are losing a battle (esp if warp is damaged), you can retreat across the border. Klingons won't pursue you.
+> You can cross quadrant borders using the arrow keys (impulse engines). If you are losing a battle (esp if warp is damaged), you can retreat across the border. Klingons won't pursue you (yet).
 
 > Always go into battle against 3 or more Klingons with a full set of torpedoes.
 
 > Do not use phasers until enemies are close, the energy depletion with distance will otherwise result in a lot less damage.
 
-> Systematically explore the galaxy by navigating in the 1 plane, ie (X, Y, 1). Good positions are eg (1,1,1), (6,6,1), (3,6,1) and so on that will long range scan a lot of nearby quadrants.
+> Systematically explore the galaxy by navigating in the Z=1 plane, ie (X, Y, 1). Good positions are eg (1,1,1), (6,6,1), (3,6,1) and so on that will long range scan a lot of nearby quadrants and collect a lot of data.
 
 > Orbit class M planets, they look a bit different.
 

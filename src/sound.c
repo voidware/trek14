@@ -50,9 +50,9 @@
 
 #define RND(_x)     ((int)((_x) + 0.5))
 
-#define TSTATE1(_n)  RND((BASE_M1/(_n) - 93.0)/42.0)
-#define TSTATE3(_n)  RND((BASE_M3/(_n) - 93.0)/42.0)
-#define TSTATE4(_n)  RND((BASE_M4/(_n) - 93.0)/42.0)
+#define TSTATE1(_n)  RND((BASE_M1/(_n) - 130)/26.2)
+#define TSTATE3(_n)  RND((BASE_M3/(_n) - 130)/26.2)
+#define TSTATE4(_n)  RND((BASE_M4/(_n) - 130)/26.2)
 
 typedef struct
 {
@@ -161,12 +161,12 @@ void playNotes(const char* m)
 
 void upSound()
 {
-    int f = 150;
+    int f = 300;
     disableInterrupts();
     do 
     {
         bit_sound(4, f);
-        f -= 2;
+        f -= 3;
     } while (f > MIN_FREQ);
     enableInterrupts();
 }

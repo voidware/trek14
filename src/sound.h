@@ -42,6 +42,6 @@ extern void alertsound();
 extern void squoink();
 extern void upSound();
 
-#define MIN_FREQ  25
+#define MIN_FREQ  50
 
 #endif // __sound_h__

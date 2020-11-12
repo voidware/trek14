@@ -183,7 +183,7 @@ static void animateOut()
     y *= 3;
     n <<= 1;
 
-    int f = 200;
+    int f = 300;
     for (;;)
     {
         if (n > 0)
