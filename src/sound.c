@@ -50,9 +50,10 @@
 
 #define RND(_x)     ((int)((_x) + 0.5))
 
-#define TSTATE1(_n)  RND((BASE_M1/(_n) - 130)/26.2)
-#define TSTATE3(_n)  RND((BASE_M3/(_n) - 130)/26.2)
-#define TSTATE4(_n)  RND((BASE_M4/(_n) - 130)/26.2)
+#define TSTATE1(_n)  RND((BASE_M1/(_n) - 118)/26.17)
+#define TSTATE3(_n)  RND((BASE_M3/(_n) - 118)/26.17)
+#define TSTATE4(_n)  RND((BASE_M4/(_n) - 118)/26.17)
+
 
 typedef struct
 {

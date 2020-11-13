@@ -54,50 +54,54 @@ __beeper::
           rrca
           rrca
           rrca                ; wide bit into bit 3 (other models ignored)
-          or   a,#1
-          inc   h
-          inc   l
+          or   a,#1           ; a=1
+
+          inc  h
+          inc  l
+          
           inc   d
           inc   e
 
           ; first phase
 .b2:
-          out  (sndbit_port),a                  ;t11
-          inc  a                                ; t4, 
-          ld   b,l                              ; t4
-          ld   c,h                              ; t4, total=23
-
+          out  (sndbit_port),a                  ;t11/13/12, a=1
+          inc  a                                ;t4/6/5,  a=2
+          ld   b,l                              ;t4/6/5
+          ld   c,h                              ;t4/6/5
 .b1:
-          djnz   .b1                            ;t13/8
-          dec    b                              ;t4
-          dec    c                              ;t4
-          jp    nz,.b1                          ;t10, total= f*13+f/256*26 + 26
+          djnz   .b1                            ;t13/8  15/10 14/9
+          dec    c                              ;t4/6/5
+          jp    nz,.b1                          ;t10/12/11, total= f*13+f/256*22 + 22
 
           ; second phase
-          out  (sndbit_port),a                  ;t11
-          dec   a                               ;t4, a=1
-          ld   b,l                              ;t4
-          ld   c,h                              ;t4
+          out  (sndbit_port),a                  ;t11/13/12
+          dec   a                               ;t4/6/5, a=1
+          ld   b,l                              ;t4/6/5
+          ld   c,h                              ;t4/6/5
 .b3:
-          djnz   .b3                            ;t13/8
-          dec    b                              ;t4
-          dec    c                              ;t4
-          jp    nz,.b3                          ;t10
+          djnz   .b3                            ;t13/8 15/10 14/9
+          dec    c                              ;t4/6/5
+          jp    nz,.b3                          ;t10/12/11
 
-          dec    e                              ;t4
-          jp     nz,.b2                         ;t10
-          dec    e                              ;t4
-          dec    d                              ;t4
-          jp     nz,.b2                         ;t10, total=32
+          dec    e                              ;t4/6/5
+          jp     nz,.b4                         ;t10/12/11
+          dec    d                              ;t4/6/5
+          jp     nz,.b2                         ;t10/12/11
           
           dec    a   ; a = 0
           out  (sndbit_port),a
           ret
 
+          ;; waste time so that the above "DEC DE" conditional
+          ;; takes the same time regardless of branch
+.b4:
+          dec     b                             ;t4
+          jp     .b2                            ;t10
+
 ; timing loops
-; 2*[23 + 13f + 26f/256 + 26] + 32
+; 2*[23 + 13f + 22f/256 + 22] + 28
 ; 98 + 26.20*f + 32
-; 130 + 26.20f
+; 118 + 26.17f
 
 _beep_sound::
         ;;  bit_sound(duration, frequency)
