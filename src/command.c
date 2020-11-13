@@ -335,7 +335,6 @@ void dockCommand()
         endgame(MSG_CODE_ENDGAME_RESIGN);
     }
     else
-        
     {
         if (orbit(ENT_TYPE_PLANET)) messageCode(MSG_CODE_PLANET_G);
         else if (orbit(ENT_TYPE_PLANET_M))
