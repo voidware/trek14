@@ -81,6 +81,7 @@ void setSpeed(uchar fast);
 void clearLine();
 
 extern uchar TRSModel;
+extern uchar  M4WaitStates;
 extern uchar TRSMemory;
 extern uchar* TRSMemoryFail;
 extern uchar cols80;

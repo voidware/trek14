@@ -52,32 +52,105 @@
 
 #define TSTATE1(_n)  RND((BASE_M1/(_n) - 118)/26.17)
 #define TSTATE3(_n)  RND((BASE_M3/(_n) - 118)/26.17)
-#define TSTATE4(_n)  RND((BASE_M4/(_n) - 118)/26.17)
+
+#define TSTATE4A(_n)  RND((BASE_M4/(_n) - 154)/30.22)
+#define TSTATE4B(_n)  RND((BASE_M4/(_n) - 136)/28.20)
+#define TSTATE4P(_n)  RND((BASE_M4/(_n) - 118)/26.17)
 
 
 typedef struct
 {
     char                _note;
     unsigned int        _freq;
-    unsigned int        _tstatesM1;
-    unsigned int        _tstatesM3;
-    unsigned int        _tstatesM4;
+    unsigned int        _tstates[5];
 } Note;
 
 static const Note notes[] =
 {
- { 'C', RND(NOTE_C), TSTATE1(NOTE_C), TSTATE3(NOTE_C), TSTATE4(NOTE_C) },
- { 'C', RND(NOTE_CS), TSTATE1(NOTE_CS), TSTATE3(NOTE_CS), TSTATE4(NOTE_CS) },
- { 'D', RND(NOTE_D), TSTATE1(NOTE_D), TSTATE3(NOTE_D), TSTATE4(NOTE_D) },
- { 'D', RND(NOTE_DS), TSTATE1(NOTE_DS), TSTATE3(NOTE_DS), TSTATE4(NOTE_DS) },
- { 'E', RND(NOTE_E), TSTATE1(NOTE_E), TSTATE3(NOTE_E), TSTATE4(NOTE_E) },
- { 'F', RND(NOTE_F), TSTATE1(NOTE_F), TSTATE3(NOTE_F), TSTATE4(NOTE_F) },
- { 'F', RND(NOTE_FS), TSTATE1(NOTE_FS), TSTATE3(NOTE_FS), TSTATE4(NOTE_FS) },
- { 'G', RND(NOTE_G), TSTATE1(NOTE_G), TSTATE3(NOTE_G), TSTATE4(NOTE_G) },
- { 'G', RND(NOTE_GS), TSTATE1(NOTE_GS), TSTATE3(NOTE_GS), TSTATE4(NOTE_GS) },
- { 'A', RND(NOTE_A), TSTATE1(NOTE_A), TSTATE3(NOTE_A), TSTATE4(NOTE_A) },
- { 'A', RND(NOTE_AS), TSTATE1(NOTE_AS), TSTATE3(NOTE_AS), TSTATE4(NOTE_AS) },
- { 'B', RND(NOTE_B), TSTATE1(NOTE_B), TSTATE3(NOTE_B), TSTATE4(NOTE_B) },
+ { 'C', RND(NOTE_C),
+   { TSTATE1(NOTE_C), TSTATE3(NOTE_C),
+     TSTATE4A(NOTE_C),
+     TSTATE4B(NOTE_C),
+     TSTATE4P(NOTE_C)
+   }
+ },
+ { 'C', RND(NOTE_CS),
+   { TSTATE1(NOTE_CS), TSTATE3(NOTE_CS),
+     TSTATE4A(NOTE_CS),
+     TSTATE4B(NOTE_CS),
+     TSTATE4P(NOTE_CS)
+   }
+ },
+ { 'D', RND(NOTE_D),
+   { TSTATE1(NOTE_D), TSTATE3(NOTE_D),
+     TSTATE4A(NOTE_D),
+     TSTATE4B(NOTE_D),
+     TSTATE4P(NOTE_D)
+   }
+ },
+ { 'D', RND(NOTE_DS),
+   { TSTATE1(NOTE_DS), TSTATE3(NOTE_DS),
+     TSTATE4A(NOTE_DS),
+     TSTATE4B(NOTE_DS),
+     TSTATE4P(NOTE_DS)
+   }
+ },
+ { 'E', RND(NOTE_E),
+   { TSTATE1(NOTE_E), TSTATE3(NOTE_E),
+     TSTATE4A(NOTE_E),
+     TSTATE4B(NOTE_E),
+     TSTATE4P(NOTE_E)
+   }
+ },
+ { 'F', RND(NOTE_F),
+   { TSTATE1(NOTE_F), TSTATE3(NOTE_F),
+     TSTATE4A(NOTE_F),
+     TSTATE4B(NOTE_F),
+     TSTATE4P(NOTE_F)
+   }
+ },
+ { 'F', RND(NOTE_FS),
+   { TSTATE1(NOTE_FS), TSTATE3(NOTE_FS),
+     TSTATE4A(NOTE_FS),
+     TSTATE4B(NOTE_FS),
+     TSTATE4P(NOTE_FS)
+   }
+ },
+ { 'G', RND(NOTE_G),
+   { TSTATE1(NOTE_G), TSTATE3(NOTE_G),
+     TSTATE4A(NOTE_G),
+     TSTATE4B(NOTE_G),
+     TSTATE4P(NOTE_G)
+   }
+ },
+ { 'G', RND(NOTE_GS),
+   { TSTATE1(NOTE_GS), TSTATE3(NOTE_GS),
+     TSTATE4A(NOTE_GS),
+     TSTATE4B(NOTE_GS),
+     TSTATE4P(NOTE_GS)
+   }
+ },
+ { 'A', RND(NOTE_A),
+   { TSTATE1(NOTE_A), TSTATE3(NOTE_A),
+     TSTATE4A(NOTE_A),
+     TSTATE4B(NOTE_A),
+     TSTATE4P(NOTE_A)
+   }
+ },
+ { 'A', RND(NOTE_AS),
+   { TSTATE1(NOTE_AS), TSTATE3(NOTE_AS),
+     TSTATE4A(NOTE_AS),
+     TSTATE4B(NOTE_AS),
+     TSTATE4P(NOTE_AS)
+   }
+ },
+ { 'B', RND(NOTE_B),
+   { TSTATE1(NOTE_B), TSTATE3(NOTE_B),
+     TSTATE4A(NOTE_B),
+     TSTATE4B(NOTE_B),
+     TSTATE4P(NOTE_B)
+   }
+ },
 };
 
 // play melodies. eg:
@@ -98,11 +171,14 @@ void playNotes(const char* m)
     uchar dt2 = 0;
     uint tempo = 12;
     char u = 0;
-    uchar mindex = 0;
+    uchar mindex = 0; // m1
 
     // determine the offset for the tstate, default M1
     if (TRSModel == 3) mindex = 1;
-    else if (TRSModel == 4) mindex = 2;
+    else if (TRSModel == 4)
+    {
+        mindex = 4 - M4WaitStates;
+    }
     
     disableInterrupts();
 
@@ -123,7 +199,7 @@ void playNotes(const char* m)
                 }
 
                 a = dt*n->_freq;
-                b = *((&n->_tstatesM1) + mindex);
+                b = n->_tstates[mindex];
 
                 char u2 = u;
                 while (u2 > 0)

@@ -35,3 +35,4 @@ unsigned int expfixed(unsigned int v);
 void tanfxDeg(short v, short* s, short* c);
 char getSingleCommand(const char* msg);
 void peformRAMTest();
+void printMachineInfo();

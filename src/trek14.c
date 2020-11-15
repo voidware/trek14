@@ -60,13 +60,8 @@ static void pressEnter()
 static void startGame()
 {
     cls();
-
-    printf_simple("TRS-80 Model %d (%dk RAM)\n", (int)TRSModel, (int)TRSMemory);
-
-#ifdef HIRES    
-    if (grayfx) printf_simple("Grayfx Board Detected\n");
-#endif
-
+    printMachineInfo();
+    
 #ifndef SKIP
     // When you run this on a real TRS-80, you'll thank this RAM test!
     peformRAMTest();

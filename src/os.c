@@ -52,6 +52,7 @@ uchar* vidRam;
 
 // what model? (set up by initModel)
 uchar TRSModel;
+uchar M4WaitStates; // number of wait states (M4 only)
 uchar useSVC;
 
 // should output be converted to upper case?
@@ -392,6 +393,79 @@ uchar ramTest(uchar a, uchar n)
     return r;
 }
 
+static uchar getM4WaitStates()
+{
+
+    // code from Petrofsky
+    // NB: Assume interrupts disabled
+    __asm
+
+  INTSTAT .equ 0xE0
+RTCIN   .equ 0xEC
+
+MASKREG .equ 0xE0
+ENRTC   .equ (1<<2)
+
+MODOUT  .equ 0xEC
+ALTSET  .equ (1<<3)
+FAST    .equ (1<<6)
+
+
+        ; Check for Model III/4, 50/60hz, gate-array.
+
+        ; Combined test for Model, frame rate, board type, and board
+        ; revision.  Sets bits 7 through 4 of H to 0/1 for Model
+        ; III/4, 60/50hz, PAL/GA, and PAL Rev A/B.  Uses 35 code
+        ; bytes, assuming we already have interrupts disabled and we
+        ; want to end with FAST on.
+
+        ; Has enough margin for error to work both with 50 hz Model 4
+        ; systems with 312 lines/frame (as in the Model III and early
+        ; versions of trs80gp's Model 4 emulation) and those with 317
+        ; lines/frame (as found on at least one actual 50 hz Model 4
+        ; CRTC).
+
+        ; The range of initial HL values that work includes all of
+        ; $5500 through $55FF, so don't bother initializing L.
+        
+        LD H, #0x55
+        LD DE, #0x36
+        LD B, #ENRTC
+        XOR A
+        OUT (MODOUT), A         ; Make sure FAST is off and set intmask.
+        LD A, B                 ;   We could probably count on
+        OUT (MASKREG), A        ;   Model III BASIC having done this.
+        IN A, (RTCIN)
+.Sync:
+        IN A, (INTSTAT)
+        AND B
+        JR NZ, .Sync
+.Delay:
+        ADD HL, DE
+        JR NC, .Delay
+        LD A, #FAST             ; Turn on FAST.
+        OUT (MODOUT), A
+        IN A, (RTCIN)
+.Count:
+        IN A, (INTSTAT)
+        ADD HL, DE
+        AND B
+        JR NZ, .Count
+
+        ;; bit 5 => no wait states
+        ;; otherwise bit 4 => 1 wait state (else 2)
+        ;; Does bit 6 => 50Hz?
+        ld   l,#0
+        bit  #5,h
+        jr   nz,1$
+        inc  l
+        bit  #4,h
+        jr   nz,1$
+        inc  l
+1$:
+    __endasm;        
+}
+
 static uchar getModel()
 {
     uchar m = 1;
@@ -427,7 +501,7 @@ void setSpeed(uchar fast)
     {
         // M4 runs at 2.02752 or 4.05504 MHz
         unsigned char v = inPort(0xff);
-        v &= 0x3f; // drop speed bit and undefined high bit.
+        v &= 0xbf; // drop speed bit
         if (fast) v |= 0x40;
         outPort(0xec, v);
     }
@@ -928,6 +1002,8 @@ void setWide(uchar v)
 
 void initModel()
 {
+    // NB: interrupts currently disabled
+    
     uchar* rp = (uchar*)0x4000;
     
     cols80 = 0;
@@ -953,11 +1029,16 @@ void initModel()
         useSVC = 1;
         vidRam = VIDRAM80;
 
+        // Not neede as getM4WaitStates enables fast
+        // setSpeed(1); // ensure we're in fast mode!
+        
+        // find out how many M4 wait states we have (and enable fast)
+        M4WaitStates = getM4WaitStates();
+
+        setM4Map3(); // NB: also enables interrupts
+        
         // switch off cursor
         dsp4(0x0f);
-
-        setM4Map3();
-        setSpeed(1); // ensure we're in fast mode!
 
         TRSMemory = 64;
 
@@ -1035,22 +1116,6 @@ void srand(uint v)
     seed = v;
 }
 
-#if 0
-unsigned int rand16()
-{
-    // this not very good
-    uint v;
-    uchar a;
-
-    v = (seed + 1)*75;
-    a = v;
-    a -= (v >> 8);
-    seed = ((v & 0xff00) | a) - 1;
-    return seed;
-}
-
-#else
-
 unsigned int rand16()
 {
     uint x = seed;
@@ -1060,7 +1125,6 @@ unsigned int rand16()
     seed = x;
     return x;
 }
-#endif
 
 uint randn(uint n)
 {

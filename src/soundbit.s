@@ -68,10 +68,15 @@ __beeper::
           inc  a                                ;t4/6/5,  a=2
           ld   b,l                              ;t4/6/5
           ld   c,h                              ;t4/6/5
+                                        ;total  23,31,27
 .b1:
           djnz   .b1                            ;t13/8  15/10 14/9
           dec    c                              ;t4/6/5
-          jp    nz,.b1                          ;t10/12/11, total= f*13+f/256*22 + 22
+          jp    nz,.b1                          ;t10/12/11
+                                        ;total= f*13+(f/256+1)*22
+                                        ;total= f*15+(f/256+1)*28
+                                        ;total= f*14+(f/256+1)*25
+                                        ;NB: djnz goes f-1 times, but ++h,++l
 
           ; second phase
           out  (sndbit_port),a                  ;t11/13/12
@@ -87,6 +92,7 @@ __beeper::
           jp     nz,.b4                         ;t10/12/11
           dec    d                              ;t4/6/5
           jp     nz,.b2                         ;t10/12/11
+                                        ;total= 28,36,32
           
           dec    a   ; a = 0
           out  (sndbit_port),a
@@ -98,10 +104,17 @@ __beeper::
           dec     b                             ;t4
           jp     .b2                            ;t10
 
-; timing loops
+; timing loops m4p
 ; 2*[23 + 13f + 22f/256 + 22] + 28
-; 98 + 26.20*f + 32
 ; 118 + 26.17f
+
+; timing loops m4a
+; 2*[31 + 15f + 28f/256 + 28] + 36
+; 154 + 30.22f
+
+; timing loops m4b
+; 2*[27 + 14f + 25f/256 + 25] + 32
+; 136 + 28.20f
 
 _beep_sound::
         ;;  bit_sound(duration, frequency)

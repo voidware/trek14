@@ -233,3 +233,14 @@ void peformRAMTest()
         printf_simple("FAILED at %x\n", (uint)TRSMemoryFail);
 }
 
+void printMachineInfo()
+{
+    printf_simple("TRS-80 Model %d", (int)TRSModel);
+    if (TRSModel == 4) printf_simple("/w%x", (int)M4WaitStates);
+    printf_simple(" (%dk RAM)\n", (int)TRSMemory);    
+
+#ifdef HIRES    
+    if (grayfx) printf_simple("Grayfx Board Detected\n");
+#endif
+}
+
