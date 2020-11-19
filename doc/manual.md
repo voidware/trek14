@@ -4,40 +4,18 @@ Models I, III and IV are supported.
 
 ## Introduction
 
+![](screen1.jpg)
+
 _TREK14_ is a newly developed "classic star trek" game for the [TRS-80](https://en.wikipedia.org/wiki/TRS-80), inspired by the originals, but with new ideas.
 
 The game style is based on [Star Trek 3.5 by Lance Micklus, 1980](http://www.retrobits.net/atari/aitrek.shtml).
 
-The graphics are retro and blocky, just like the originals.
+All source code and binaries are available at;
 
-![](doc/trek14.gif)
+https://github.com/voidware/trek14
 
-## How To Run
+<div style="page-break-after: always; break-after: page;"></div>
 
-### Model 1 Cassette 
-The binary `TREK14.CAS` is a trs-80 model I SYSTEM CAS file, to be loaded through the cassette interface. Load using the following commands:
-
-    SYSTEM (enter)
-    *? (press T enter)
-
-The program will load with flashing asterisks in the top right corner.
-at the next `*?` prompt type `/` (enter).
-
-### Model 1 DOS
-`go1.bat`
-
-At the command prompt type, `TREK14`
-
-
-### Model 3
-`go3.bat`
-
-At the command prompt type, `TREK14`
-
-### Model 4/4P
-`go4.bat`
-
-At the command prompt type, `TREK14`
 
 ## How To Play
 
@@ -57,16 +35,17 @@ Star Fleet HQ is in the bottom corner of the galaxy at 772. This is also where y
 
 ## Main Menu
 
-![](doc/com.png)
+![](com.png)
 
 Commands available from the main menu.
 
 Press the appropriate letter.
 
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Short Range Scan
 
-![](doc/srs.png)
+![](srs.png)
 
 Press "S" from the command menu.
 
@@ -96,10 +75,11 @@ You can also move into planetary orbit. Position adjacent to a planet and press 
 _Kirk's tip:_
 > Keep a sharp lookout for rare Earth-like "M" planets. Orbit these so Mr. Spock can scan them. 
 
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Long Range Scan
 
-![](doc/lrs.png)
+![](lrs.png)
 
 Press "L" for long range scan.
 
@@ -116,6 +96,7 @@ You can use arrow keys within long range scan to pan around. But only the _curre
 _Kirk's tip:_
 > Be sure to locate a nearby base _before_ going into battle. Use the long range scan movement arrows to remind you where the base is when you want to warp out.
 
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Warp Drive
 
@@ -130,10 +111,11 @@ When prompted for the location enter the three coordinates X, Y, Z either separa
 _Kirk's tip:_
 > If you try to exit a quadrant on impulse, but you can't move, there might be something stopping you.
 
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Klingons
 
-![](doc/kling.png)
+![](kling.png)
 
 Klingons cluster in bunches of 1 to 4. Their ships are smaller and have less energy capacity than a starship. They have no photon torpedoes and rely wholly on phasers for weapons. Klingons can manoeuvre slightly better on impulse engines and can move diagonally; they can close on a ship quite fast.
 
@@ -144,10 +126,11 @@ Some Klingon ships are bigger and are more formidable, but are still inferior to
 _Kirk's tip:_
 > The Klingons have developed a technology to recharge from stars, but you cannot. Act quickly to dispatch them before they restore their energies. Some stars are more powerful than others.
 
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Phasers
 
-![](doc/phaser.png)
+![](phaser.png)
 
 Press "P" from the command menu or from the short range scan.
 
@@ -162,6 +145,7 @@ Klingons will tend to close rapidly for attack, fire at close range, then move b
 _Kirk's tip:_
 > Use "S" to scan enemy energy levels, and use phasers in close proximity for maximum devastation.
 
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Photon Torpedoes
 
@@ -202,10 +186,11 @@ Be wary of that old Klingon trick, to place itself between you and a star or pla
 _Kirk's tip:_
 > Manoeuvre to get two enemies lined up and fire! If the nearest dodges, you'll get the one behind!
 
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Bases
 
-![](doc/base.png)
+![](base.png)
 
 There are 10 Federation bases in the galaxy, 9 of which you can dock to refuel and spent photon torpedoes are replenished. To dock, manoeuvre your ship adjacent to the base and press "D".
 
@@ -218,6 +203,7 @@ If the star date reaches 2100, you will be recalled to HQ. If this happens, do n
 _Kirk's tip:_
 > If you're recalled to star fleet, but delay too long, Spock has authority to assume command.
 
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Damage
 
@@ -262,6 +248,8 @@ eg;
 
 Will run galaxy 1234.
 
+<div style="page-break-after: always; break-after: page;"></div>
+
 ## Tactics
 
 _Kirk Says:_
@@ -288,30 +276,7 @@ _Kirk Says:_
 
 ----
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Compiling Trek14
 
@@ -341,6 +306,8 @@ Then `make` should work.
 SDCC generates Intel HEX format "binaries". These are converted to TRS80 CAS format. There is a utility in tools/mksys that performs this conversion. There is a windows mksys.exe compiled binary for convenience, otherwise you'll have to compile the mksys.cpp program yourself - which is only the one file with no dependencies.
 
 The conversion from IHX to CAS is done automatically by the makefile using this  mksys utility.
+
+<div style="page-break-after: always; break-after: page;"></div>
 
 ## Game Design, Motivation and Ideas for v2
 
@@ -385,7 +352,6 @@ _Planned for v2_;
 Currently, you can only orbit M-Planets. In v2, you can "beam down" and play a mini-game.
 
 Winning the mini-games will give you new technologies such as;
-
 
 * Expanded photon torpedo capacity
 * Cloaking devices

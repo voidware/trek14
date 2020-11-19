@@ -69,7 +69,7 @@ static void startGame()
     // printStack();
 #endif
 
-    outs("\nTREK 2014! v1.0\nhttps://github.com/voidware/trek14\n\nInspired by TREK III.5 by Lance Micklus.\n\n"
+    outs("\nTREK 2014! v1.0\nhttps://github.com/voidware/trek14\n\nInspired by TREK III.5 by Lance Micklus, 1980.\n\n"
 "Your mission is to BOLDY:\n\n"
 "* Explore the galaxy\n"
 "* Destroy the 50 Klingons\n"
