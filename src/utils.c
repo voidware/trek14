@@ -97,7 +97,7 @@ unsigned int expfixed(unsigned int v)
                 // subtract value column
                 v -= *tp;
 
-                // if numerator is odd, then it is 2^k+1, so we rememeber
+                // if numerator is odd, then it is 2^k+1, so we remember
                 // the odd `r' and add it later
                 
                 r0 = 0;

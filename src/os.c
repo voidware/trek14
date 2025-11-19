@@ -720,14 +720,14 @@ void outsn(const char* s, uchar n)
 void outint(int v)
 {
     char buf[17];
-    _itoa(v, buf, 10);  // STDCC extention
+    _itoa(v, buf, 10);  // STDCC extension
     outs(buf);
 }
 
 void outuint(uint v)
 {
     char buf[17];
-    _uitoa(v, buf, 10);  // STDCC extention
+    _uitoa(v, buf, 10);  // STDCC extension
     outs(buf);
 }
 
@@ -794,15 +794,15 @@ static void _printf_simple(const char* f, va_list args)
             switch (c)
             {
             case 'd':
-                _itoa(va_arg(args, int), buf, 10);  // STDCC extention
+                _itoa(va_arg(args, int), buf, 10);  // STDCC extension
                 s = buf;
                 break;
             case 'x':
-                _itoa(va_arg(args, int), buf, 16);  // STDCC extention
+                _itoa(va_arg(args, int), buf, 16);  // STDCC extension
                 s = buf;
                 break;
             case 'u':
-                _uitoa(va_arg(args, uint), buf, 10);  // STDCC extention
+                _uitoa(va_arg(args, uint), buf, 10);  // STDCC extension
                 s = buf;
                 break;
             case 's':
@@ -811,7 +811,7 @@ static void _printf_simple(const char* f, va_list args)
             case 'l':
                 // XX ASSUME %ld
                 ++f;
-                _ltoa(va_arg(args, long), buf, 10);  // STDCC extention
+                _ltoa(va_arg(args, long), buf, 10);  // STDCC extension
                 s = buf;
                 break;
             case 'c':
@@ -1029,7 +1029,7 @@ void initModel()
         useSVC = 1;
         vidRam = VIDRAM80;
 
-        // Not neede as getM4WaitStates enables fast
+        // Not needed as getM4WaitStates enables fast
         // setSpeed(1); // ensure we're in fast mode!
         
         // find out how many M4 wait states we have (and enable fast)

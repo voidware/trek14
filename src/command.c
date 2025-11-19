@@ -254,7 +254,7 @@ void phaserCommand()
                 // ensure keep some back.
                 if (e <= (int)(ENT_ENERGY(galaxy) - 500))
                 {
-                    // phaser lock sound; doesnt work properly
+                    // phaser lock sound; doesn't work properly
                     //playNotes("CE++F--B++D-F#-B+"); // nameP, C, L, B, G, K,  D
                     if (!phasers(galaxy, e, ENT_TYPE_KLINGON))
                         messageCode(MSG_CODE_PHASERS_NO_LOCK);

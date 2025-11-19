@@ -18,7 +18,7 @@ __rti::
 
 _bit_soundi::
         ;;  bit_sound(duration, frequency)
-        ;;  disables interupts
+        ;;  disables interrupts
         di
         pop   hl
         exx

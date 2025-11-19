@@ -38,7 +38,7 @@ Synchro bit n                Data bit n                      Synchro bit n + 1
 t1 = t2 = 125 us
 t3 = 750 us
 
-bytes most signifiant bits transfered first """
+bytes most significant bits transferred first """
 
 from optparse import OptionParser
 import struct
