@@ -8,9 +8,9 @@ xmas 2016
 
 * bugfix in K slow recharge
 * K recharge from stars
-* enemy nagivation AI
+* enemy navigation AI
 * condition RED/GREEN displayed on status
-* revert to condition green when all enemies destoyed.
+* revert to condition green when all enemies destroyed.
 * draw explosion when enemy destroyed.
 * phasers do not lock on far away objects.
 * relieved of command for destroying planet or star.

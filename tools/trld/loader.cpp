@@ -24,7 +24,7 @@
 // I'm hoping to preserve information between layers so that a higher layer
 // can identify the data in the previous layer that generated it.  This
 // is angling towards some kind of visual environment where a user may
-// interactively apply data processing steps to decypher unknown or
+// interactively apply data processing steps to decipher unknown or
 // damaged data.
 //
 // Scripting may be a nice way to extend what data formats are supported.
@@ -860,7 +860,7 @@ void TRS80Loader::ParseLevel1Tape()
     AddRecord(new TRS80Record(TRS80Record::loadHL, endAddress, 0));
 
     // Level 1 BASIC programs load at $4200 and do not automatically execute.
-    // Level 1 machine langauge programs load lower than $4200 and overwrite
+    // Level 1 machine language programs load lower than $4200 and overwrite
     // a stack address so they run automatically.  We check for that possibility
     // and set the PC if so.  We don't set the stack pointer, though nor
     // generally perform all the possible side-effects.
@@ -1537,7 +1537,7 @@ static int tokenize(const char *line, unsigned char *tok)
 }
 
 // Ugly, platform-specific stuff beyond this point.
-// Should be seperate file, etc.
+// Should be separate file, etc.
 
 #include <windows.h>
 

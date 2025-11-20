@@ -314,7 +314,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        printf("can't open inpout file '%s'\n", infile);
+        printf("can't open input file '%s'\n", infile);
     }
     
     return 0;

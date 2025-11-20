@@ -26,7 +26,7 @@ Z = 2 bits.
 
 NB: require only 13 bits for energy (so we have a spare bit)
 
-Rather than having an array of 192, we have the reverse data structure, which is a table of entities. The advantage of this is that we can always maintain the exact screen location of all content. This is relevent when you cross a quadrant boundary locally (impulse engines) and then return; you want everything to be in the same position. Additionally, it means that photon torpedos can (in theory) cross quadrant boundaries.
+Rather than having an array of 192, we have the reverse data structure, which is a table of entities. The advantage of this is that we can always maintain the exact screen location of all content. This is relevant when you cross a quadrant boundary locally (impulse engines) and then return; you want everything to be in the same position. Additionally, it means that photon torpedoes can (in theory) cross quadrant boundaries.
 
 The disadvantage is that, to know the contents of a given quadrant, the whole table must be scanned (more on this later).
 
@@ -71,7 +71,7 @@ mostly apply a hit and run attack. if energy is greater than half capacity, they
 
 ok, klingons dont retreat. so instead they "retreat" to recharge from the nearest star. 
 
-klingons can recharge from stars, because they have no base stations. whenever a klingon is adjancent to a star, it will collect a fixed amount of recharge energy each turn (until capacity). This amount is dependent on the star and is set up as the "star energy" (in the entity energy field) on creation of the galaxy. Thus there are some stars better than others to use. and recharging is consistent.
+klingons can recharge from stars, because they have no base stations. whenever a klingon is adjacent to a star, it will collect a fixed amount of recharge energy each turn (until capacity). This amount is dependent on the star and is set up as the "star energy" (in the entity energy field) on creation of the galaxy. Thus there are some stars better than others to use. and recharging is consistent.
 
 klingon max energy is 4096, they attack whenever >= 2048. so recharge of 2048 in, say 10, turns is 2048/10 ~ 200 units per turn. Thus stars have a randomly chosen recharge energy of between 128 and 256, as 128 + rand(128).
 

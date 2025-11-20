@@ -11,7 +11,7 @@
 // output. Tolerate checksum errors. Auto-load SYSTEM files.  Option to leave
 // name out of .cmd output.
 //
-// Future possibilities include translations that preserve as much orignial
+// Future possibilities include translations that preserve as much original
 // structure as possible.  Simple dumps.  Module offsets.
 //
 
